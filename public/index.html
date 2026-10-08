@@ -3258,6 +3258,184 @@ tbody tr.click:hover td{background:#F5F8FF}
 }
 </style>
 
+
+<style id="mobile-final-fix">
+/* ===== FINAL RESPONSIVE FIX =====
+   iPhone/iPad: fixed header + safe-area + stable drawer.
+   Desktop layout is intentionally unchanged. */
+@media (max-width: 900px){
+  html, body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  body{
+    overscroll-behavior-x:none;
+  }
+
+  .app{
+    width:100%;
+    min-width:0;
+    display:block;
+  }
+
+  .mainc{
+    width:100%;
+    min-width:0;
+    padding-top:calc(50px + env(safe-area-inset-top));
+  }
+
+  /* Sticky inside a grid can behave badly in iOS Safari.
+     A fixed mobile header keeps it visible while scrolling. */
+  .top{
+    position:fixed!important;
+    left:0;
+    right:0;
+    top:0;
+    width:100%;
+    height:calc(50px + env(safe-area-inset-top));
+    padding:env(safe-area-inset-top) 12px 0;
+    z-index:120;
+  }
+
+  .burger{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    display:grid;
+    place-items:center;
+    touch-action:manipulation;
+  }
+
+  .top-title{
+    min-width:0;
+    flex:1;
+  }
+
+  .prof-wrap{z-index:125}
+  .menu{z-index:130;max-width:calc(100vw - 24px)}
+
+  .side{
+    width:min(86vw,300px);
+    max-width:300px;
+    height:100dvh;
+    height:100vh;
+    top:0;
+    bottom:0;
+    padding-top:calc(12px + env(safe-area-inset-top));
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    z-index:140;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .side-scrim{
+    z-index:130!important;
+    touch-action:none;
+  }
+
+  .side-open{
+    overflow:hidden!important;
+    overscroll-behavior:none;
+  }
+
+  .view{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    padding-top:18px;
+    padding-left:max(13px, env(safe-area-inset-left));
+    padding-right:max(13px, env(safe-area-inset-right));
+  }
+
+  .ph,
+  .ph-act,
+  .tools,
+  .panel-h{
+    min-width:0;
+  }
+
+  .ph-act{
+    width:100%;
+  }
+
+  .ph-act .btn{
+    max-width:100%;
+  }
+
+  /* Never let long controls create a horizontal page. */
+  input,select,textarea,button,.field{
+    max-width:100%;
+  }
+
+  /* Touch targets: easier to use on phones. */
+  .nav-i{
+    min-height:44px;
+    padding-top:9px;
+    padding-bottom:9px;
+  }
+
+  .btn,.ib{
+    touch-action:manipulation;
+  }
+
+  /* Scroll wide tables inside their own panel instead of moving the page. */
+  .gwrap,
+  .table-wrap,
+  .tbl-wrap,
+  .panel-b:has(table){
+    max-width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table.tt,
+  table.att-week,
+  table.gm-tab{
+    max-width:none;
+  }
+}
+
+@media (max-width: 560px){
+  .strip{grid-template-columns:1fr 1fr}
+  .gg{grid-template-columns:1fr}
+
+  .ph h1{font-size:21px}
+  .ph p{max-width:100%}
+
+  .panel-h,
+  .panel-b{padding-left:13px;padding-right:13px}
+
+  .modal{
+    width:calc(100vw - 20px);
+    max-width:calc(100vw - 20px);
+    max-height:calc(100dvh - 20px);
+    margin:10px;
+  }
+
+  .modal-h,
+  .modal-f{padding-left:13px;padding-right:13px}
+
+  .modal-f{
+    flex-wrap:wrap;
+  }
+
+  .modal-f .btn{
+    min-height:42px;
+  }
+}
+
+@media (max-width: 380px){
+  .top{padding-left:8px;padding-right:8px}
+  .view{padding-left:10px;padding-right:10px}
+  .strip-i{padding:9px 8px}
+  .strip-i b{font-size:19px}
+  .strip-i span,.strip-i em{font-size:10px}
+}
+</style>
+
 </head>
 
 <body>
