@@ -11466,7 +11466,7 @@ Object.assign(RU,{
 "Alg":"Алг","Bio":"Био","Fiz":"Физ","Ing":"Англ","Mat":"Мат","Matem":"Матем","Nem":"Нем",
 "Yanvar":"Январь","Fevral":"Февраль","Mart":"Март","Aprel":"Апрель","May":"Май","Iyun":"Июнь","Iyul":"Июль","Avgust":"Август","Sentabr":"Сентябрь","Oktabr":"Октябрь","Noyabr":"Ноябрь","Dekabr":"Декабрь",
 "Yan":"Янв","Fev":"Фев","Mar":"Мар","Apr":"Апр","Iyn":"Июн","Iyl":"Июл","Avg":"Авг","Sen":"Сен","Okt":"Окт","Noy":"Ноя","Dek":"Дек",
-"Du":"Пн","Se":"Вт","Cho":"Ср","Pa":"Чт","Ju":"Пт","Sh":"Сб","Ya":"Вс"
+"Du":"Пн","Se":"Вт","Cho":"Ср","Pa":"Чт","Ju":"Пт","Ya":"Вс"
 });
 const MON={Yanvar:'Январь',Fevral:'Февраль',Mart:'Март',Aprel:'Апрель',May:'Май',Iyun:'Июнь',Iyul:'Июль',Avgust:'Август',Sentabr:'Сентябрь',Oktabr:'Октябрь',Noyabr:'Ноябрь',Dekabr:'Декабрь'};
 const PAT=[[/^(\d+) ta test$/,'Тестов: $1'],[/^(\d+) ta fan$/,'Предметов: $1'],[/^(\d+) ta sinf$/,'Классов: $1'],[/^(\d+) ta o'quvchi$/,'Учеников: $1'],[/^(\d+) ta darsda$/,'Уроков: $1'],[/^(\d+) ta dars$/,'Уроков: $1'],
@@ -11504,12 +11504,34 @@ Object.assign(RU,{
 PAT.push([/^(\d+) ta$/,'Всего: $1'],[/^(\d+) o'quvchi$/,'$1 уч.']);
 const GEN={Yanvar:'января',Fevral:'февраля',Mart:'марта',Aprel:'апреля',May:'мая',Iyun:'июня',Iyul:'июля',Avgust:'августа',Sentabr:'сентября',Oktabr:'октября',Noyabr:'ноября',Dekabr:'декабря',Yan:'янв',Fev:'фев',Mar:'мар',Apr:'апр',Iyn:'июн',Iyl:'июл',Avg:'авг',Sen:'сен',Okt:'окт',Noy:'ноя',Dek:'дек'};
 const DATE_RE=new RegExp('(\\d) ('+Object.keys(GEN).sort((a,b)=>b.length-a.length).join('|')+')(?![a-zA-Z])','g');
+Object.assign(RU,{
+"Shu hafta":"Эта неделя","Shu oy":"Этот месяц","Oy":"Месяц","Hali vaqt kiritilmagan.":"Время пока не указано.","Sizning faningiz bu sinfda yo'q":"Вашего предмета в этом классе нет",
+"Umumiy savollar sonini bir marta kiriting, so'ng har bir o'quvchining to'g'ri javoblarini belgilang — foiz avtomatik hisoblanadi.":"Один раз введите общее число вопросов, затем отметьте правильные ответы каждого ученика — процент считается автоматически.",
+"Administrator sizni dars jadvaliga qo'shgach, natija kiritish mumkin bo'ladi.":"После того как администратор добавит вас в расписание, можно будет вводить результаты.",
+"Administrator sizni dars jadvaliga qo'shgach, sinflaringiz shu yerda paydo bo'ladi.":"После того как администратор добавит вас в расписание, ваши классы появятся здесь.",
+"Baho, natija va reyting faqat shu fanlar bo'yicha hisoblanadi. O'qituvchi va vaqtlarni “Dars jadvali” bo'limida belgilaysiz.":"Оценки, результаты и рейтинг считаются только по этим предметам. Учителей и время вы задаёте в разделе «Расписание уроков».",
+"Bu tizimdan faqat administrator foydalanadi. Kirish uchun login va parol yarating.":"Этой системой пользуется только администратор. Создайте логин и пароль для входа.",
+"Jadvalni to'ldirish uchun avval “Sinflar” bo'limida sinf yarating (masalan, 10-A).":"Чтобы заполнить таблицу, сначала создайте класс в разделе «Классы» (например, 10-А).",
+"Login va parol shu qurilma xotirasida saqlanadi. Uni unutmang — keyin tiklab bo'lmaydi.":"Логин и пароль хранятся в памяти этого устройства. Не забудьте их — потом восстановить нельзя.",
+"O'qituvchi shu login va parol bilan kirib, faqat natija kiritadi, reyting va dars jadvalini ko'radi. Login bo'sh bo'lsa — kirish yo'q.":"Учитель входит с этим логином и паролем, только вводит результаты, видит рейтинг и расписание уроков. Если логин пуст — входа нет.",
+"O'quvchining natijalari, to'lovlari va davomati saqlanib qoladi, faqat sinfi almashadi.":"Результаты, платежи и посещаемость ученика сохранятся, изменится только класс.",
+"Reyting Baho bo'limidagi shanba natijalaridan shakllanadi.":"Рейтинг формируется из субботних результатов в разделе «Оценка».",
+"Sinf yarating (masalan, 10-A), so'ng “Dars jadvali” bo'limida uning haftalik darslarini belgilang.":"Создайте класс (например, 10-А), затем задайте его недельные уроки в разделе «Расписание уроков».",
+"Sha":"Сб","Kamida 4 belgi":"Не менее 4 символов"
+});
+const KEEP=new Set(['IT','Deutsch School','Deutsch','School']);
+const TL={sh:'ш',ch:'ч',yo:'ё',yu:'ю',ya:'я',ye:'е',"o'":'у',"g'":'г',a:'а',b:'б',c:'к',d:'д',e:'е',f:'ф',g:'г',h:'х',i:'и',j:'дж',k:'к',l:'л',m:'м',n:'н',o:'о',p:'п',q:'к',r:'р',s:'с',t:'т',u:'у',v:'в',w:'в',x:'х',y:'й',z:'з',"'":''};
+function tl(s){return s.replace(/[’‘ʻʼ`]/g,"'").replace(/sh|ch|yo|yu|ya|ye|o'|g'|[a-z']/gi,(m,off,str)=>{const k=m.toLowerCase();let r=TL[k];
+  if(k==='e'&&(off===0||!/[a-z']/i.test(str[off-1])))r='э';
+  if(m[0]!==m[0].toLowerCase()&&r)r=(m.length>1&&m[1]!==m[1].toLowerCase())?r.toUpperCase():r[0].toUpperCase()+r.slice(1);return r})}
+function nameTr(v){const t=v.replace(/\s+/g,' ').trim();if(t.length<2||KEEP.has(t)||(t.length<=2&&t===t.toUpperCase()))return null;const w=t.split(' ');
+  if(w.length>4||/\d/.test(t)||!w.every(x=>/^[A-Z][A-Za-z‘’ʻ'.]*$/.test(x)))return null;return tl(t)}
 const nz=s=>s.replace(/[’‘ʻʼ`]/g,"'").replace(/\s+/g,' ').trim();
 const D=new Map(Object.entries(RU).map(([k,v])=>[nz(k),v]));
 const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const FK=[...D.keys()].filter(k=>k.length>=7||k.includes(' ')).sort((a,b)=>b.length-a.length);
 const FRre=new RegExp('(^|[^\\p{L}])('+FK.map(esc).join('|')+')(?![\\p{L}])','gu');
-const CL={A:'А',B:'Б',C:'В',D:'Г'};
+const CL={A:'А',B:'Б',C:'С',D:'Д'};
 function frag(t){let c=false;t=t.replace(/(^|[^\p{L}\d])(\d{1,2})-([A-D])(?![\p{L}])/gu,(m,p,n,l)=>{c=true;return p+n+'-'+CL[l]});let o=t.replace(DATE_RE,(m,d,mo)=>{c=true;return d+' '+GEN[mo]});
   o=o.replace(FRre,(m,p,k)=>{c=true;return p+D.get(k)});return c?o:null}
 let lang='uz';try{lang=localStorage.getItem('ds_lang')==='ru'?'ru':'uz'}catch(e){}
@@ -11519,7 +11541,7 @@ const find=t=>{t=nz(t);let r=D.get(t);if(r)return r;for(const[re,f]of PAT){if(re
 function txt(n){
   const v=n.nodeValue;if(!v||!v.trim())return;
   const m=memo.get(n);
-  if(lang==='ru'){const r=find(v);if(r){memo.set(n,{u:v,r});n.nodeValue=r}}
+  if(lang==='ru'){const r=find(v)||nameTr(v);if(r){memo.set(n,{u:v,r});n.nodeValue=r}}
   else if(m&&v===m.r){n.nodeValue=m.u}
 }
 function attrs(el){
