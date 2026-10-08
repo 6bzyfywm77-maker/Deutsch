@@ -3083,6 +3083,8 @@ table.gm-tab td::before{content:none!important;display:none!important}
 
     <nav id="nav" aria-label="Asosiy menyu"></nav>
 
+    <div class="lang-sw" role="group" aria-label="Til / Язык"><button type="button" data-lang="uz">O‘zbekcha</button><button type="button" data-lang="ru">Русский</button></div>
+
     <div class="side-foot">
       Ma’lumotlar xavfsiz serverda saqlanadi
       va faqat administratorga ko‘rinadi.
@@ -11393,6 +11395,76 @@ $('#loginForm').addEventListener(
 
 })();
 
+</script>
+<style>
+.lang-sw{display:flex;gap:4px;margin:auto 10px 0;padding:3px;border-radius:9px;background:rgba(255,255,255,.07)}
+.lang-sw+.side-foot{margin-top:0}
+.lang-sw button{flex:1;min-height:30px;border-radius:7px;font:700 12px var(--body,inherit);color:#C7CBDA;background:transparent;border:0;cursor:pointer}
+.lang-sw button.on{background:var(--gold,#A9812F);color:#fff}
+</style>
+<script>
+(()=>{
+const RU={
+'Umumiy':'Общее','Ta’lim':'Обучение','Natijalar':'Результаты','Moliya':'Финансы','Tizim':'Система','O‘qituvchilar uchun':'Для учителей',
+'Boshqaruv paneli':'Панель управления','Fanlar':'Предметы','Sinflar':'Классы','O‘qituvchilar':'Учителя','O‘quvchilar':'Ученики','Dars jadvali':'Расписание уроков',
+'Haftalik natijalar':'Недельные результаты','Baho':'Оценка','Reyting':'Рейтинг','O‘qituvchi baholari':'Оценки учителей','To‘lovlar':'Платежи','Davomat':'Посещаемость',
+'Sozlamalar':'Настройки','Mening sinflarim':'Мои классы','Ma’lumotlar xavfsiz serverda saqlanadi va faqat administratorga ko‘rinadi.':'Данные хранятся на защищённом сервере и видны только администратору.',
+'Siz o‘qituvchi sifatida kirdingiz: natija kiritish va ma’lumotlarni ko‘rish mumkin.':'Вы вошли как учитель: можно вводить результаты и просматривать данные.',
+'Yopish':'Закрыть','Bekor qilish':'Отмена','Saqlash':'Сохранить','Tahrirlash':'Редактировать','O‘chirish':'Удалить','Chop etish':'Печать','Ko‘rish':'Просмотр',
+'O‘quvchi':'Ученик','O‘qituvchi':'Учитель','Sinf':'Класс','Fan':'Предмет','Vaqt':'Время','Login':'Логин','Parol':'Пароль','Parolni takrorlang':'Повторите пароль',
+'Ism':'Имя','Telefon':'Телефон','Izoh':'Комментарий','Holat':'Статус','Hafta':'Неделя','Bugun':'Сегодня','Foiz':'Процент','Profil':'Профиль',
+'Boshqaruv panelini o‘rnatish':'Установка панели управления','Deutsch School — Boshqaruv paneli':'Deutsch School — Панель управления',
+'Tezkor amallar':'Быстрые действия','Sinf yaratish':'Создать класс','Hali sinf yo‘q':'Классов пока нет','Hali sinf yo‘q.':'Классов пока нет.','Hali o‘qituvchi yo‘q':'Учителей пока нет',
+'Hali natija yo‘q':'Результатов пока нет','Bu sinfda o‘quvchi yo‘q':'В этом классе нет учеников','Avval sinf kerak':'Сначала нужен класс','O‘quvchi yo‘q':'Нет учеников',
+'Jadval bo‘sh':'Расписание пусто','Dars vaqtlari belgilanmagan':'Время уроков не задано','Yo‘nalish':'Направление','Aniq fanlar':'Точные науки','Tabiiy fanlar':'Естественные науки',
+'Sinfni o‘chirish':'Удалить класс','O‘quvchini o‘chirish':'Удалить ученика','O‘qituvchini o‘chirish':'Удалить учителя','Fanni o‘chirish':'Удалить предмет',
+'— Bo‘sh —':'— Пусто —','Tayinlanmagan':'Не назначен','Topilmadi':'Не найдено','Biriktirilmagan':'Не закреплён','Belgilanmagan':'Не задано',
+'Boshlanish':'Начало','Tugash':'Конец','To‘g‘ri javob':'Правильных ответов','Testlar soni':'Количество тестов','Oylik o‘rtacha':'Среднее за месяц','To‘lov izohi':'Комментарий к оплате',
+'Barcha sinflar bo‘yicha':'По всем классам','Oylik to‘lov':'Ежемесячная оплата','sinf o‘rtachasi':'среднее по классу','60% dan past':'Ниже 60%','O‘rtacha':'Среднее',
+'Katakchani bosing:':'Нажмите на ячейку:','Keldi':'Пришёл','S — sababsiz':'С — без причины','DQ — dars qoldirgan':'ДК — пропустил урок','K — kech qolgan':'К — опоздал',
+'Shanba testi — umumiy savol soni':'Субботний тест — общее число вопросов','Parolni almashtirish':'Сменить пароль','Zaxira nusxa':'Резервная копия','Dars jadvali vaqtlari':'Время уроков',
+'Tushlik':'Обед','Shanba testlari':'Субботние тесты','O‘rtacha baho':'Средняя оценка','Shanba natijasi':'Результат субботы','Sizga hali sinf biriktirilmagan':'За вами пока не закреплён ни один класс',
+'Sizga hali dars biriktirilmagan':'За вами пока не закреплено ни одного урока','Natija kiritish':'Ввод результатов','O‘quvchilar ro‘yxati':'Список учеников','Mening dars jadvalim':'Моё расписание',
+'Hali o‘qituvchi natija kiritmagan':'Учитель ещё не вводил результаты','Barcha o‘qituvchilar':'Все учителя','Baholangan':'Оценено','Kiritilgan':'Введено','yo‘q':'нет',
+'Sababini yozing...':'Укажите причину...','Oldingi hafta':'Предыдущая неделя','Keyingi hafta':'Следующая неделя','Oldingi oy':'Предыдущий месяц','Keyingi oy':'Следующий месяц',
+'Sanani tanlash':'Выбрать дату','Haftani tanlash':'Выбрать неделю','Oylik baholarni ko‘rish':'Посмотреть оценки за месяц','Kamida 4 belgi':'Не менее 4 символов','Asosiy menyu':'Главное меню',
+'Menyuni ochish':'Открыть меню','Ism Familiya':'Имя Фамилия','Ism bo‘yicha qidirish...':'Поиск по имени...','Amallar':'Действия','Izoh yozing...':'Напишите комментарий...',
+'Masalan: Nemis tili — A1':'Например: Немецкий язык — A1','Masalan: 10-A':'Например: 10-А',
+'Dushanba':'Понедельник','Seshanba':'Вторник','Chorshanba':'Среда','Payshanba':'Четверг','Juma':'Пятница','Shanba':'Суббота','Yakshanba':'Воскресенье'
+};
+const nz=s=>s.replace(/[’‘ʻʼ`]/g,"'").replace(/\s+/g,' ').trim();
+const D=new Map(Object.entries(RU).map(([k,v])=>[nz(k),v]));
+let lang='uz';try{lang=localStorage.getItem('ds_lang')==='ru'?'ru':'uz'}catch(e){}
+const sf=document.querySelector('.side-foot');if(sf&&sf.dataset.orig===undefined)sf.dataset.orig=sf.textContent.trim();
+const memo=new WeakMap(),AT=['placeholder','title','aria-label'];
+const find=t=>{t=nz(t);let r=D.get(t);if(r)return r;if(t.endsWith(':')){r=D.get(t.slice(0,-1));if(r)return r+':'}return null};
+function txt(n){
+  const v=n.nodeValue;if(!v||!v.trim())return;
+  const m=memo.get(n);
+  if(lang==='ru'){const r=find(v);if(r){memo.set(n,{u:v,r});n.nodeValue=r}}
+  else if(m&&v===m.r){n.nodeValue=m.u}
+}
+function attrs(el){
+  for(const a of AT){const v=el.getAttribute&&el.getAttribute(a);const k='data-uz-'+a;
+    if(lang==='ru'){const r=v&&find(v);if(r){if(!el.hasAttribute(k))el.setAttribute(k,v);el.setAttribute(a,r)}}
+    else if(el.hasAttribute&&el.hasAttribute(k)){el.setAttribute(a,el.getAttribute(k));el.removeAttribute(k)}}
+}
+function walk(root){
+  if(root.nodeType===3){txt(root);return}
+  if(root.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/.test(root.tagName))return;
+  attrs(root);root.querySelectorAll('[placeholder],[title],[aria-label],[data-uz-title],[data-uz-placeholder],[data-uz-aria-label]').forEach(attrs);
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.tagName)?2:1});
+  let n;while((n=w.nextNode()))txt(n);
+}
+const mo=new MutationObserver(ms=>{for(const m of ms){
+  if(m.type==='characterData')txt(m.target);else m.addedNodes.forEach(walk)}});
+function mark(){document.documentElement.lang=lang;
+  document.querySelectorAll('.lang-sw button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang))}
+function setLang(l){lang=l;try{localStorage.setItem('ds_lang',l)}catch(e){}mark();walk(document.body)}
+document.addEventListener('click',e=>{const b=e.target.closest('.lang-sw button');if(b){e.stopPropagation();setLang(b.dataset.lang)}},true);
+mark();walk(document.body);
+mo.observe(document.body,{childList:true,subtree:true,characterData:true});
+})();
 </script>
 </body>
 </html>
