@@ -4184,11 +4184,51 @@ function canGrade(gid,subId){
   if(!isTeacher())return true;
   return teacherSubjectIds(S.teacherId,gid).has(subId);
 }
+/* ================= YO‘NALISH (aniq / tabiiy fanlar) ================= */
+const TRACKS={
+  exact:{label:'Aniq fanlar',subs:['Algebra','Fizika','Ingliz tili','Nemis tili','IT']},
+  natural:{label:'Tabiiy fanlar',subs:['Kimyo','Biologiya','Algebra','Nemis tili']}
+};
+function findSubByName(n){
+  const k=(n||'').toLowerCase().trim();
+  return S.d.subjects.find(x=>(x.name||'').toLowerCase().trim()===k)||
+    (k.length>3?S.d.subjects.find(x=>(x.name||'').toLowerCase().trim().startsWith(k)):null)||null;
+}
+/* yo‘nalishdagi fanlarni topadi, yo‘q bo‘lsa yaratadi */
+function ensureTrackSubjects(track){
+  const t=TRACKS[track];
+  if(!t)return [];
+  return t.subs.map(n=>{
+    let x=findSubByName(n);
+    if(!x){
+      x={id:uid(),name:n,color:PALETTE[S.d.subjects.length%PALETTE.length]};
+      S.d.subjects.push(x);
+    }
+    return x.id;
+  });
+}
+const groupAllows=(g,sid)=>!g||!Array.isArray(g.subjectIds)||!g.subjectIds.length||sid===GEN_SUBJECT||g.subjectIds.includes(sid);
+/* sinfga biriktirilgan fanlar (biriktirilmagan eski sinflarda — hammasi) */
+function groupSubjectList(gid){
+  const g=grp(gid);
+  if(!g||!Array.isArray(g.subjectIds)||!g.subjectIds.length)return S.d.subjects;
+  return S.d.subjects.filter(x=>g.subjectIds.includes(x.id));
+}
+function allowedSubIds(gid){
+  if(isTeacher())return [...teacherSubjectIds(S.teacherId,gid)];
+  return groupSubjectList(gid).map(x=>x.id);
+}
+function ttSubjectChoices(g,e){
+  const list=g?groupSubjectList(g.id).slice():S.d.subjects.slice();
+  if(e&&e.subjectId&&!list.some(x=>x.id===e.subjectId)){const o=sub(e.subjectId);if(o)list.push(o)}
+  return list;
+}
 function subOptionsFor(gid,sel){
-  if(!isTeacher())return subOptions(sel);
-  const ids=teacherSubjectIds(S.teacherId,gid);
-  return S.d.subjects
-    .filter(s=>ids.has(s.id))
+  if(!isTeacher()&&!S.d.subjects.length)return subOptions(sel);
+  const list=isTeacher()
+    ?S.d.subjects.filter(s=>teacherSubjectIds(S.teacherId,gid).has(s.id))
+    :groupSubjectList(gid);
+  return list
     .map(s=>`<option value="${s.id}" ${s.id===sel?'selected':''}>${esc(s.name)}</option>`)
     .join('');
 }
@@ -5209,10 +5249,12 @@ views.groups=()=>{
 
         const lessons=ttLessonsOf(g.id);
 
-        const subjIds=
-          [...new Set(
-            lessons.map(l=>l.subjectId)
-          )];
+                const subjIds=
+          (Array.isArray(g.subjectIds)&&g.subjectIds.length)
+            ?g.subjectIds.filter(id=>sub(id))
+            :[...new Set(
+              lessons.map(l=>l.subjectId)
+            )];
 
         return `
           <article
@@ -5226,7 +5268,7 @@ views.groups=()=>{
                 <h3>
                   ${esc(g.name)}
                 </h3>
-
+                ${g.track&&TRACKS[g.track]?`<span class="tag sm">${TRACKS[g.track].label}</span> `:''}
                 ${
                   subjIds.length
                   ?
@@ -5663,14 +5705,20 @@ function groupForm(g){
             </div>
 
             <div class="f full">
-
+              <label for="gf-t">Yo‘nalish</label>
+              <select id="gf-t" name="track">
+                <option value="" ${!x.track?'selected':''}>${g?'Tanlanmagan (barcha fanlar)':'— Tanlang —'}</option>
+                <option value="exact" ${x.track==='exact'?'selected':''}>Aniq fanlar</option>
+                <option value="natural" ${x.track==='natural'?'selected':''}>Tabiiy fanlar</option>
+              </select>
+            </div>
+            <div class="f full">
               <p class="hint">
-                Fan, o‘qituvchi va vaqtlarni
-                “Dars jadvali” bo‘limida,
-                shu sinfning har bir darsi
-                uchun alohida belgilaysiz.
+                <b>Aniq fanlar:</b> ${TRACKS.exact.subs.join(', ')}.<br>
+                <b>Tabiiy fanlar:</b> ${TRACKS.natural.subs.join(', ')}.<br>
+                Baho, natija va reyting faqat shu fanlar bo‘yicha hisoblanadi.
+                O‘qituvchi va vaqtlarni “Dars jadvali” bo‘limida belgilaysiz.
               </p>
-
             </div>
 
           </div>
@@ -5788,7 +5836,7 @@ function ttCellForm(groupId,day,periodId){
                 <select id="tc-s" name="subjectId">
                   <option value="">— Bo‘sh —</option>
                   ${
-                    d.subjects.map(s=>`
+                    ttSubjectChoices(g,e).map(s=>`
                       <option value="${s.id}" ${e?.subjectId===s.id?'selected':''}>
                         ${esc(s.name)}
                       </option>
@@ -7034,11 +7082,10 @@ views.weekly=()=>{
         ?d.subjects[0].id
         :GEN_SUBJECT;
 
-  if(isTeacher()){
-    const ids=[...teacherSubjectIds(S.teacherId,S.ui.wG)];
+    {
+    const ids=allowedSubIds(S.ui.wG);
     if(ids.length&&!ids.includes(S.ui.wS))S.ui.wS=ids[0];
   }
-
   const g=grp(S.ui.wG);
   const list=studentsOf(g.id);
 
@@ -7175,11 +7222,13 @@ function resultForm(){
 
   const list=studentsOf(gid);
 
-  const sidNow=
+    const gSubs=groupSubjectList(gid);
+  let sidNow=
     S.ui.wS&&
     (S.ui.wS!==GEN_SUBJECT||!d.subjects.length)
       ?S.ui.wS
       :(d.subjects.length?d.subjects[0].id:GEN_SUBJECT);
+  if(gSubs.length&&!gSubs.some(x=>x.id===sidNow))sidNow=gSubs[0].id;
 
   const wkKeyNow=
     gid+'|'+sidNow+'|'+weekKeyFromDate(S.ui.wD||iso());
@@ -7253,7 +7302,7 @@ function resultForm(){
             name="subjectId"
           >
 
-            ${subOptions(sidNow)}
+            ${subOptionsFor(gid,sidNow)}
 
           </select>
 
@@ -7369,6 +7418,9 @@ function rankData(
         filterSubject &&
         keySubId!==filterSubject
       )
+        return;
+
+            if(!groupAllows(grp(gid),keySubId))
         return;
 
       if(
@@ -7602,8 +7654,9 @@ views.ranking=()=>{
   const fg=
     S.ui.rankGroup||'';
 
-  const fs=
+    let fs=
     S.ui.rankSubject||'';
+  if(fs&&fg&&!groupSubjectList(fg).some(x=>x.id===fs)){fs='';S.ui.rankSubject='';}
 
   const mode=
     S.ui.rankMode==='month'
@@ -7655,7 +7708,7 @@ views.ranking=()=>{
       Barcha fanlar
     </option>`
     +
-    d.subjects
+    (fg?groupSubjectList(fg):d.subjects)
       .map(
         s=>`
           <option
@@ -8182,7 +8235,7 @@ function attWeekDates(weekStart){
   return out;
 }
 
-const FIXED_SUBS=['Matem','Ingliz tili','Fizika','Nemis tili','IT','Biologiya','Kimyo'];
+const FIXED_SUBS=['Matem','Algebra','Ingliz tili','Fizika','Nemis tili','IT','Biologiya','Kimyo'];
 const canonSub=n=>{const l=(n||'').toLowerCase().trim();return FIXED_SUBS.find(f=>l.startsWith(f.toLowerCase()))||n};
 function attSubjects(g){
   if(isTeacher()){
@@ -8199,13 +8252,13 @@ function baseSubs(g){
   // Sinfning fanlari faqat shu sinf dars jadvalidan olinadi (o‘qituvchi filtrisiz)
   const out=[];
   if(!g)return out;
-  (S.d.timetable||[]).filter(x=>x.groupId===g.id&&x.subjectId&&sub(x.subjectId)).forEach(x=>{
+  (S.d.timetable||[]).filter(x=>x.groupId===g.id&&x.subjectId&&sub(x.subjectId)&&groupAllows(g,x.subjectId)).forEach(x=>{
     const c=canonSub(sub(x.subjectId).name);
     if(!out.includes(c))out.push(c);
   });
   return out;
 }
-const SUB_SHORT={'Matem':'Mat','Ingliz tili':'Ing','Fizika':'Fiz','Nemis tili':'Nem','IT':'IT','Biologiya':'Bio','Kimyo':'Kim'};
+const SUB_SHORT={'Matem':'Mat','Algebra':'Alg','Ingliz tili':'Ing','Fizika':'Fiz','Nemis tili':'Nem','IT':'IT','Biologiya':'Bio','Kimyo':'Kim'};
 const subShort=k=>SUB_SHORT[k]||String(k).slice(0,3);
 function ttLessonsFor(g){
   return (S.d.timetable||[]).filter(x=>
@@ -8921,21 +8974,30 @@ group:(fd,f)=>{
           'Sinf nomini kiriting'
       );
 
-    const id=f.dataset.id;
-
+        const id=f.dataset.id;
+    const track=fd.get('track')||'';
+    if(!id&&!track)
+      return void(
+        f.querySelector('.form-error').textContent=
+          'Yo‘nalishni tanlang: aniq yoki tabiiy fanlar'
+      );
     if(id){
-
       const g=grp(id);
-
       g.name=name;
-
+      if(!track){
+        delete g.track;
+        delete g.subjectIds;
+      }else if(g.track!==track||!(g.subjectIds||[]).length){
+        g.track=track;
+        g.subjectIds=ensureTrackSubjects(track);
+      }
     }else{
-
       S.d.groups.push({
         id:uid(),
-        name
+        name,
+        track,
+        subjectIds:ensureTrackSubjects(track)
       });
-
     }
 
     save();
@@ -10296,8 +10358,9 @@ document.addEventListener(
 
     }
 
-    if(t.id==='rf-g'){
-
+        if(t.id==='rf-g'){
+      const fsel=$('#rf-f');
+      if(fsel)fsel.innerHTML=subOptionsFor(t.value,fsel.value);
       const sel=
         $('#rf-s');
 
