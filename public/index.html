@@ -11471,12 +11471,51 @@ Object.assign(RU,{
 const MON={Yanvar:'Январь',Fevral:'Февраль',Mart:'Март',Aprel:'Апрель',May:'Май',Iyun:'Июнь',Iyul:'Июль',Avgust:'Август',Sentabr:'Сентябрь',Oktabr:'Октябрь',Noyabr:'Ноябрь',Dekabr:'Декабрь'};
 const PAT=[[/^(\d+) ta test$/,'Тестов: $1'],[/^(\d+) ta fan$/,'Предметов: $1'],[/^(\d+) ta sinf$/,'Классов: $1'],[/^(\d+) ta o'quvchi$/,'Учеников: $1'],[/^(\d+) ta darsda$/,'Уроков: $1'],[/^(\d+) ta dars$/,'Уроков: $1'],
 [/^(Yanvar|Fevral|Mart|Aprel|May|Iyun|Iyul|Avgust|Sentabr|Oktabr|Noyabr|Dekabr) (\d{4})$/,(m,a,y)=>MON[a]+' '+y]];
+Object.assign(RU,{
+"Administrator sizni dars jadvaliga qo'shgach,":"После того как администратор добавит вас в расписание,","Administrator yoki o'qituvchi sifatida kiring":"Войдите как администратор или учитель",
+"Avval o'quvchi qo'shing.":"Сначала добавьте ученика.","Avval umumiy savollar sonini kiriting":"Сначала введите общее число вопросов","Avval “Fanlar” bo'limida fan qo'shing.":"Сначала добавьте предмет в разделе «Предметы».",
+"Avval “O'qituvchilar” bo'limida":"Сначала в разделе «Учителя»","Avval “O'qituvchilar” bo'limida o'qituvchi qo'shing.":"Сначала добавьте учителя в разделе «Учителя».",
+"Baho, natija va reyting faqat shu fanlar bo'yicha hisoblanadi.":"Оценки, результаты и рейтинг считаются только по этим предметам.","Barcha fanlar":"Все предметы","Barcha sinflar":"Все классы","Barchasi":"Все","Barchasi →":"Все →",
+"Birinchi fanni qo'shing,":"Сначала добавьте предмет,","Birinchi fanni qo'shing, so'ng unga sinflar bog'lang.":"Сначала добавьте предмет, затем привяжите к нему классы.",
+"Boshqa nom bilan":"Под другим названием","Boshqa nom bilan qidirib ko'ring.":"Попробуйте поискать по другому названию.","Bu bo'yicha natija yo'q":"Результатов по этому нет",
+"Bu fayl to'g'ri zaxira nusxasi emas.":"Этот файл не является корректной резервной копией.","Bu qurilmada eslab qol":"Запомнить на этом устройстве","Bu tushlik vaqti":"Это время обеда","Dars kunlari:":"Дни занятий:",
+"Dars jadvaliga moslangan: faqat dars bor kunlarga baho qo'yiladi. Shanba natijasi reytingga o'tadi.":"Привязано к расписанию: оценки ставятся только в дни, когда есть урок. Результат субботы идёт в рейтинг.",
+"Fan nomi":"Название предмета","Fan qo'shish":"Добавить предмет","Fan(lar)":"Предмет(ы)","Filtrni o'zgartirib ko'ring.":"Попробуйте изменить фильтр.","Haftalik natijalar kiritilgach":"После ввода недельных результатов",
+"Hali fan qo'shilmagan":"Предметы ещё не добавлены","Hali o'qituvchi qo'shilmagan":"Учителя ещё не добавлены","Hali o'qituvchi qo'shilmagan.":"Учителя ещё не добавлены.","Hali o'quvchi yo'q":"Учеников пока нет",
+"Hozirgi ma'lumotlar zaxira fayldagi ma'lumot bilan almashtiriladi.":"Текущие данные будут заменены данными из резервного файла.","Jadvalni to'ldirish uchun":"Чтобы заполнить таблицу",
+"Kirish logini":"Логин для входа","Kirish:":"Логин:","Markaz nomi":"Название центра","Natija kiritish uchun":"Для ввода результатов","O'chirish sababi (izoh)":"Причина удаления (комментарий)",
+"O'qituvchi qo'shish":"Добавить учителя","O'quvchi qo'shish":"Добавить ученика","Sinf qo'shish":"Добавить класс",
+"O'qituvchi shu login va parol bilan kirib, faqat natija kiritadi,":"Учитель входит с этим логином и паролем и только вводит результаты,","O'qituvchi va vaqtlarni “Dars jadvali” bo'limida belgilaysiz.":"Учителя и время вы задаёте в разделе «Расписание уроков».",
+"O'qituvchilar bo'yicha":"По учителям","O'qituvchilarga o'tish":"Перейти к учителям","O'qituvchilarni qo'shib,":"Добавьте учителей и","O'qituvchilarni qo'shib, ularni sinflarga tayinlang.":"Добавьте учителей и назначьте их на классы.",
+"O'quvchilarning o'rtacha":"Средний результат учеников","O'quvchining natijalari, to'lovlari va":"Результаты, платежи ученика и","Oylik to'lov (so'm)":"Ежемесячная оплата (сум)","To'lov":"Платёж",
+"Reyting Baho bo'limidagi shanba":"Рейтинг формируется по субботним","Reyting — top o'quvchilar":"Рейтинг — лучшие ученики","Sana (hafta shu sanadan aniqlanadi)":"Дата (неделя определяется по этой дате)",
+"Savollar soni":"Количество вопросов","Sinf nomi":"Название класса","Sinflar bo'yicha":"По классам","Serverga ulanib bo'lmadi. Internetni tekshirib, sahifani yangilang.":"Не удалось подключиться к серверу. Проверьте интернет и обновите страницу.",
+"Sozlamalar bo'limida":"В разделе «Настройки»","Sozlamalar bo'limida dars vaqtlarini kiriting.":"Укажите время уроков в разделе «Настройки».","Sozlamalarga o'tish":"Перейти в настройки",
+"To'lovlarni kuzatish uchun":"Чтобы отслеживать платежи","Umumiy (aralash)":"Общий (смешанный)","Umumiy savollar soni:":"Общее число вопросов:","Xush kelibsiz,":"Добро пожаловать,",
+"Yangi parol":"Новый пароль","Yangi parol (takror)":"Новый пароль (повтор)","Yaratish va kirish":"Создать и войти","avval “Sinflar” bo'limida":"сначала в разделе «Классы»","butunlay o'chiriladi.":"будет удалено полностью.",
+"dars vaqtlarini kiriting.":"укажите время уроков.","davomati saqlanib qoladi, faqat sinfi":"посещаемость сохранится, только класс","kamida bitta sinf va":"хотя бы один класс и",
+"natija kiritish mumkin bo'ladi.":"можно будет вводить результаты.","natijalaridan shakllanadi.":"формируется из результатов.","natijasi bo'yicha reytingi.":"рейтинг по результатам.","o'qituvchi qo'shing.":"добавьте учителя.",
+"o'quvchi bo'lishi kerak.":"один ученик.","qidirib ko'ring.":"попробуйте поискать.","reyting shu yerda chiqadi.":"рейтинг появится здесь.","reyting va dars jadvalini ko'radi. Login bo'sh bo'lsa — kirish yo'q.":"рейтинг и расписание уроков. Если логин пуст — входа нет.",
+"sinflaringiz shu yerda paydo bo'ladi.":"ваши классы появятся здесь.","so'm":"сум","so'ng unga sinflar bog'lang.":"затем привяжите к нему классы.","so'ng “Dars jadvali” bo'limida":"затем в разделе «Расписание уроков»",
+"ta dars jadvalidan olib tashlanadi.":"ур. будет удалено из расписания.","ta darsda o'qituvchisiz qoladi.":"ур. останется без учителя.","ta o'quvchi · haftada":"уч. · в неделю","ta ·":"·","yig'ildi:":"собрано:",
+"uchun sinf bo'yicha to'lovlar va qarzdorlar.":"платежи и должники по классам.","ularni sinflarga tayinlang.":"назначьте их на классы.","uning haftalik darslarini belgilang.":"задайте его недельные уроки.",
+"dars/hafta":"ур./нед.","ta fan":"предм.","ta sinf":"кл.","ta o'quvchi":"уч.","ta test":"тестов","ta dars":"ур."
+});
+PAT.push([/^(\d+) ta$/,'Всего: $1'],[/^(\d+) o'quvchi$/,'$1 уч.']);
+const GEN={Yanvar:'января',Fevral:'февраля',Mart:'марта',Aprel:'апреля',May:'мая',Iyun:'июня',Iyul:'июля',Avgust:'августа',Sentabr:'сентября',Oktabr:'октября',Noyabr:'ноября',Dekabr:'декабря',Yan:'янв',Fev:'фев',Mar:'мар',Apr:'апр',Iyn:'июн',Iyl:'июл',Avg:'авг',Sen:'сен',Okt:'окт',Noy:'ноя',Dek:'дек'};
+const DATE_RE=new RegExp('(\\d) ('+Object.keys(GEN).sort((a,b)=>b.length-a.length).join('|')+')(?![a-zA-Z])','g');
 const nz=s=>s.replace(/[’‘ʻʼ`]/g,"'").replace(/\s+/g,' ').trim();
 const D=new Map(Object.entries(RU).map(([k,v])=>[nz(k),v]));
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const FK=[...D.keys()].filter(k=>k.length>=7||k.includes(' ')).sort((a,b)=>b.length-a.length);
+const FRre=new RegExp('(^|[^\\p{L}])('+FK.map(esc).join('|')+')(?![\\p{L}])','gu');
+const CL={A:'А',B:'Б',C:'В',D:'Г'};
+function frag(t){let c=false;t=t.replace(/(^|[^\p{L}\d])(\d{1,2})-([A-D])(?![\p{L}])/gu,(m,p,n,l)=>{c=true;return p+n+'-'+CL[l]});let o=t.replace(DATE_RE,(m,d,mo)=>{c=true;return d+' '+GEN[mo]});
+  o=o.replace(FRre,(m,p,k)=>{c=true;return p+D.get(k)});return c?o:null}
 let lang='uz';try{lang=localStorage.getItem('ds_lang')==='ru'?'ru':'uz'}catch(e){}
 const sf=document.querySelector('.side-foot');if(sf&&sf.dataset.orig===undefined)sf.dataset.orig=sf.textContent.trim();
-const memo=new WeakMap(),AT=['placeholder','title','aria-label'];
-const find=t=>{t=nz(t);let r=D.get(t);if(r)return r;for(const[re,f]of PAT){if(re.test(t))return t.replace(re,f)}if(t.endsWith(':')){r=D.get(t.slice(0,-1));if(r)return r+':'}return null};
+const memo=new WeakMap(),AT=['placeholder','title','aria-label','data-label'];
+const find=t=>{t=nz(t);let r=D.get(t);if(r)return r;for(const[re,f]of PAT){if(re.test(t))return t.replace(re,f)}if(t.endsWith(':')){r=D.get(t.slice(0,-1));if(r)return r+':'}return frag(t)};
 function txt(n){
   const v=n.nodeValue;if(!v||!v.trim())return;
   const m=memo.get(n);
@@ -11491,7 +11530,7 @@ function attrs(el){
 function walk(root){
   if(root.nodeType===3){txt(root);return}
   if(root.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/.test(root.tagName))return;
-  attrs(root);root.querySelectorAll('[placeholder],[title],[aria-label],[data-uz-title],[data-uz-placeholder],[data-uz-aria-label]').forEach(attrs);
+  attrs(root);root.querySelectorAll('[placeholder],[title],[aria-label],[data-label],[data-uz-data-label],[data-uz-title],[data-uz-placeholder],[data-uz-aria-label]').forEach(attrs);
   const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.tagName)?2:1});
   let n;while((n=w.nextNode()))txt(n);
 }
