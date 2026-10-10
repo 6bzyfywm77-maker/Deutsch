@@ -361,6 +361,7 @@ function viewFor(sess) {
     delete d.subjectDeleteLog;
     delete d.teacherDeleteLog;
     delete d.groupDeleteLog;
+    delete d.editLog;
     if (d.profile) d.profile = { name: d.profile.name, photo: '' };
   }
   return d;
