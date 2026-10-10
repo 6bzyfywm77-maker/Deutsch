@@ -43,7 +43,7 @@
   --abg:88%;
   --afg:26%;
 
-  --display:'Fraunces','Iowan Old Style','Georgia',serif;
+  --display:'Unbounded','Onest',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   --body:'Onest',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 
@@ -3259,64 +3259,206 @@ tbody tr.click:hover td{background:#F5F8FF}
 </style>
 
 
-<style id="final-mobile-fix">
-/* FINAL RESPONSIVE FIX */
-html,body{width:100%;max-width:100%;overflow-x:hidden;}
-body{margin:0;}
-@media (max-width:900px){
-  .app{display:block!important;min-height:100dvh!important;width:100%!important;max-width:100%!important;}
-  .mainc{width:100%!important;min-width:0!important;max-width:100%!important;}
-  .side{
-    position:fixed!important;
-    left:0!important;right:auto!important;top:0!important;bottom:0!important;
-    width:min(280px,86vw)!important;
-    height:100dvh!important;max-height:100dvh!important;
-    z-index:1000!important;
-    transform:translate3d(-105%,0,0)!important;
-    visibility:hidden!important;
-    overflow-y:auto!important;overflow-x:hidden!important;
+<style id="mobile-final-fix">
+/* ===== FINAL RESPONSIVE FIX =====
+   iPhone/iPad: fixed header + safe-area + stable drawer.
+   Desktop layout is intentionally unchanged. */
+@media (max-width: 900px){
+  html, body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
-    box-sizing:border-box!important;
-    transition:transform .22s ease,visibility 0s linear .22s!important;
   }
-  body.side-open .side{
-    transform:translate3d(0,0,0)!important;
-    visibility:visible!important;
-    transition:transform .22s ease!important;
+
+  body{
+    overscroll-behavior-x:none;
   }
-  .side-scrim{
-    display:none!important;position:fixed!important;inset:0!important;
-    z-index:999!important;background:rgba(0,0,0,.52)!important;
+
+  .app{
+    width:100%;
+    min-width:0;
+    display:block;
   }
-  body.side-open .side-scrim{display:block!important;}
+
+  .mainc{
+    width:100%;
+    min-width:0;
+    padding-top:calc(50px + env(safe-area-inset-top));
+  }
+
+  /* Sticky inside a grid can behave badly in iOS Safari.
+     A fixed mobile header keeps it visible while scrolling. */
   .top{
-    position:sticky!important;top:0!important;z-index:900!important;
-    width:100%!important;box-sizing:border-box!important;
-    padding-left:max(12px,env(safe-area-inset-left))!important;
-    padding-right:max(12px,env(safe-area-inset-right))!important;
-    padding-top:env(safe-area-inset-top)!important;
-    height:calc(52px + env(safe-area-inset-top))!important;
+    position:fixed!important;
+    left:0;
+    right:0;
+    top:0;
+    width:100%;
+    height:calc(50px + env(safe-area-inset-top));
+    padding:env(safe-area-inset-top) 12px 0;
+    z-index:120;
   }
-  .burger{display:grid!important;flex:none!important;width:42px!important;height:42px!important;}
-  .view{width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow-x:hidden!important;padding-left:14px!important;padding-right:14px!important;}
-  .ph{min-width:0!important;flex-wrap:wrap!important;}
-  .ph-act{max-width:100%!important;flex-wrap:wrap!important;}
-  .tools{max-width:100%!important;min-width:0!important;overflow-x:auto!important;}
-  .panel{max-width:100%!important;min-width:0!important;}
-  .panel-b{min-width:0!important;}
-  table{max-width:100%;}
-  .modal{box-sizing:border-box!important;max-width:calc(100vw - 20px)!important;}
-  .modal-b{min-width:0!important;overflow-x:auto!important;}
-  body.side-open{overflow:hidden!important;touch-action:none;}
+
+  .burger{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    display:grid;
+    place-items:center;
+    touch-action:manipulation;
+  }
+
+  .top-title{
+    min-width:0;
+    flex:1;
+  }
+
+  .prof-wrap{z-index:125}
+  .menu{z-index:130;max-width:calc(100vw - 24px)}
+
+  .side{
+    width:min(86vw,300px);
+    max-width:300px;
+    height:100vh;
+    height:100dvh;
+    top:0;
+    bottom:0;
+    padding-top:calc(12px + env(safe-area-inset-top));
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    z-index:140;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .side-scrim{
+    z-index:130!important;
+    touch-action:none;
+  }
+
+  .side-open{
+    overflow:hidden!important;
+    overscroll-behavior:none;
+  }
+
+  .view{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    padding-top:18px;
+    padding-left:max(13px, env(safe-area-inset-left));
+    padding-right:max(13px, env(safe-area-inset-right));
+  }
+
+  .ph,
+  .ph-act,
+  .tools,
+  .panel-h{
+    min-width:0;
+  }
+
+  .ph-act{
+    width:100%;
+  }
+
+  .ph-act .btn{
+    max-width:100%;
+  }
+
+  /* Never let long controls create a horizontal page. */
+  input,select,textarea,button,.field{
+    max-width:100%;
+  }
+
+  /* Touch targets: easier to use on phones. */
+  .nav-i{
+    min-height:44px;
+    padding-top:9px;
+    padding-bottom:9px;
+  }
+
+  .btn,.ib{
+    touch-action:manipulation;
+  }
+
+  /* Scroll wide tables inside their own panel instead of moving the page. */
+  .gwrap,
+  .table-wrap,
+  .tbl-wrap,
+  .panel-b:has(table){
+    max-width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table.tt,
+  table.att-week,
+  table.gm-tab{
+    max-width:none;
+  }
 }
-@media (max-width:420px){
-  .view{padding-left:10px!important;padding-right:10px!important;}
-  .top-title{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
-  .prof{flex:none!important;}
-  .ph h1{font-size:20px!important;}
+
+@media (max-width: 560px){
+  .strip{grid-template-columns:1fr 1fr}
+  .gg{grid-template-columns:1fr}
+
+  .ph h1{font-size:21px}
+  .ph p{max-width:100%}
+
+  .panel-h,
+  .panel-b{padding-left:13px;padding-right:13px}
+
+  .modal{
+    width:calc(100vw - 20px);
+    max-width:calc(100vw - 20px);
+    max-height:calc(100dvh - 20px);
+    margin:10px;
+  }
+
+  .modal-h,
+  .modal-f{padding-left:13px;padding-right:13px}
+
+  .modal-f{
+    flex-wrap:wrap;
+  }
+
+  .modal-f .btn{
+    min-height:42px;
+  }
+}
+
+@media (max-width: 380px){
+  .top{padding-left:8px;padding-right:8px}
+  .view{padding-left:10px;padding-right:10px}
+  .strip-i{padding:9px 8px}
+  .strip-i b{font-size:19px}
+  .strip-i span,.strip-i em{font-size:10px}
 }
 </style>
 
+
+<style id="stability-fixes">
+/* ===== Barqarorlik: barcha telefon va kompyuterlar uchun ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{overflow-wrap:break-word;min-width:0}
+img,svg,video,canvas{max-width:100%}
+button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulation}
+/* eski brauzerlarda color-mix() bo'lmasa ham fokus ko'rinsin */
+:focus-visible{outline:3px solid rgba(31,70,216,.45);outline-offset:2px}
+/* iPhone/iPad Safari: 16px dan kichik maydonga bosganda sahifa o'zi kattalashmasin */
+@supports (-webkit-touch-callout:none){
+  input,select,textarea{font-size:16px!important}
+  .satbox input{padding-left:2px!important;padding-right:2px!important;min-width:0}
+}
+/* Android/boshqa sensorli qurilmalar: ham kamida 16px */
+@media (pointer:coarse){
+  input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:max(16px,1em)}
+}
+/* Juda tor telefonlar (320px) */
+@media (max-width:340px){
+  .modal,.dlg{max-width:calc(100vw - 16px)}
+}
+</style>
 </head>
 
 <body>
@@ -6732,8 +6874,8 @@ function periodForm(p){
 
       `
         <div class="f">
-          <label for="pf-s">Boshlanish</label>
-          <input id="pf-s" name="start" type="time" value="${esc(x.start||'')}" autofocus>
+          <label for="pf-s-m">Boshlanish</label>
+          <input id="pf-s-m" name="start" type="time" value="${esc(x.start||'')}" autofocus>
         </div>
 
         <div class="f">
@@ -6854,7 +6996,7 @@ function studentForm(s){
             min="0"
             inputmode="numeric"
             value="${x.fee||''}"
-            placeholder="masalan: 500000"
+            placeholder="0"
           >
 
         </div>
