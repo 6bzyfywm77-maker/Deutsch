@@ -3112,16 +3112,12 @@ h1,h2,h3{letter-spacing:-.025em}
 /* ---------- Yon menyu ---------- */
 .side{
   background:
+    linear-gradient(180deg,var(--flag-k) 0 33.33%,var(--flag-r) 33.33% 66.66%,var(--flag-g) 66.66% 100%) left top/4px 100% no-repeat,
     radial-gradient(420px 260px at 0% 0%,rgba(31,70,216,.30),transparent 70%),
     linear-gradient(180deg,#0C1431 0%,#080D1F 100%);
   padding:16px 12px;
   border-right:1px solid rgba(255,255,255,.04);
   position:sticky;
-}
-.side::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
-  background:linear-gradient(180deg,var(--flag-k) 0 33.33%,var(--flag-r) 33.33% 66.66%,var(--flag-g) 66.66% 100%);
-  opacity:.95;
 }
 .side .brand{padding:6px 8px 18px;gap:12px;margin-left:4px;
   border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:8px;font-size:15px}
@@ -3460,6 +3456,81 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 /* Juda tor telefonlar (320px) */
 @media (max-width:340px){
   .modal,.dlg{max-width:calc(100vw - 16px)}
+}
+
+/* Baho jadvali: sarlavhadagi sana (masalan 10/10) ikki qatorga bo'linib ketmasin */
+.gtab th small{white-space:nowrap}
+@media (max-width:560px){
+  table.gtab th small{font-size:9px!important;letter-spacing:-.02em}
+  table.gtab th.satc,table.gtab td.satc,table.gtab th.tod{width:15%}
+}
+
+/* Baho jadvali kompyuterda/planshetda butun kenglikni egallasin (o'ngda bo'sh joy qolmasin) */
+@media (min-width:561px){
+  table.gtab{width:max-content!important;min-width:100%!important}
+}
+</style>
+<style id="design-polish">
+/* ===== Dizayn sayqali: FAQAT kompyuter (>900px). Telefon ko'rinishi o'zgarmaydi ===== */
+@media (min-width:901px){
+  :root{
+    --bg:#F4F6FC;--line:#E1E6F2;--ink2:#4A5470;
+    --brand:#2147D6;--brand-dark:#16349A;--brand-soft:#E8EEFE;
+    --r-sm:11px;--r-md:15px;--r-lg:20px;
+    --sh-1:0 1px 2px rgba(13,20,40,.04),0 6px 18px rgba(13,20,40,.05);
+    --sh-2:0 4px 8px rgba(13,20,40,.05),0 18px 44px rgba(13,20,40,.10);
+  }
+  /* raqamlar tekis turadi (baho, foiz, to'lov) */
+  table,.strip-i b,.att-pct,.gsum{font-variant-numeric:tabular-nums}
+  body{font-feature-settings:"cv11","ss01"}
+
+  /* sarlavha */
+  .ph h1{font-size:27px;background:linear-gradient(90deg,var(--ink) 60%,var(--brand-dark));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+  /* statistika kartalari */
+  .strip{border-radius:var(--r-md);box-shadow:var(--sh-1);overflow:hidden;position:relative}
+  .strip::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--brand),#5B7BFF 55%,var(--gold))}
+  .strip-i{padding:16px 18px;transition:background .18s}
+  .strip-i:hover{background:var(--brand-soft)}
+
+  /* panellar */
+  .panel{transition:box-shadow .25s var(--ease),border-color .2s,transform .25s var(--ease)}
+  .panel:hover{box-shadow:var(--sh-2);border-color:#D2DAF0}
+
+  /* jadvallar: qator ustiga kelganda yengil ajratish (rangli kataklar ustida ham ishlaydi) */
+  .wtable tbody tr,.gtab tbody tr,.gm-tab tbody tr{transition:box-shadow .15s}
+  .wtable tbody tr:hover td,.gtab tbody tr:hover td,.gm-tab tbody tr:hover td{box-shadow:inset 0 0 0 999px rgba(33,71,214,.045)}
+  .wtable thead th,.gtab thead th,.gm-tab thead th{font-weight:650;letter-spacing:.01em;color:var(--ink2)}
+
+  /* tugmalar */
+  .btn{min-height:40px;padding-left:16px;padding-right:16px;border-radius:var(--r-sm);gap:8px}
+  .btn.primary{background:linear-gradient(180deg,#3560F0 0%,var(--brand) 100%);border-color:var(--brand-dark)}
+  .btn.primary:hover{transform:translateY(-1px)}
+  .btn:focus-visible{outline:3px solid rgba(33,71,214,.35);outline-offset:2px}
+  .ib{width:36px;height:36px}
+
+  /* maydonlar */
+  .field,.f input,.f select,.f textarea{border-radius:var(--r-sm);padding-top:10px;padding-bottom:10px}
+
+  /* yon menyu */
+  .nav-i{transition:background .18s,color .18s,padding-left .2s var(--ease)}
+  .nav-i:hover{padding-left:15px}
+  .side{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+
+  /* oyna (modal) */
+  .modal{border-radius:26px}
+  .modal-h h3,.modal-h h2{font-family:var(--display);letter-spacing:-.025em}
+
+  /* ingichka, chiroyli scrollbar */
+  *{scrollbar-width:thin;scrollbar-color:#C5CDE3 transparent}
+  *::-webkit-scrollbar{width:10px;height:10px}
+  *::-webkit-scrollbar-thumb{background:#C5CDE3;border-radius:999px;border:2px solid transparent;background-clip:content-box}
+  *::-webkit-scrollbar-thumb:hover{background:#A9B5D6;background-clip:content-box;border:2px solid transparent}
+  *::-webkit-scrollbar-track{background:transparent}
+}
+@media (min-width:901px) and (prefers-reduced-motion:reduce){
+  .panel,.btn,.nav-i{transition:none!important}
+  .btn.primary:hover{transform:none}
 }
 </style>
 </head>
@@ -4416,6 +4487,10 @@ function blank(){
 
     weeklyBy:{},
 
+    grades:{},
+
+    satRes:{},
+
     payments:{},
 
     attendance:{},
@@ -4810,7 +4885,7 @@ function confirmBox(title,text,onYes,label='O‘chirish'){
 const NAV=[
   {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home']]},
   {g:'Ta’lim',items:[['subjects','Fanlar','layers'],['groups','Sinflar','sliders'],['teachers','O‘qituvchilar','teacher'],['students','O‘quvchilar','users'],['schedule','Dars jadvali','calendar']]},
-  {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy'],['tgrades','O‘qituvchi baholari','teacher']]},
+  {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy']]},
   {g:'Moliya',items:[['payments','To‘lovlar','wallet'],['attendance','Davomat','calendar']]},
   {g:'Tizim',items:[['settings','Sozlamalar','user']]}
 ];
