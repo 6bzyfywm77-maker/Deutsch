@@ -60,6 +60,12 @@ class Client {
   // ruxsatlar
   r = await t.call('POST', '/api/data', { ops: [{ p: ['weekly', 'g1|s1|2026-10-05', 'st1'], v: { total: 10, correct: 8 } }] }); ok(r.s === 200, 'o‘z sinfiga yozdi');
   r = await t.call('POST', '/api/data', { ops: [{ p: ['weekly', 'g2|s1|2026-10-05', 'st1'], v: { total: 1 } }] }); ok(r.s === 403, 'boshqa sinf taqiqlangan');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['grades'], v: {} }, { p: ['satRes'], v: {} }] }); ok(r.s === 200, 'bo‘sh baho bo‘limlarini yaratdi');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['grades', 'g1|Deutsch|2026-10-06', 'st1'], v: 5 }] }); ok(r.s === 200, 'o‘z fani bahosi');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['satRes', 'g1|Deutsch|2026-10-10'], v: { total: 50, r: {} } }] }); ok(r.s === 200, 'shanba testi');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['grades', 'g1|Fizika|2026-10-06', 'st1'], v: 5 }] }); ok(r.s === 403, 'boshqa fan bahosi taqiqlangan');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['grades', 'g2|Deutsch|2026-10-06', 'st1'], v: 5 }] }); ok(r.s === 403, 'boshqa sinf bahosi taqiqlangan');
+  r = await t.call('POST', '/api/data', { ops: [{ p: ['grades'], v: {} }] }); ok(r.s === 403, 'mavjud baholarni o‘chirib bo‘lmaydi');
   r = await t.call('POST', '/api/data', { ops: [{ p: ['payments', 'x'], v: 1 }] }); ok(r.s === 403, 'to‘lov taqiqlangan');
   r = await t.call('POST', '/api/data', { ops: [{ p: ['students'], v: [] }] }); ok(r.s === 403, 'o‘quvchilar taqiqlangan');
   r = await t.call('POST', '/api/credentials', { teacherId: 't1', login: 'z', password: 'abcd' }); ok(r.s === 403, 'o‘qituvchi login o‘zgartira olmaydi');
