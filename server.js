@@ -304,19 +304,38 @@ function securityHeaders(req, res) {
 
 /* ---------------- ma'lumotga ruxsat va tozalash ---------------- */
 
-const TEACHER_KEYS = new Set(['weekly', 'weeklyMeta', 'weeklyBy', 'attendance']);
+const TEACHER_KEYS = new Set(['weekly', 'weeklyMeta', 'weeklyBy', 'attendance', 'grades', 'satRes']);
+// grades va satRes kalitida fan NOMI turadi (masalan "Algebra"), boshqalarida fan ID si
+const NAME_KEYED = new Set(['grades', 'satRes']);
+const FIXED_SUBS = ['Matem', 'Algebra', 'Ingliz tili', 'Fizika', 'Nemis tili', 'IT', 'Biologiya', 'Kimyo'];
 const GEN_SUBJECT = '__general__';
+
+function canonSub(n) {
+  const l = String(n || '').toLowerCase().trim();
+  return FIXED_SUBS.find(f => l.startsWith(f.toLowerCase())) || String(n || '');
+}
 
 function teacherLessons(data, tid) {
   return (data.timetable || []).filter(x => x && x.teacherId === tid && x.subjectId && x.groupId);
 }
-function teacherMayWrite(data, tid, p) {
+function teacherMayWrite(data, tid, p, op) {
   if (!TEACHER_KEYS.has(p[0])) return false;
-  if (p.length < 2) return false; // butun bo'limni almashtira olmaydi
+  if (p.length < 2) {
+    // faqat bo'sh bo'limni birinchi marta yaratishga ruxsat (mavjudini almashtirib bo'lmaydi)
+    const empty = op && op.v && typeof op.v === 'object' && !Array.isArray(op.v) && Object.keys(op.v).length === 0;
+    return NAME_KEYED.has(p[0]) && !!empty && data[p[0]] === undefined;
+  }
   const parts = String(p[1]).split('|');
   const gid = parts[0];
   const lessons = teacherLessons(data, tid).filter(x => x.groupId === gid);
   if (!lessons.length) return false;
+  if (NAME_KEYED.has(p[0])) {
+    const want = canonSub(String(parts[1] || '').replace(/#\d+$/, ''));
+    return lessons.some(x => {
+      const sb = (data.subjects || []).find(z => z && z.id === x.subjectId);
+      return sb && canonSub(sb.name) === want;
+    });
+  }
   if (p[0] !== 'attendance' && parts[1] && parts[1] !== GEN_SUBJECT) {
     if (!lessons.some(x => x.subjectId === parts[1])) return false;
   }
@@ -355,7 +374,7 @@ function applyOps(data, ops, sess) {
     for (const seg of p) {
       if (typeof seg !== 'string' || BAD_KEYS.has(seg) || seg.length > 300) throw httpErr(400, 'Noto‘g‘ri kalit');
     }
-    if (sess.role === 'teacher' && !teacherMayWrite(data, sess.id, p)) {
+    if (sess.role === 'teacher' && !teacherMayWrite(data, sess.id, p, op)) {
       throw httpErr(403, 'Bu o‘zgarishga ruxsat yo‘q');
     }
   }
