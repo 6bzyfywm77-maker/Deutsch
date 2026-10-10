@@ -3685,7 +3685,7 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 
     <nav id="nav" aria-label="Asosiy menyu"></nav>
 
-    <div class="lang-sw" role="group" aria-label="Til / Язык"><button type="button" data-lang="uz">O‘zbekcha</button><button type="button" data-lang="ru">Русский</button></div>
+    <div class="lang-sw" role="group" aria-label="Til / Язык / Sprache"><button type="button" data-lang="uz">O‘zbekcha</button><button type="button" data-lang="ru">Русский</button><button type="button" data-lang="de">Deutsch</button></div>
 
     <div class="side-foot">
       Ma’lumotlar xavfsiz serverda saqlanadi
@@ -4503,6 +4503,8 @@ function blank(){
 
     groupDeleteLog:[],
 
+    editLog:[],
+
     periods:[
       {id:uid(),n:1,start:'09:00',end:'09:45'},
       {id:uid(),n:2,start:'09:50',end:'10:35'},
@@ -4863,7 +4865,10 @@ let toastT=null;
 function toast(msg,kind=''){const el=$('#toast');el.textContent=msg;el.className='toast show'+(kind?' '+kind:'');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2600)}
 function closeModal(){const r=$('#modalRoot');r.innerHTML='';document.body.classList.remove('noscroll')}
 function openModal(html){$('#modalRoot').innerHTML=html;document.body.classList.add('noscroll');const f=$('#modalRoot [autofocus]')||$('#modalRoot input,#modalRoot select,#modalRoot textarea');f&&f.focus()}
+const EDITK={student:'students',teacher:'teachers',group:'groups',subject:'subjects'};
+const EDIT_NOTE=`<div class="f full"><label for="ef-note">Izoh (nima o‘zgartirildi va nima uchun?)</label><textarea id="ef-note" name="editNote" rows="2" placeholder="Izoh yozing..."></textarea></div>`;
 function formModal(title,formName,id,body,submitLabel,wide){
+  if(id&&EDITK[formName])body+=EDIT_NOTE;
   return `<div class="scrim" data-scrim="1"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">
     <div class="modal-h"><h3>${esc(title)}</h3><button class="ib plain" data-act="close-modal" aria-label="Yopish">${ic('x')}</button></div>
     <form data-form="${formName}" data-id="${id||''}" novalidate>
@@ -6330,7 +6335,7 @@ function groupForm(g){
             </div>
 
           </div>
-          <div class="form-error"></div>
+          ${g?EDIT_NOTE:''}<div class="form-error"></div>
         </div>
 
         <div class="modal-f">
@@ -6567,7 +6572,7 @@ views.students=()=>{
     d.students.filter(
       s=>
         (!q||
-          fullName(s)
+          (fullName(s)+' '+sName(s))
             .toLowerCase()
             .includes(q))
         &&
@@ -6646,7 +6651,10 @@ views.students=()=>{
 };
 
 
+const sName=s=>`${s.last||''} ${s.first||''}`.trim();
 function studentRows(list){
+  const gi=id=>{const i=S.d.groups.findIndex(g=>g.id===id);return i<0?1e9:i};
+  list=list.map((s,i)=>[s,i]).sort((a,b)=>gi(a[0].groupId)-gi(b[0].groupId)||a[1]-b[1]).map(x=>x[0]);
 
   if(!list.length)
 
@@ -6670,12 +6678,12 @@ function studentRows(list){
     return `
       <div class="stu-row">
 
-        ${av(fullName(s),30)}
+        ${av(sName(s),30)}
 
         <div class="stu-main">
 
           <div class="stu-name">
-            ${esc(fullName(s))}
+            ${esc(sName(s))}
           </div>
 
           <div class="stu-meta">
@@ -9129,6 +9137,56 @@ views.grades=()=>{
 
 
 
+
+/* ---------- Tahrirlar tarixi ---------- */
+const ELBL={first:'Ism',last:'Familiya',phone:'Telefon',login:'Login',pwHash:'Parol',subjectIds:'Fan(lar)',groupId:'Sinf',color:'Rang',track:'Yo‘nalish'};
+const ENAME={subject:'Fan nomi',group:'Sinf nomi',teacher:'Ism familiya'};
+const EKIND={student:'O‘quvchi',teacher:'O‘qituvchi',group:'Sinf',subject:'Fan'};
+const eFind=(k,id)=>(S.d[EDITK[k]]||[]).find(x=>x.id===id);
+function editPre(f,fd){
+  const k=f.dataset.form,id=f.dataset.id;
+  if(!id||!EDITK[k])return null;
+  const note=(fd.get('editNote')||'').trim();
+  if(!note){const e=f.querySelector('.form-error');if(e)e.textContent='Izoh kiriting';return false}
+  const x=eFind(k,id);if(!x)return null;
+  return {k,id,note,snap:JSON.parse(JSON.stringify(x))};
+}
+function editPost(pre){
+  if(!pre)return;
+  const x=eFind(pre.k,pre.id);if(!x)return;
+  const show=(key,v)=>{
+    if(key==='pwHash')return '••••';
+    if(key==='groupId')return (grp(v)||{}).name||'—';
+    if(key==='subjectIds')return (v||[]).map(i=>(sub(i)||{}).name).filter(Boolean).join(', ')||'—';
+    return v===undefined||v===''?'—':String(v);
+  };
+  const ch=[];
+  new Set([...Object.keys(pre.snap),...Object.keys(x)]).forEach(key=>{
+    if(key==='id')return;
+    const a=JSON.stringify(pre.snap[key]),b=JSON.stringify(x[key]);
+    if(a===b)return;
+    ch.push({f:key==='name'?ENAME[pre.k]:(ELBL[key]||key),a:show(key,pre.snap[key]),b:show(key,x[key])});
+  });
+  if(!ch.length)return;
+  S.d.editLog=S.d.editLog||[];
+  S.d.editLog.push({id:uid(),kind:pre.k,name:pre.k==='student'?fullName(x):(x.name||''),note:pre.note,date:iso(),changes:ch});
+  save();
+}
+function editLogPanel(){
+  const d=S.d;
+  const del=(arr,kind)=>(arr||[]).map(x=>({kind,name:x.name||'',note:x.note||'',date:x.date||'',del:1}));
+  const all=[].concat(
+    (d.editLog||[]).map(x=>Object.assign({},x)),
+    del(d.studentDeleteLog,'student'),del(d.teacherDeleteLog,'teacher'),
+    del(d.groupDeleteLog,'group'),del(d.subjectDeleteLog,'subject')
+  ).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const rows=all.map(x=>`<div class="stu-row" style="align-items:flex-start"><div class="stu-main">
+    <div class="stu-name"><span class="tag sm">${EKIND[x.kind]}</span> ${esc(x.name)} <span class="mute">· ${x.del?'O‘chirildi':'Tahrirlandi'} · ${esc(x.date)}</span></div>
+    ${(x.changes||[]).map(c=>`<div class="stu-meta"><b>${c.f}</b>: ${esc(c.a)} → ${esc(c.b)}</div>`).join('')}
+    <div class="stu-meta"><b>Izoh</b>: ${esc(x.note)}</div></div></div>`).join('');
+  return `<section class="panel"><div class="panel-h"><h3>Tahrirlar tarixi</h3></div>
+    ${rows||'<p class="mute" style="padding:12px 16px">Hali o‘zgarish yo‘q</p>'}</section>`;
+}
 views.settings=()=>{
 
   const d=S.d;
@@ -9459,6 +9517,8 @@ views.settings=()=>{
         </div>
 
       </section>
+
+      ${editLogPanel()}
 
     </div>
 
@@ -10827,12 +10887,12 @@ document.addEventListener(
 
       if(isTeacher())return;
       const fn=forms[f.dataset.form];
-
-      if(fn)
-        fn(
-          new FormData(f),
-          f
-        );
+      if(fn){
+        const fd=new FormData(f);
+        const pre=editPre(f,fd);
+        if(pre===false)return;
+        Promise.resolve(fn(fd,f)).then(()=>editPost(pre));
+      }
 
       return;
     }
@@ -12022,7 +12082,7 @@ const RU={
 'Boshqaruv panelini o‘rnatish':'Установка панели управления','Deutsch School — Boshqaruv paneli':'Deutsch School — Панель управления',
 'Tezkor amallar':'Быстрые действия','Sinf yaratish':'Создать класс','Hali sinf yo‘q':'Классов пока нет','Hali sinf yo‘q.':'Классов пока нет.','Hali o‘qituvchi yo‘q':'Учителей пока нет',
 'Hali natija yo‘q':'Результатов пока нет','Bu sinfda o‘quvchi yo‘q':'В этом классе нет учеников','Avval sinf kerak':'Сначала нужен класс','O‘quvchi yo‘q':'Нет учеников',
-'Jadval bo‘sh':'Расписание пусто','Dars vaqtlari belgilanmagan':'Время уроков не задано','Yo‘nalish':'Направление','Aniq fanlar':'Точные науки','Tabiiy fanlar':'Естественные науки',
+'Jadval bo‘sh':'Расписание пусто','Dars vaqtlari belgilanmagan':'Время уроков не задано','Yo‘nalish':'Направление','Aniq fanlar':'Точные предметы','Tabiiy fanlar':'Естественные предметы',
 'Sinfni o‘chirish':'Удалить класс','O‘quvchini o‘chirish':'Удалить ученика','O‘qituvchini o‘chirish':'Удалить учителя','Fanni o‘chirish':'Удалить предмет',
 '— Bo‘sh —':'— Пусто —','Tayinlanmagan':'Не назначен','Topilmadi':'Не найдено','Biriktirilmagan':'Не закреплён','Belgilanmagan':'Не задано',
 'Boshlanish':'Начало','Tugash':'Конец','To‘g‘ri javob':'Правильных ответов','Testlar soni':'Количество тестов','Oylik o‘rtacha':'Среднее за месяц','To‘lov izohi':'Комментарий к оплате',
@@ -12074,24 +12134,130 @@ Object.assign(RU,{
 "Yan":"Янв","Fev":"Фев","Mar":"Мар","Apr":"Апр","Iyn":"Июн","Iyl":"Июл","Avg":"Авг","Sen":"Сен","Okt":"Окт","Noy":"Ноя","Dek":"Дек",
 "Du":"Пн","Se":"Вт","Cho":"Ср","Pa":"Чт","Ju":"Пт","Sh":"Сб","Ya":"Вс"
 });
+const DE={
+'Umumiy':'Allgemein','Ta’lim':'Unterricht','Natijalar':'Ergebnisse','Moliya':'Finanzen','Tizim':'System','O‘qituvchilar uchun':'Für Lehrer',
+'Boshqaruv paneli':'Verwaltungspanel','Fanlar':'Fächer','Sinflar':'Klassen','O‘qituvchilar':'Lehrer','O‘quvchilar':'Schüler','Dars jadvali':'Stundenplan',
+'Haftalik natijalar':'Wochenergebnisse','Baho':'Note','Reyting':'Rangliste','To‘lovlar':'Zahlungen','Davomat':'Anwesenheit','Sozlamalar':'Einstellungen','Mening sinflarim':'Meine Klassen',
+'Ma’lumotlar xavfsiz serverda saqlanadi va faqat administratorga ko‘rinadi.':'Die Daten werden sicher auf dem Server gespeichert und sind nur für den Administrator sichtbar.',
+'Siz o‘qituvchi sifatida kirdingiz: natija kiritish va ma’lumotlarni ko‘rish mumkin.':'Sie sind als Lehrer angemeldet: Ergebnisse eingeben und Daten ansehen ist möglich.',
+'Yopish':'Schließen','Bekor qilish':'Abbrechen','Saqlash':'Speichern','Tahrirlash':'Bearbeiten','O‘chirish':'Löschen','Chop etish':'Drucken','Ko‘rish':'Ansehen',
+'O‘quvchi':'Schüler','O‘qituvchi':'Lehrer','Sinf':'Klasse','Fan':'Fach','Vaqt':'Zeit','Login':'Benutzername','Parol':'Passwort','Parolni takrorlang':'Passwort wiederholen',
+'Ism':'Vorname','Familiya':'Nachname','Ism familiya':'Vor- und Nachname','Telefon':'Telefon','Izoh':'Kommentar','Holat':'Status','Hafta':'Woche','Bugun':'Heute','Foiz':'Prozent','Profil':'Profil',
+'Boshqaruv panelini o‘rnatish':'Verwaltungspanel einrichten','Deutsch School — Boshqaruv paneli':'Deutsch School — Verwaltungspanel',
+'Tezkor amallar':'Schnellaktionen','Sinf yaratish':'Klasse erstellen','Hali sinf yo‘q':'Noch keine Klasse','Hali sinf yo‘q.':'Noch keine Klasse.','Hali o‘qituvchi yo‘q':'Noch kein Lehrer',
+'Hali natija yo‘q':'Noch keine Ergebnisse','Bu sinfda o‘quvchi yo‘q':'In dieser Klasse gibt es keine Schüler','Avval sinf kerak':'Zuerst wird eine Klasse benötigt','O‘quvchi yo‘q':'Keine Schüler',
+'Jadval bo‘sh':'Der Plan ist leer','Dars vaqtlari belgilanmagan':'Unterrichtszeiten sind nicht festgelegt','Yo‘nalish':'Richtung','Aniq fanlar':'Exakte Fächer','Tabiiy fanlar':'Naturkundliche Fächer',
+'Sinfni o‘chirish':'Klasse löschen','O‘quvchini o‘chirish':'Schüler löschen','O‘qituvchini o‘chirish':'Lehrer löschen','Fanni o‘chirish':'Fach löschen',
+'— Bo‘sh —':'— Leer —','Tayinlanmagan':'Nicht zugewiesen','Topilmadi':'Nicht gefunden','Biriktirilmagan':'Nicht zugeordnet','Belgilanmagan':'Nicht festgelegt',
+'Boshlanish':'Beginn','Tugash':'Ende','To‘g‘ri javob':'Richtige Antworten','Testlar soni':'Anzahl der Tests','Oylik o‘rtacha':'Monatsdurchschnitt','To‘lov izohi':'Zahlungskommentar',
+'Barcha sinflar bo‘yicha':'Über alle Klassen','Oylik to‘lov':'Monatliche Zahlung','sinf o‘rtachasi':'Klassendurchschnitt','60% dan past':'Unter 60 %','O‘rtacha':'Durchschnitt',
+'Katakchani bosing:':'Tippen Sie auf ein Feld:','Keldi':'Anwesend','S — sababsiz':'S — unentschuldigt','DQ — dars qoldirgan':'DQ — Unterricht versäumt','K — kech qolgan':'K — verspätet',
+'Shanba testi — umumiy savol soni':'Samstagstest — Gesamtzahl der Fragen','Parolni almashtirish':'Passwort ändern','Zaxira nusxa':'Sicherungskopie','Dars jadvali vaqtlari':'Unterrichtszeiten',
+'Tushlik':'Mittagspause','Shanba testlari':'Samstagstests','O‘rtacha baho':'Durchschnittsnote','Shanba natijasi':'Samstagsergebnis','Sizga hali sinf biriktirilmagan':'Ihnen ist noch keine Klasse zugewiesen',
+'Sizga hali dars biriktirilmagan':'Ihnen ist noch keine Stunde zugewiesen','Natija kiritish':'Ergebnisse eingeben','O‘quvchilar ro‘yxati':'Schülerliste','Mening dars jadvalim':'Mein Stundenplan',
+'Hali o‘qituvchi natija kiritmagan':'Der Lehrer hat noch keine Ergebnisse eingegeben','Barcha o‘qituvchilar':'Alle Lehrer','Baholangan':'Benotet','Kiritilgan':'Eingegeben','yo‘q':'nein',
+'Sababini yozing...':'Grund angeben...','Oldingi hafta':'Vorherige Woche','Keyingi hafta':'Nächste Woche','Oldingi oy':'Vorheriger Monat','Keyingi oy':'Nächster Monat',
+'Sanani tanlash':'Datum wählen','Haftani tanlash':'Woche wählen','Oylik baholarni ko‘rish':'Monatsnoten ansehen','Kamida 4 belgi':'Mindestens 4 Zeichen','Asosiy menyu':'Hauptmenü',
+'Menyuni ochish':'Menü öffnen','Ism Familiya':'Vorname Nachname','Ism bo‘yicha qidirish...':'Nach Namen suchen...','Amallar':'Aktionen','Izoh yozing...':'Kommentar schreiben...',
+'Masalan: Nemis tili — A1':'Zum Beispiel: Deutsch — A1','Masalan: 10-A':'Zum Beispiel: 10-A',
+'Dushanba':'Montag','Seshanba':'Dienstag','Chorshanba':'Mittwoch','Payshanba':'Donnerstag','Juma':'Freitag','Shanba':'Samstag','Yakshanba':'Sonntag',
+"Server bilan aloqa yo'q — o'zgarishlar qayta yuboriladi. Sahifani yopmang.":'Keine Verbindung zum Server — Änderungen werden erneut gesendet. Seite nicht schließen.',
+"O'qitiladigan fanlarni shu yerda boshqaring.":'Verwalten Sie hier die unterrichteten Fächer.',
+'Fanni tahrirlash':'Fach bearbeiten','Yangi fan':'Neues Fach',"O'qituvchini tahrirlash":'Lehrer bearbeiten',"Yangi o'qituvchi":'Neuer Lehrer','Sinfni tahrirlash':'Klasse bearbeiten','Yangi sinf':'Neue Klasse',
+"O'quvchini tahrirlash":'Schüler bearbeiten',"Yangi o'quvchi":'Neuer Schüler','Yangi dars vaqti':'Neue Unterrichtszeit','Vaqtni tahrirlash':'Zeit bearbeiten',
+"Boshqa sinfga o'tkazish":'In andere Klasse versetzen','Oylik natijalar':'Monatsergebnisse','Natija qo\'shish':'Ergebnis hinzufügen','Avval sinf yarating':'Erstellen Sie zuerst eine Klasse',
+"Avval kamida bitta sinf yarating.":'Erstellen Sie zuerst mindestens eine Klasse.',"Dars qoldirgan":'Unterricht versäumt',
+"Profil, parol va ma'lumotlarni boshqaring.":'Verwalten Sie Profil, Passwort und Daten.',
+'Fan nomini kiriting':'Fachnamen eingeben','Fan yangilandi':'Fach aktualisiert',"Fan qo'shildi":'Fach hinzugefügt','Ismni kiriting':'Namen eingeben',
+"Bu login boshqa o'qituvchida bor":'Dieser Benutzername wird bereits von einem anderen Lehrer verwendet','Parol kiriting':'Passwort eingeben',
+"Parol kamida 4 belgidan iborat bo'lsin":'Das Passwort muss mindestens 4 Zeichen haben',"O'qituvchi yangilandi":'Lehrer aktualisiert',"O'qituvchi qo'shildi":'Lehrer hinzugefügt',
+'Sinf nomini kiriting':'Klassennamen eingeben','Sinf yangilandi':'Klasse aktualisiert',"Sinf qo'shildi":'Klasse hinzugefügt','Dars belgilandi':'Stunde markiert','Dars tozalandi':'Markierung entfernt',
+'Izoh saqlandi':'Kommentar gespeichert',"O'quvchi yangilandi":'Schüler aktualisiert',"O'quvchi qo'shildi":'Schüler hinzugefügt','Sinf almashtirildi':'Klasse gewechselt',
+'Sababini kiriting':'Grund angeben',"Sinf o'chirildi":'Klasse gelöscht',"O'quvchi o'chirildi":'Schüler gelöscht',"Fan o'chirildi":'Fach gelöscht',"O'qituvchi o'chirildi":'Lehrer gelöscht',
+"Vaqt qo'shildi":'Zeit hinzugefügt',"Natija qo'shildi":'Ergebnis hinzugefügt',"Vaqtni o'chirish":'Zeit löschen',"Vaqt o'chirildi":'Zeit gelöscht',"To'lovni tasdiqlang":'Zahlung bestätigen',
+"To'lov belgilandi":'Zahlung markiert',"To'lov bekor qilindi":'Zahlung storniert',"To'lovni bekor qilish":'Zahlung stornieren','Profil saqlandi':'Profil gespeichert',
+'Yangi parollar mos emas':'Die neuen Passwörter stimmen nicht überein','Parol muvaffaqiyatli yangilandi':'Passwort erfolgreich geändert','Parollar mos emas':'Passwörter stimmen nicht überein',
+'Login kiriting':'Benutzernamen eingeben',"Ma'lumotlar xavfsiz serverda saqlanadi.":'Die Daten werden sicher auf dem Server gespeichert.','Administrator':'Administrator',
+"Ma'lumotlar tiklandi":'Daten wiederhergestellt','Hisob yaratildi':'Konto erstellt',"O'zgartirmaslik uchun bo'sh qoldiring":'Zum Beibehalten leer lassen',"Qarzdor":'Schuldner',"To'langan":'Bezahlt',
+'Sababsiz':'Unentschuldigt','Kech qolgan':'Verspätet','Saqlanmadi':'Nicht gespeichert',"Serverga ulanib bo'lmadi":'Verbindung zum Server fehlgeschlagen',"Sessiya tugadi. Qayta kiring":'Sitzung abgelaufen. Bitte erneut anmelden',
+'Tizimdan chiqdingiz':'Sie wurden abgemeldet','Tiklash':'Wiederherstellen','Tozalash':'Leeren','Xatolik':'Fehler','Zaxiradan tiklash':'Aus Sicherung wiederherstellen','Vaqt yangilandi':'Zeit aktualisiert',
+"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
+'Algebra':'Algebra','Biologiya':'Biologie','Fizika':'Physik','Ingliz tili':'Englisch','Kimyo':'Chemie','Matematika':'Mathematik','Nemis tili':'Deutsch','IT':'IT',
+'Alg':'Alg','Bio':'Bio','Fiz':'Phy','Ing':'Eng','Mat':'Mat','Matem':'Mathe','Nem':'Deu',
+'Yanvar':'Januar','Fevral':'Februar','Mart':'März','Aprel':'April','May':'Mai','Iyun':'Juni','Iyul':'Juli','Avgust':'August','Sentabr':'September','Oktabr':'Oktober','Noyabr':'November','Dekabr':'Dezember',
+'Yan':'Jan','Fev':'Feb','Mar':'Mär','Apr':'Apr','Iyn':'Jun','Iyl':'Jul','Avg':'Aug','Sen':'Sep','Okt':'Okt','Noy':'Nov','Dek':'Dez',
+'Du':'Mo','Se':'Di','Cho':'Mi','Pa':'Do','Ju':'Fr','Sh':'Sa','Ya':'So',
+'Barchasi':'Alle','Barchasi →':'Alle →','Barcha fanlar':'Alle Fächer','Barcha sinflar':'Alle Klassen','Shu hafta':'Diese Woche','Shu oy':'Dieser Monat','Oy':'Monat','Rang':'Farbe',
+'Fan nomi':'Fachname','Sinf nomi':'Klassenname','Savollar soni':'Anzahl der Fragen','Umumiy savollar soni:':'Gesamtzahl der Fragen:','Joriy parol':'Aktuelles Passwort','Yangi parol':'Neues Passwort',
+'Yangi parol (takror)':'Neues Passwort (Wiederholung)','Markaz nomi':'Name des Zentrums','Kirish logini':'Anmeldename','Yaratish va kirish':'Erstellen und anmelden','Umumiy (aralash)':'Allgemein (gemischt)',
+"Reyting — top o'quvchilar":'Rangliste — beste Schüler',"O'qituvchilar bo'yicha":'Nach Lehrern',"Sinflar bo'yicha":'Nach Klassen',"Hali fan qo'shilmagan":'Noch kein Fach hinzugefügt',
+"Hali o'qituvchi qo'shilmagan":'Noch kein Lehrer hinzugefügt',"Hali o'quvchi yo'q":'Noch keine Schüler','Hali vaqt kiritilmagan.':'Noch keine Zeit eingegeben.',
+"Avval o'quvchi qo'shing.":'Fügen Sie zuerst einen Schüler hinzu.',"Sozlamalarga o'tish":'Zu den Einstellungen',"O'qituvchilarga o'tish":'Zu den Lehrern',"Ha, to'langan":'Ja, bezahlt',
+"Oylik to'lov (so'm)":'Monatliche Zahlung (So\'m)',"O'chirish sababi (izoh)":'Grund der Löschung (Kommentar)','Bu tushlik vaqti':'Dies ist die Mittagspause',"Bu bo'yicha natija yo'q":'Dazu gibt es keine Ergebnisse',
+"Dars jadvalida bu kuni dars yo'q":'Am Stundenplan ist an diesem Tag kein Unterricht','Haftalik natijalar kiritilgach reyting shu yerda chiqadi.':'Sobald Wochenergebnisse eingegeben sind, erscheint hier die Rangliste.',
+'Avval umumiy savollar sonini kiriting':'Geben Sie zuerst die Gesamtzahl der Fragen ein','Bu qurilmada eslab qol':'Auf diesem Gerät merken',"Administrator yoki o'qituvchi sifatida kiring":'Als Administrator oder Lehrer anmelden',
+"Dars jadvaliga moslangan: faqat dars bor kunlarga baho qo'yiladi. Shanba natijasi reytingga o'tadi.":'Passend zum Stundenplan: Noten gibt es nur an Unterrichtstagen. Das Samstagsergebnis fließt in die Rangliste ein.',
+"Reyting Baho bo'limidagi shanba natijalaridan shakllanadi.":'Die Rangliste ergibt sich aus den Samstagsergebnissen im Bereich Note.',
+"Sizning faningiz bu sinfda yo'q":'Ihr Fach wird in dieser Klasse nicht unterrichtet',"Filtrni o'zgartirib ko'ring.":'Ändern Sie den Filter.',"Boshqa nom bilan qidirib ko'ring.":'Suchen Sie unter einem anderen Namen.'
+};
+const MOND={Yanvar:'Januar',Fevral:'Februar',Mart:'März',Aprel:'April',May:'Mai',Iyun:'Juni',Iyul:'Juli',Avgust:'August',Sentabr:'September',Oktabr:'Oktober',Noyabr:'November',Dekabr:'Dezember'};
+Object.assign(RU,{
+"Tahrirlar tarixi":"История изменений","Tahrirlandi":"Изменено","O'chirildi":"Удалено","Izoh kiriting":"Введите комментарий","Izoh (nima o'zgartirildi va nima uchun?)":"Комментарий (что изменено и почему?)","Hali o'zgarish yo'q":"Изменений пока нет",
+"Familiya":"Фамилия","Ism familiya":"Имя и фамилия","Fan nomi":"Название предмета","Sinf nomi":"Название класса","Savollar soni":"Количество вопросов","Umumiy savollar soni:":"Общее число вопросов:","Joriy parol":"Текущий пароль","Yangi parol":"Новый пароль","Yangi parol (takror)":"Новый пароль (повтор)","Markaz nomi":"Название центра","Kirish logini":"Логин для входа","Yaratish va kirish":"Создать и войти","Umumiy (aralash)":"Общий (смешанный)","Barchasi":"Все","Barchasi →":"Все →","Barcha fanlar":"Все предметы","Barcha sinflar":"Все классы","Shu hafta":"Эта неделя","Shu oy":"Этот месяц","Oy":"Месяц","Rang":"Цвет","Fan(lar)":"Предмет(ы)","Yo'nalish":"Направление",
+"Reyting — top o'quvchilar":"Рейтинг — лучшие ученики","O'qituvchilar bo'yicha":"По учителям","Sinflar bo'yicha":"По классам","Hali fan qo'shilmagan":"Предметы ещё не добавлены","Hali o'qituvchi qo'shilmagan":"Учителя ещё не добавлены","Hali o'qituvchi qo'shilmagan.":"Учителя ещё не добавлены.","Hali o'quvchi yo'q":"Учеников пока нет","Hali vaqt kiritilmagan.":"Время ещё не введено.",
+"Avval o'quvchi qo'shing.":"Сначала добавьте ученика.","Sozlamalarga o'tish":"Перейти в настройки","O'qituvchilarga o'tish":"Перейти к учителям","Ha, to'langan":"Да, оплачено","Oylik to'lov (so'm)":"Ежемесячная оплата (сум)","O'chirish sababi (izoh)":"Причина удаления (комментарий)","Bu tushlik vaqti":"Это время обеда","Bu bo'yicha natija yo'q":"По этому нет результатов","Dars jadvalida bu kuni dars yo'q":"В расписании в этот день нет уроков",
+"Haftalik natijalar kiritilgach reyting shu yerda chiqadi.":"После ввода недельных результатов здесь появится рейтинг.","Avval umumiy savollar sonini kiriting":"Сначала введите общее число вопросов","Bu qurilmada eslab qol":"Запомнить на этом устройстве","Administrator yoki o'qituvchi sifatida kiring":"Войдите как администратор или учитель","Tahrirlash uchun 2 marta bosing":"Дважды нажмите, чтобы изменить",
+"Dars jadvaliga moslangan: faqat dars bor kunlarga baho qo'yiladi. Shanba natijasi reytingga o'tadi.":"По расписанию: оценки ставятся только в дни, когда есть уроки. Результат субботы идёт в рейтинг.","Reyting Baho bo'limidagi shanba natijalaridan shakllanadi.":"Рейтинг формируется из результатов субботы в разделе «Оценка».","Sizning faningiz bu sinfda yo'q":"Вашего предмета в этом классе нет","Filtrni o'zgartirib ko'ring.":"Попробуйте изменить фильтр.","Boshqa nom bilan qidirib ko'ring.":"Попробуйте поискать по другому имени.",
+"Administrator sizni dars jadvaliga qo'shgach, natija kiritish mumkin bo'ladi.":"Когда администратор добавит вас в расписание, вы сможете вводить результаты.","Administrator sizni dars jadvaliga qo'shgach, sinflaringiz shu yerda paydo bo'ladi.":"Когда администратор добавит вас в расписание, ваши классы появятся здесь.",
+"Avval “Fanlar” bo'limida fan qo'shing.":"Сначала добавьте предмет в разделе «Предметы».","Avval “O'qituvchilar” bo'limida o'qituvchi qo'shing.":"Сначала добавьте учителя в разделе «Учителя».",
+"Baho, natija va reyting faqat shu fanlar bo'yicha hisoblanadi. O'qituvchi va vaqtlarni “Dars jadvali” bo'limida belgilaysiz.":"Оценки, результаты и рейтинг считаются только по этим предметам. Учителя и время вы задаёте в разделе «Расписание уроков».",
+"Barcha ma'lumotni fayl sifatida yuklab oling yoki avval saqlangan nusxadan tiklang.":"Скачайте все данные файлом или восстановите их из ранее сохранённой копии.","Birinchi fanni qo'shing, so'ng unga sinflar bog'lang.":"Добавьте первый предмет, затем привяжите к нему классы.","Bu fayl to'g'ri zaxira nusxasi emas.":"Этот файл не является корректной резервной копией.",
+"Bu tizimdan faqat administrator foydalanadi. Kirish uchun login va parol yarating.":"Этой системой пользуется только администратор. Создайте логин и пароль для входа.","Deutsch School uchun ichki boshqaruv tizimi: sinflar, o'quvchilar, haftalik natijalar va reyting.":"Внутренняя система управления Deutsch School: классы, ученики, недельные результаты и рейтинг.",
+"Jadvalni to'ldirish uchun avval “Sinflar” bo'limida sinf yarating (masalan, 10-A).":"Чтобы заполнить расписание, сначала создайте класс в разделе «Классы» (например, 10-А).","Login va parol shu qurilma xotirasida saqlanadi. Uni unutmang — keyin tiklab bo'lmaydi.":"Логин и пароль хранятся в памяти этого устройства. Не забудьте их — потом восстановить нельзя.",
+"Natija kiritish uchun kamida bitta sinf va o'quvchi bo'lishi kerak.":"Для ввода результатов нужен хотя бы один класс и один ученик.","O'qituvchi shu login va parol bilan kirib, faqat natija kiritadi, reyting va dars jadvalini ko'radi. Login bo'sh bo'lsa — kirish yo'q.":"Учитель входит с этим логином и паролем, вводит только результаты и видит рейтинг и расписание. Если логин пуст — входа нет.",
+"O'qituvchilarni qo'shib, ularni sinflarga tayinlang.":"Добавьте учителей и назначьте их на классы.","O'quvchining natijalari, to'lovlari va davomati saqlanib qoladi, faqat sinfi almashadi.":"Результаты, платежи и посещаемость ученика сохранятся, изменится только класс.","Sana (hafta shu sanadan aniqlanadi)":"Дата (неделя определяется по этой дате)",
+"Sinf yarating (masalan, 10-A), so'ng “Dars jadvali” bo'limida uning haftalik darslarini belgilang.":"Создайте класс (например, 10-А), затем задайте его недельные уроки в разделе «Расписание уроков».","Sozlamalar bo'limida dars vaqtlarini kiriting.":"Введите время уроков в разделе «Настройки».","To'lovlarni kuzatish uchun kamida bitta sinf va o'quvchi bo'lishi kerak.":"Для учёта платежей нужен хотя бы один класс и один ученик.",
+"Umumiy savollar sonini bir marta kiriting, so'ng har bir o'quvchining to'g'ri javoblarini belgilang — foiz avtomatik hisoblanadi.":"Один раз введите общее число вопросов, затем отметьте правильные ответы каждого ученика — процент считается автоматически.","Serverga ulanib bo'lmadi. Internetni tekshirib, sahifani yangilang.":"Не удалось подключиться к серверу. Проверьте интернет и обновите страницу."
+});
+Object.assign(DE,{
+"Tahrirlar tarixi":"Änderungsverlauf","Tahrirlandi":"Bearbeitet","O'chirildi":"Gelöscht","Izoh kiriting":"Kommentar eingeben","Izoh (nima o'zgartirildi va nima uchun?)":"Kommentar (was wurde geändert und warum?)","Hali o'zgarish yo'q":"Noch keine Änderungen","Fan(lar)":"Fach/Fächer","Yo'nalish":"Richtung",
+"Tahrirlash uchun 2 marta bosing":"Zum Ändern doppelt tippen","Aniq fanlar":"Exakte Fächer","Tabiiy fanlar":"Naturkundliche Fächer",
+"Hali o'qituvchi qo'shilmagan.":"Noch kein Lehrer hinzugefügt.",
+"Administrator sizni dars jadvaliga qo'shgach, natija kiritish mumkin bo'ladi.":"Sobald der Administrator Sie in den Stundenplan aufnimmt, können Sie Ergebnisse eingeben.","Administrator sizni dars jadvaliga qo'shgach, sinflaringiz shu yerda paydo bo'ladi.":"Sobald der Administrator Sie in den Stundenplan aufnimmt, erscheinen hier Ihre Klassen.",
+"Avval “Fanlar” bo'limida fan qo'shing.":"Fügen Sie zuerst im Bereich „Fächer“ ein Fach hinzu.","Avval “O'qituvchilar” bo'limida o'qituvchi qo'shing.":"Fügen Sie zuerst im Bereich „Lehrer“ einen Lehrer hinzu.",
+"Baho, natija va reyting faqat shu fanlar bo'yicha hisoblanadi. O'qituvchi va vaqtlarni “Dars jadvali” bo'limida belgilaysiz.":"Noten, Ergebnisse und Rangliste werden nur für diese Fächer berechnet. Lehrer und Zeiten legen Sie im Bereich „Stundenplan“ fest.",
+"Barcha ma'lumotni fayl sifatida yuklab oling yoki avval saqlangan nusxadan tiklang.":"Laden Sie alle Daten als Datei herunter oder stellen Sie sie aus einer gespeicherten Kopie wieder her.","Birinchi fanni qo'shing, so'ng unga sinflar bog'lang.":"Fügen Sie das erste Fach hinzu und verknüpfen Sie dann Klassen damit.","Bu fayl to'g'ri zaxira nusxasi emas.":"Diese Datei ist keine gültige Sicherungskopie.",
+"Bu tizimdan faqat administrator foydalanadi. Kirish uchun login va parol yarating.":"Dieses System wird nur vom Administrator genutzt. Erstellen Sie Benutzername und Passwort für die Anmeldung.","Deutsch School uchun ichki boshqaruv tizimi: sinflar, o'quvchilar, haftalik natijalar va reyting.":"Internes Verwaltungssystem der Deutsch School: Klassen, Schüler, Wochenergebnisse und Rangliste.",
+"Jadvalni to'ldirish uchun avval “Sinflar” bo'limida sinf yarating (masalan, 10-A).":"Um den Plan auszufüllen, erstellen Sie zuerst im Bereich „Klassen“ eine Klasse (z. B. 10-A).","Login va parol shu qurilma xotirasida saqlanadi. Uni unutmang — keyin tiklab bo'lmaydi.":"Benutzername und Passwort werden im Speicher dieses Geräts abgelegt. Vergessen Sie sie nicht — sie lassen sich nicht wiederherstellen.",
+"Natija kiritish uchun kamida bitta sinf va o'quvchi bo'lishi kerak.":"Zum Eingeben von Ergebnissen wird mindestens eine Klasse und ein Schüler benötigt.","O'qituvchi shu login va parol bilan kirib, faqat natija kiritadi, reyting va dars jadvalini ko'radi. Login bo'sh bo'lsa — kirish yo'q.":"Der Lehrer meldet sich mit diesen Daten an, gibt nur Ergebnisse ein und sieht Rangliste und Stundenplan. Ist der Benutzername leer, gibt es keinen Zugang.",
+"O'qituvchilarni qo'shib, ularni sinflarga tayinlang.":"Fügen Sie Lehrer hinzu und weisen Sie sie Klassen zu.","O'quvchining natijalari, to'lovlari va davomati saqlanib qoladi, faqat sinfi almashadi.":"Ergebnisse, Zahlungen und Anwesenheit des Schülers bleiben erhalten, nur die Klasse ändert sich.","Sana (hafta shu sanadan aniqlanadi)":"Datum (die Woche ergibt sich aus diesem Datum)",
+"Sinf yarating (masalan, 10-A), so'ng “Dars jadvali” bo'limida uning haftalik darslarini belgilang.":"Erstellen Sie eine Klasse (z. B. 10-A) und legen Sie ihre Wochenstunden dann im Bereich „Stundenplan“ fest.","Sozlamalar bo'limida dars vaqtlarini kiriting.":"Geben Sie die Unterrichtszeiten im Bereich „Einstellungen“ ein.","To'lovlarni kuzatish uchun kamida bitta sinf va o'quvchi bo'lishi kerak.":"Zur Zahlungsverfolgung wird mindestens eine Klasse und ein Schüler benötigt.",
+"Umumiy savollar sonini bir marta kiriting, so'ng har bir o'quvchining to'g'ri javoblarini belgilang — foiz avtomatik hisoblanadi.":"Geben Sie die Gesamtzahl der Fragen einmal ein und markieren Sie dann die richtigen Antworten jedes Schülers — der Prozentsatz wird automatisch berechnet.","Serverga ulanib bo'lmadi. Internetni tekshirib, sahifani yangilang.":"Verbindung zum Server fehlgeschlagen. Prüfen Sie das Internet und laden Sie die Seite neu."
+});
 const MON={Yanvar:'Январь',Fevral:'Февраль',Mart:'Март',Aprel:'Апрель',May:'Май',Iyun:'Июнь',Iyul:'Июль',Avgust:'Август',Sentabr:'Сентябрь',Oktabr:'Октябрь',Noyabr:'Ноябрь',Dekabr:'Декабрь'};
 const PAT=[[/^(\d+) ta test$/,'Тестов: $1'],[/^(\d+) ta fan$/,'Предметов: $1'],[/^(\d+) ta sinf$/,'Классов: $1'],[/^(\d+) ta o'quvchi$/,'Учеников: $1'],[/^(\d+) ta darsda$/,'Уроков: $1'],[/^(\d+) ta dars$/,'Уроков: $1'],
 [/^(Yanvar|Fevral|Mart|Aprel|May|Iyun|Iyul|Avgust|Sentabr|Oktabr|Noyabr|Dekabr) (\d{4})$/,(m,a,y)=>MON[a]+' '+y]];
 const nz=s=>s.replace(/[’‘ʻʼ`]/g,"'").replace(/\s+/g,' ').trim();
 const D=new Map(Object.entries(RU).map(([k,v])=>[nz(k),v]));
-let lang='uz';try{lang=localStorage.getItem('ds_lang')==='ru'?'ru':'uz'}catch(e){}
+const DD=new Map(Object.entries(DE).map(([k,v])=>[nz(k),v]));
+const DL={ru:D,de:DD};
+const MR='(Yanvar|Fevral|Mart|Aprel|May|Iyun|Iyul|Avgust|Sentabr|Oktabr|Noyabr|Dekabr)';
+const PATD=[[/^(\d+) ta test$/,'Tests: $1'],[/^(\d+) ta fan$/,'Fächer: $1'],[/^(\d+) ta sinf$/,'Klassen: $1'],[/^(\d+) ta o'quvchi$/,'Schüler: $1'],[/^(\d+) ta darsda$/,'Stunden: $1'],[/^(\d+) ta dars$/,'Stunden: $1'],[new RegExp('^'+MR+' (\\d{4})$'),(m,a,y)=>MOND[a]+' '+y]];
+PAT.push([/^Faqat (.+) sinfi bo'yicha$/,'Только по классу $1']);PATD.push([/^Faqat (.+) sinfi bo'yicha$/,'Nur Klasse $1']);
+const PL={ru:PAT,de:PATD};
+let lang='uz';try{const s=localStorage.getItem('ds_lang');lang=(s==='ru'||s==='de')?s:'uz'}catch(e){}
 const sf=document.querySelector('.side-foot');if(sf&&sf.dataset.orig===undefined)sf.dataset.orig=sf.textContent.trim();
 const memo=new WeakMap(),AT=['placeholder','title','aria-label'];
-const find=t=>{t=nz(t);let r=D.get(t);if(r)return r;for(const[re,f]of PAT){if(re.test(t))return t.replace(re,f)}if(t.endsWith(':')){r=D.get(t.slice(0,-1));if(r)return r+':'}return null};
+const find=t=>{const d=DL[lang],pt=PL[lang];t=nz(t);let r=d.get(t);if(r)return r;for(const[re,f]of pt){if(re.test(t))return t.replace(re,f)}if(t.endsWith(':')){r=d.get(t.slice(0,-1));if(r)return r+':'}return null};
 function txt(n){
   const v=n.nodeValue;if(!v||!v.trim())return;
   const m=memo.get(n);
-  if(lang==='ru'){const r=find(v);if(r){memo.set(n,{u:v,r});n.nodeValue=r}}
+  if(lang!=='uz'){const r=find(v);if(r&&r!==v){memo.set(n,{u:v,r});n.nodeValue=r}}
   else if(m&&v===m.r){n.nodeValue=m.u}
 }
 function attrs(el){
   for(const a of AT){const v=el.getAttribute&&el.getAttribute(a);const k='data-uz-'+a;
-    if(lang==='ru'){const r=v&&find(v);if(r){if(!el.hasAttribute(k))el.setAttribute(k,v);el.setAttribute(a,r)}}
+    if(lang!=='uz'){const r=v&&find(v);if(r&&r!==v){if(!el.hasAttribute(k))el.setAttribute(k,v);el.setAttribute(a,r)}}
     else if(el.hasAttribute&&el.hasAttribute(k)){el.setAttribute(a,el.getAttribute(k));el.removeAttribute(k)}}
 }
 function walk(root){
@@ -12105,7 +12271,7 @@ const mo=new MutationObserver(ms=>{for(const m of ms){
   if(m.type==='characterData')txt(m.target);else m.addedNodes.forEach(walk)}});
 function mark(){document.documentElement.lang=lang;
   document.querySelectorAll('.lang-sw button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang))}
-function setLang(l){lang=l;try{localStorage.setItem('ds_lang',l)}catch(e){}mark();walk(document.body)}
+function setLang(l){lang='uz';walk(document.body);lang=l;try{localStorage.setItem('ds_lang',l)}catch(e){}mark();walk(document.body)}
 document.addEventListener('click',e=>{const b=e.target.closest('.lang-sw button');if(b){e.stopPropagation();setLang(b.dataset.lang)}},true);
 mark();walk(document.body);
 mo.observe(document.body,{childList:true,subtree:true,characterData:true});
