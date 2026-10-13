@@ -84,6 +84,24 @@ class Client {
   r = await admin.call('GET', '/api/session'); ok(r.s === 200, 'yangi cookie bilan davom');
   const old = new Client(); r = await old.call('POST', '/api/auth/login', { user: 'boss', password: 'secret123' }); ok(r.s === 401, 'eski parol ishlamaydi');
 
+  // chat
+  r = await anon.call('GET', '/api/chat'); ok(r.s === 401, 'chat kirishsiz yopiq');
+  r = await t.call('POST', '/api/chat', { text: '   ' }); ok(r.s === 400, 'bo‘sh xabar');
+  r = await t.call('POST', '/api/chat', { text: 'Salom, men Anna' }); ok(r.s === 200 && r.j.msg.name === 'Anna' && r.j.msg.role === 'teacher', 'o‘qituvchi yozdi');
+  r = await admin.call('POST', '/api/chat', { text: 'Salom, Anna' }); ok(r.s === 200 && r.j.msg.role === 'admin', 'admin yozdi');
+  const mid = r.j.msg.id;
+  r = await t.call('GET', '/api/chat'); ok(r.j.msgs.length === 2 && r.j.me === 't1', 'o‘qituvchi chatni o‘qidi');
+  r = await t.call('GET', '/api/chat?since=' + r.j.last); ok(r.j.msgs.length === 0, 'yangi xabar yo‘q');
+  r = await t.call('POST', '/api/chat/delete', { id: mid }); ok(r.s === 403, 'o‘qituvchi xabar o‘chira olmaydi');
+  r = await admin.call('POST', '/api/chat/delete', { id: mid }); ok(r.s === 200, 'admin xabarni o‘chirdi');
+  r = await t.call('GET', '/api/chat?since=2'); ok(r.j.msgs.length === 1 && r.j.msgs[0].x === 1 && r.j.msgs[0].text === '', 'o‘chirilgan xabar yangilanadi');
+
+  // parolni tasdiqlash (tarixni tozalash uchun)
+  r = await t.call('POST', '/api/auth/verify', { password: 'abcd' }); ok(r.s === 403, 'o‘qituvchi tasdiqlay olmaydi');
+  r = await admin.call('POST', '/api/auth/verify', { password: 'xato' }); ok(r.s === 403, 'noto‘g‘ri parol tasdiqlanmadi');
+  r = await admin.call('POST', '/api/auth/verify', { password: 'newpass1' }); ok(r.s === 200, 'to‘g‘ri parol tasdiqlandi');
+  r = await admin.call('POST', '/api/data', { ops: [{ p: ['editLog'], v: [] }] }); ok(r.s === 200, 'admin tarixni tozalaydi');
+
   // logout
   r = await t.call('POST', '/api/auth/logout'); t.cookie = 'ds_sid='; r = await t.call('GET', '/api/data'); ok(r.s === 401, 'logoutdan keyin');
 
