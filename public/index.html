@@ -4888,7 +4888,7 @@ function confirmBox(title,text,onYes,label='O‘chirish'){
 
 /* ---------- nav / render shell ---------- */
 const NAV=[
-  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home']]},
+  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home'],['chat','Chat','chat']]},
   {g:'Ta’lim',items:[['subjects','Fanlar','layers'],['groups','Sinflar','sliders'],['teachers','O‘qituvchilar','teacher'],['students','O‘quvchilar','users'],['schedule','Dars jadvali','calendar']]},
   {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy']]},
   {g:'Moliya',items:[['payments','To‘lovlar','wallet'],['attendance','Davomat','calendar']]},
@@ -4896,11 +4896,11 @@ const NAV=[
 ];
 
 const TNAV=[
-  {g:'O‘qituvchilar uchun',items:[['tmy','Mening sinflarim','teacher']]},
+  {g:'O‘qituvchilar uchun',items:[['tmy','Mening sinflarim','teacher'],['chat','Chat','chat']]},
   {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy']]},
   {g:'Ta’lim',items:[['attendance','Davomat','calendar'],['schedule','Dars jadvali','calendar']]}
 ];
-const TPAGES=['tmy','weekly','grades','ranking','attendance','schedule'];
+const TPAGES=['tmy','chat','weekly','grades','ranking','attendance','schedule'];
 
 const TITLES=Object.fromEntries(
   NAV.concat(TNAV).flatMap(g=>g.items).map(([k,l])=>[k,l])
@@ -4913,7 +4913,7 @@ function buildNav(){
       g.items.map(([k,l,i])=>
         `<button class="nav-i" data-act="go" data-page="${k}">
           ${ic(i)}
-          <span>${l}</span>
+          <span>${l}</span>${k==='chat'?'<b class="chat-bd" hidden></b>':''}
         </button>`
       ).join('')
     ).join('');
@@ -4953,6 +4953,7 @@ function render(){
 
   $('#view').innerHTML=
     views[key]();
+  if(typeof chatHook==='function')chatHook(key);
 
   $('#view').focus?.();
 
@@ -9184,7 +9185,8 @@ function editLogPanel(){
     <div class="stu-name"><span class="tag sm">${EKIND[x.kind]}</span> ${esc(x.name)} <span class="mute">· ${x.del?'O‘chirildi':'Tahrirlandi'} · ${esc(x.date)}</span></div>
     ${(x.changes||[]).map(c=>`<div class="stu-meta"><b>${c.f}</b>: ${esc(c.a)} → ${esc(c.b)}</div>`).join('')}
     <div class="stu-meta"><b>Izoh</b>: ${esc(x.note)}</div></div></div>`).join('');
-  return `<section class="panel"><div class="panel-h"><h3>Tahrirlar tarixi</h3></div>
+  const clr=rows?`<button type="button" class="btn sm danger" data-act="clear-history">${ic('trash')}Tarixni tozalash</button>`:'';
+  return `<section class="panel"><div class="panel-h"><h3>Tahrirlar tarixi</h3>${clr}</div>
     ${rows||'<p class="mute" style="padding:12px 16px">Hali o‘zgarish yo‘q</p>'}</section>`;
 }
 views.settings=()=>{
@@ -12276,6 +12278,226 @@ document.addEventListener('click',e=>{const b=e.target.closest('.lang-sw button'
 mark();walk(document.body);
 mo.observe(document.body,{childList:true,subtree:true,characterData:true});
 })();
+</script>
+
+<style id="chat-sticky-v1">
+/* ===== Yon menyu (ko'k qism) sahifa aylantirilganda joyida turishi uchun =====
+   Sabab: html/body dagi overflow-x:hidden "sticky" ni buzar edi.
+   overflow-x:clip gorizontal aylantirishni xuddi shunday to'sadi, lekin sticky'ga xalaqit bermaydi. */
+@media (min-width:901px){
+  html,body{overflow-x:clip!important}
+  .app{align-items:start}
+  .side{position:sticky!important;top:0;align-self:start}
+}
+
+/* ===== Chat ===== */
+.nav-i .chat-bd{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--flag-r);color:#fff;font:700 11px/20px var(--body);text-align:center}
+.nav-i .chat-bd[hidden]{display:none}
+.panel-h .btn.danger{margin-left:auto}
+.chat-panel{display:flex;flex-direction:column;height:min(680px,calc((100dvh - 260px) / var(--z,1)));min-height:360px}
+.chat-list{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px;background:var(--surface2);-webkit-overflow-scrolling:touch}
+.chat-empty{margin:auto;text-align:center;color:var(--mute);font-size:14px;padding:20px}
+.chat-day{align-self:center;margin:10px 0 4px;padding:3px 12px;border-radius:99px;background:#fff;border:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--mute)}
+.chat-m{max-width:min(78%,520px);align-self:flex-start;display:flex;flex-direction:column}
+.chat-m.me{align-self:flex-end;align-items:flex-end}
+.chat-who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:650;color:var(--ink2);margin:0 4px 2px}
+.chat-who .tag{font-size:10px}
+.chat-b{position:relative;padding:8px 12px 6px;border-radius:16px 16px 16px 5px;background:#fff;border:1px solid var(--line);box-shadow:var(--sh-1);font-size:14.5px;line-height:1.45;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-m.me .chat-b{background:var(--brand);border-color:var(--brand);color:#fff;border-radius:16px 16px 5px 16px}
+.chat-b time{display:block;margin-top:2px;text-align:right;font-size:10.5px;opacity:.6}
+.chat-m.gone .chat-b{background:transparent;border-style:dashed;box-shadow:none;color:var(--mute);font-style:italic}
+.chat-x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:6px}
+.chat-x:hover{color:var(--bad);background:var(--bad-soft)}
+.chat-m.me .chat-x{color:rgba(255,255,255,.8)}
+.chat-m.me .chat-x:hover{color:#fff;background:rgba(255,255,255,.2)}
+.chat-form{display:flex;gap:10px;align-items:flex-end;padding:12px;border-top:1px solid var(--line);background:#fff}
+.chat-form textarea{flex:1;resize:none;max-height:140px;min-height:42px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);font:inherit;line-height:1.4}
+.chat-form textarea:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px rgba(31,70,216,.13)}
+.chat-form .btn{flex:none;min-height:42px}
+.pwbox{display:block;width:100%;margin-top:10px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font:inherit}
+.pwbox:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px rgba(31,70,216,.13)}
+.pw-err{min-height:18px;margin-top:6px;color:var(--bad);font-size:13px;font-weight:600}
+@media (max-width:900px){
+  .chat-panel{height:calc(100dvh - 190px);min-height:320px}
+  .chat-m{max-width:88%}
+  .chat-form textarea{font-size:16px}
+}
+</style>
+
+<script>
+/* ============================================================
+   CHAT (administrator + o‘qituvchilar) va tarixni parol bilan tozalash
+   ============================================================ */
+Object.assign(IC,{
+  chat:'<path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4.5 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>',
+  send:'<path d="M21 3 10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>'
+});
+TITLES.chat='Chat';
+
+const CHAT={msgs:[],last:0,user:'',open:false,busy:false,seen:0,seenInit:false};
+const chatUserKey=()=>S.role==='teacher'?('t:'+S.teacherId):'admin';
+const chatSeenKey=()=>'ds_chat_seen_'+chatUserKey();
+
+function chatReset(){
+  CHAT.msgs=[];CHAT.last=0;CHAT.seen=0;CHAT.seenInit=false;CHAT.user=chatUserKey();
+  try{const v=localStorage.getItem(chatSeenKey());if(v!==null){CHAT.seen=Number(v)||0;CHAT.seenInit=true}}catch(e){}
+}
+function chatMarkSeen(){
+  CHAT.seen=CHAT.last;CHAT.seenInit=true;
+  try{localStorage.setItem(chatSeenKey(),String(CHAT.seen))}catch(e){}
+}
+const chatMine=m=>m.uid===(S.role==='teacher'?S.teacherId:'admin');
+
+function chatBadge(){
+  const b=document.querySelector('.nav-i .chat-bd');
+  if(!b)return;
+  const n=CHAT.open?0:CHAT.msgs.filter(m=>m.seq>CHAT.seen&&!m.x&&!chatMine(m)).length;
+  b.hidden=!n;
+  b.textContent=n>99?'99+':String(n);
+}
+
+function chatDayLabel(ts){
+  const d=new Date(ts),t=new Date();
+  const same=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+  const y=new Date(t);y.setDate(t.getDate()-1);
+  if(same(d,t))return 'Bugun';
+  if(same(d,y))return 'Kecha';
+  return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
+}
+const chatTime=ts=>{const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes())};
+
+function chatRender(stick){
+  const box=$('#chatList');
+  if(!box)return;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  if(!CHAT.msgs.length){
+    box.innerHTML='<div class="chat-empty">Hali xabar yo‘q. Birinchi bo‘lib yozing 👋</div>';
+    return;
+  }
+  let day='',html='';
+  CHAT.msgs.forEach(m=>{
+    const dl=chatDayLabel(m.ts);
+    if(dl!==day){day=dl;html+=`<div class="chat-day">${dl}</div>`}
+    const me=chatMine(m);
+    const who=me?'':`<div class="chat-who">${esc(m.name)} <span class="tag sm">${m.role==='admin'?'Administrator':'O‘qituvchi'}</span></div>`;
+    const del=(S.role==='admin'&&!m.x)?` <button type="button" class="chat-x" data-id="${m.id}" title="O‘chirish">o‘chirish</button>`:'';
+    html+=`<div class="chat-m${me?' me':''}${m.x?' gone':''}">${who}
+      <div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}${del}</time></div></div>`;
+  });
+  box.innerHTML=html;
+  if(stick||near)box.scrollTop=box.scrollHeight;
+}
+
+async function chatPull(force){
+  if(!S.d)return;
+  if(CHAT.user!==chatUserKey())chatReset();
+  try{
+    const r=await API.get('/api/chat?since='+CHAT.last);
+    let changed=false;
+    (r.msgs||[]).forEach(m=>{
+      const i=CHAT.msgs.findIndex(x=>x.id===m.id);
+      if(i>=0)CHAT.msgs[i]=m;else CHAT.msgs.push(m);
+      changed=true;
+    });
+    CHAT.msgs.sort((a,b)=>a.seq-b.seq);
+    CHAT.last=Math.max(CHAT.last,r.last||0);
+    if(!CHAT.seenInit&&!CHAT.open)chatMarkSeen(); // birinchi kirishda eski xabarlar "o‘qilmagan" bo‘lib chiqmasin
+    if(CHAT.open){
+      if(changed||force)chatRender(force);
+      chatMarkSeen();
+    }
+    chatBadge();
+  }catch(e){}
+}
+
+async function chatSend(){
+  const inp=$('#chatIn');
+  if(!inp||CHAT.busy)return;
+  const text=inp.value.trim();
+  if(!text)return;
+  CHAT.busy=true;
+  try{
+    const r=await API.post('/api/chat',{text});
+    inp.value='';inp.style.height='';
+    if(r.msg&&!CHAT.msgs.some(x=>x.id===r.msg.id)){
+      CHAT.msgs.push(r.msg);CHAT.msgs.sort((a,b)=>a.seq-b.seq);
+      CHAT.last=Math.max(CHAT.last,r.msg.seq);
+    }
+    chatRender(true);chatMarkSeen();
+  }catch(e){
+    if(e.status===401)sessionExpired();
+    else toast(e.message||'Yuborilmadi','err');
+  }finally{CHAT.busy=false;inp.focus()}
+}
+
+views.chat=()=>head('Chat','Administrator va o‘qituvchilar uchun umumiy yozishma')+
+  `<section class="panel chat-panel">
+    <div class="chat-list" id="chatList"><div class="chat-empty">Yuklanmoqda…</div></div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <textarea id="chatIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
+      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
+    </form>
+  </section>`;
+
+function chatHook(key){
+  CHAT.open=(key==='chat');
+  if(CHAT.open){
+    if(CHAT.user!==chatUserKey())chatReset();
+    chatRender(true);
+    const f=$('#chatForm'),inp=$('#chatIn'),list=$('#chatList');
+    f.addEventListener('submit',e=>{e.preventDefault();chatSend()});
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();chatSend()}
+    });
+    inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'});
+    list.addEventListener('click',e=>{
+      const b=e.target.closest('.chat-x');
+      if(!b)return;
+      confirmBox('Xabarni o‘chirish','Bu xabar hamma uchun o‘chiriladi.',async()=>{
+        try{await API.post('/api/chat/delete',{id:b.dataset.id});await chatPull(true)}
+        catch(er){toast(er.message||'Xatolik','err')}
+      });
+    });
+    chatPull(true);
+    if(window.matchMedia('(hover:hover)').matches)inp.focus();
+  }
+  chatBadge();
+}
+
+setInterval(()=>{if(S.d&&!document.hidden)chatPull()},4000);
+
+/* ---------- Tahrirlar tarixini tozalash (administrator parolini so‘raydi) ---------- */
+acts['clear-history']=()=>{
+  openModal(`<div class="scrim" data-scrim="1"><div class="modal sm" role="dialog" aria-modal="true">
+    <div class="modal-h"><h3>Tarixni tozalash</h3><button class="ib plain" data-act="close-modal" aria-label="Yopish">${ic('x')}</button></div>
+    <div class="modal-b">
+      <p>Tahrirlar va o‘chirishlar tarixi butunlay o‘chiriladi. Davom etish uchun administrator parolini kiriting.</p>
+      <input class="pwbox" id="pwClear" type="password" autocomplete="off" placeholder="Administrator paroli" autofocus>
+      <div class="pw-err" id="pwClearErr"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Bekor qilish</button><button type="button" class="btn danger" id="pwClearGo">Tozalash</button></div>
+  </div></div>`);
+  const inp=$('#pwClear'),err=$('#pwClearErr'),go=$('#pwClearGo');
+  let busy=false;
+  const run=async()=>{
+    if(busy)return;
+    const pw=inp.value;
+    if(!pw){err.textContent='Parolni kiriting';return}
+    busy=true;go.disabled=true;err.textContent='';
+    try{
+      await API.post('/api/auth/verify',{password:pw});
+      const d=S.d;
+      d.editLog=[];d.studentDeleteLog=[];d.teacherDeleteLog=[];d.groupDeleteLog=[];d.subjectDeleteLog=[];
+      save();closeModal();render();toast('Tarix tozalandi');
+    }catch(e){
+      busy=false;go.disabled=false;
+      err.textContent=e.net?e.message:(e.status===429?e.message:'Parol noto‘g‘ri');
+      inp.select();
+    }
+  };
+  go.onclick=run;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run()}});
+};
 </script>
 </body>
 </html>
