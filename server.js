@@ -142,6 +142,7 @@ let DOC = { rev: 0, data: {} }; // asosiy ma'lumot
 let ADMIN = null; // { user, hash, ver }
 let CREDS = {}; // teacherId -> { login, hash, ver, t }
 let META = { secret: '' };
+let CHAT = { seq: 0, msgs: [] }; // chat: administrator + o'qituvchilar
 
 const persistDoc = () => serial(() => store.set('doc', DOC));
 const persistAdmin = () => serial(() => store.set('admin', ADMIN));
@@ -361,7 +362,6 @@ function viewFor(sess) {
     delete d.subjectDeleteLog;
     delete d.teacherDeleteLog;
     delete d.groupDeleteLog;
-    delete d.editLog;
     if (d.profile) d.profile = { name: d.profile.name, photo: '' };
   }
   return d;
@@ -617,6 +617,71 @@ async function api(req, res, url) {
     return send(res, 200, { ok: true });
   }
 
+  /* ---- administrator parolini tasdiqlash (xavfli amallar oldidan) ---- */
+  if (route === 'POST /api/auth/verify') {
+    if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
+    const key = clientIp(req) + '|verify';
+    if (tooMany(key)) return fail(res, 429, 'Juda ko‘p urinish. 15 daqiqadan keyin qayta urinib ko‘ring');
+    const b = await readBody(req);
+    if (!(await verifyPassword(String(b.password || ''), ADMIN.hash))) {
+      addAttempt(key);
+      return fail(res, 403, 'Parol noto‘g‘ri');
+    }
+    return send(res, 200, { ok: true });
+  }
+
+  /* ---- chat (administrator va o'qituvchilar) ---- */
+  if (route === 'GET /api/chat') {
+    const since = Number(url.searchParams.get('since')) || 0;
+    const msgs = since ? CHAT.msgs.filter(m => m.seq > since) : CHAT.msgs.slice(-100);
+    return send(res, 200, { last: CHAT.seq, msgs, me: sess.id });
+  }
+  if (route === 'POST /api/chat') {
+    const b = await readBody(req);
+    const text = String(b.text || '').replace(/\r\n/g, '\n').trim();
+    if (!text) return fail(res, 400, 'Xabar bo‘sh');
+    if (text.length > 2000) return fail(res, 400, 'Xabar juda uzun (2000 belgigacha)');
+    let name = 'Administrator';
+    if (sess.role === 'admin') {
+      const pn = DOC.data.profile && String(DOC.data.profile.name || '').trim();
+      if (pn) name = pn;
+    } else {
+      const t = (DOC.data.teachers || []).find(x => x && x.id === sess.id);
+      name = (t && t.name) || 'O‘qituvchi';
+    }
+    const msg = await serial(async () => {
+      const m = {
+        id: crypto.randomBytes(6).toString('hex'),
+        seq: ++CHAT.seq,
+        uid: sess.id,
+        role: sess.role,
+        name: String(name).slice(0, 80),
+        text,
+        ts: Date.now()
+      };
+      CHAT.msgs.push(m);
+      if (CHAT.msgs.length > 1000) CHAT.msgs = CHAT.msgs.slice(-1000);
+      await store.set('chat', CHAT);
+      return m;
+    });
+    return send(res, 200, { ok: true, msg });
+  }
+  if (route === 'POST /api/chat/delete') {
+    if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
+    const b = await readBody(req);
+    const out = await serial(async () => {
+      const m = CHAT.msgs.find(x => x.id === String(b.id || ''));
+      if (!m) return null;
+      m.x = 1;
+      m.text = '';
+      m.seq = ++CHAT.seq;
+      await store.set('chat', CHAT);
+      return m;
+    });
+    if (!out) return fail(res, 404, 'Xabar topilmadi');
+    return send(res, 200, { ok: true });
+  }
+
   /* ---- zaxiralar (faqat admin) ---- */
   if (route === 'GET /api/backups') {
     if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
@@ -740,6 +805,8 @@ async function init() {
   ADMIN = await store.get('admin');
   CREDS = (await store.get('creds')) || {};
   META = (await store.get('meta')) || { secret: '' };
+  CHAT = (await store.get('chat')) || { seq: 0, msgs: [] };
+  if (!Array.isArray(CHAT.msgs)) CHAT = { seq: 0, msgs: [] };
 
   if (!META.secret) {
     META.secret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString('hex');
