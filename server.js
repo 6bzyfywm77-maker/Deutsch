@@ -487,18 +487,37 @@ async function dailyBackup() {
 
 /* ---------------- to'lov tizimlari (Payme + Click) ---------------- */
 
-const buildStudentView = require('./student');
-const PAY = require('./payments')({
-  getStore: () => store,
-  getDoc: () => DOC,
-  serial,
-  log,
-  send,
-  fail,
-  readBody,
-  sessionOf,
-  isHttps
-});
+/* To'lov tizimi hozircha o'chirilgan. Fayllar (payments.js / student.js)
+   bo'lsa ishlatiladi, bo'lmasa xavfsiz "bo'sh" variant ishlaydi. */
+function tryRequire(name) {
+  try { return require(name); }
+  catch (e) {
+    if (e && e.code === 'MODULE_NOT_FOUND' && String(e.message).includes(name)) return null;
+    throw e;
+  }
+}
+
+const studentMod = tryRequire('./student');
+const buildStudentView = studentMod || function (data, id) {
+  const list = Array.isArray(data && data.students) ? data.students : [];
+  const st = list.find(x => x && String(x.id) === String(id));
+  if (!st) return null;
+  const o = Object.assign({}, st);
+  delete o.pwHash;
+  delete o.payments;
+  return { student: o, payments: null };
+};
+
+const paymentsMod = tryRequire('./payments');
+const PAY = paymentsMod
+  ? paymentsMod({ getStore: () => store, getDoc: () => DOC, serial, log, send, fail, readBody, sessionOf, isHttps })
+  : {
+      config: () => ({ enabled: false }),
+      isPage: () => false,
+      page: (req, res) => fail(res, 404, 'Topilmadi'),
+      route: async (req, res) => { fail(res, 503, "To'lov tizimi hozircha o'chirilgan"); return true; },
+      studentPay: (req, res) => fail(res, 503, "To'lov tizimi hozircha o'chirilgan")
+    };
 
 /* ---------------- API ---------------- */
 
