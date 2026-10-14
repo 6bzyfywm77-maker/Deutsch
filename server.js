@@ -140,9 +140,9 @@ let DUMMY_HASH = null; // login vaqtini tenglashtirish uchun
 let store;
 let DOC = { rev: 0, data: {} }; // asosiy ma'lumot
 let ADMIN = null; // { user, hash, ver }
-let CREDS = {}; // teacherId -> { login, hash, ver, t }
+let CREDS = {}; // id (o'qituvchi yoki o'quvchi) -> { login, hash, ver, t, role }
+let CHAT = { counter: 0, msgs: [] }; // umumiy chat (admin + o'qituvchilar)
 let META = { secret: '' };
-let CHAT = { seq: 0, msgs: [] }; // chat: administrator + o'qituvchilar
 
 const persistDoc = () => serial(() => store.set('doc', DOC));
 const persistAdmin = () => serial(() => store.set('admin', ADMIN));
@@ -204,7 +204,7 @@ function addHeader(res, k, v) {
   else res.setHeader(k, [].concat(cur, v));
 }
 
-/** Joriy foydalanuvchi: { role:'admin' } | { role:'teacher', id } | null */
+/** Joriy foydalanuvchi: { role:'admin' } | { role:'teacher'|'student', id } | null */
 function sessionOf(req) {
   const tok = parseCookies(req.headers.cookie).ds_sid;
   const p = readToken(tok);
@@ -215,7 +215,7 @@ function sessionOf(req) {
   }
   const c = CREDS[p.w];
   if (!c || c.ver !== p.v) return null;
-  return { role: 'teacher', id: p.w };
+  return { role: c.role === 'student' ? 'student' : 'teacher', id: p.w };
 }
 
 /* ---------------- login urinishlarini cheklash ---------------- */
@@ -242,6 +242,19 @@ setInterval(() => {
   const now = Date.now();
   for (const [k, v] of attempts) if (v.reset < now) attempts.delete(k);
 }, 10 * 60000).unref();
+
+const chatHits = new Map();
+function chatRate(key) {
+  const now = Date.now();
+  const arr = (chatHits.get(key) || []).filter(t => now - t < 10000);
+  arr.push(now);
+  chatHits.set(key, arr);
+  return arr.length > 15;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of chatHits) if (!v.some(t => now - t < 10000)) chatHits.delete(k);
+}, 60000).unref();
 
 /* ---------------- HTTP yordamchilari ---------------- */
 
@@ -356,6 +369,19 @@ function viewFor(sess) {
       return o;
     });
   }
+  if (Array.isArray(d.students)) {
+    d.students = d.students.map(st => {
+      const o = { ...st };
+      delete o.pwHash;
+      delete o.login;
+      const c = CREDS[st.id];
+      if (sess.role === 'admin') {
+        o.pwHash = c && c.role === 'student' ? 'set' : '';
+        if (c && c.role === 'student') o.login = c.login;
+      }
+      return o;
+    });
+  }
   if (sess.role === 'teacher') {
     delete d.payments;
     delete d.studentDeleteLog;
@@ -403,15 +429,16 @@ function httpErr(code, msg) {
   return Object.assign(new Error(msg), { code });
 }
 
-/** teachers[] o'zgarganda login ma'lumotlarini moslash */
+/** teachers[] va students[] o'zgarganda login ma'lumotlarini moslash */
 function syncCreds() {
   let changed = false;
-  const list = Array.isArray(DOC.data.teachers) ? DOC.data.teachers : [];
-  const byId = new Map(list.map(t => [t.id, t]));
+  const tList = Array.isArray(DOC.data.teachers) ? DOC.data.teachers.filter(isObj) : [];
+  const sList = Array.isArray(DOC.data.students) ? DOC.data.students.filter(isObj) : [];
+  const byId = { teacher: new Map(tList.map(t => [t.id, t])), student: new Map(sList.map(x => [x.id, x])) };
   const taken = new Set();
   if (ADMIN) taken.add(ADMIN.user.toLowerCase());
   for (const [id, c] of Object.entries(CREDS)) {
-    const t = byId.get(id);
+    const t = byId[c.role === 'student' ? 'student' : 'teacher'].get(id);
     if (!t) {
       if (Date.now() - (c.t || 0) > 120000) {
         delete CREDS[id];
@@ -436,9 +463,8 @@ function syncCreds() {
     }
   }
   // doimiy xesh maydonlarini hujjatdan olib tashlash
-  for (const t of list) {
-    if ('pwHash' in t) delete t.pwHash;
-  }
+  for (const t of tList) if ('pwHash' in t) delete t.pwHash;
+  for (const x of sList) if ('pwHash' in x) delete x.pwHash;
   return changed;
 }
 
@@ -459,6 +485,21 @@ async function dailyBackup() {
   }
 }
 
+/* ---------------- to'lov tizimlari (Payme + Click) ---------------- */
+
+const buildStudentView = require('./student');
+const PAY = require('./payments')({
+  getStore: () => store,
+  getDoc: () => DOC,
+  serial,
+  log,
+  send,
+  fail,
+  readBody,
+  sessionOf,
+  isHttps
+});
+
 /* ---------------- API ---------------- */
 
 async function api(req, res, url) {
@@ -471,6 +512,10 @@ async function api(req, res, url) {
 
   if (req.method !== 'GET' && req.method !== 'HEAD' && !sameOrigin(req)) {
     return fail(res, 403, 'Ruxsat etilmagan manba');
+  }
+
+  if (url.pathname.startsWith('/api/pay/')) {
+    if (await PAY.route(req, res, url)) return;
   }
 
   if (route === 'GET /api/status') {
@@ -527,7 +572,8 @@ async function api(req, res, url) {
       return fail(res, 401, 'Login yoki parol noto‘g‘ri');
     }
     setSessionCookie(req, res, who, ver, !!b.remember);
-    return send(res, 200, { ok: true, role: who === 'admin' ? 'admin' : 'teacher', id: who });
+    const role = who === 'admin' ? 'admin' : CREDS[who].role === 'student' ? 'student' : 'teacher';
+    return send(res, 200, { ok: true, role, id: who });
   }
 
   if (route === 'POST /api/auth/logout') {
@@ -561,6 +607,22 @@ async function api(req, res, url) {
   }
 
   /* ---- ma'lumot ---- */
+  /* ---- o'quvchi: faqat o'z paneli ---- */
+  if (sess.role === 'student') {
+    if (route === 'GET /api/me') {
+      const v = buildStudentView(DOC.data, sess.id, PAY.config());
+      if (!v) return fail(res, 404, 'O‘quvchi topilmadi');
+      return send(res, 200, v);
+    }
+    if (route === 'POST /api/me/pay') return PAY.studentPay(req, res, sess);
+    if (route === 'POST /api/auth/password') return fail(res, 403, 'Faqat administrator');
+    return fail(res, 403, 'Bu bo‘limga ruxsat yo‘q');
+  }
+
+  if (url.pathname === '/api/me' || url.pathname.startsWith('/api/me/')) {
+    return fail(res, 403, 'Bu bo‘lim faqat o‘quvchilar uchun');
+  }
+
   if (route === 'GET /api/data') {
     const since = Number(url.searchParams.get('rev'));
     if (since && since === DOC.rev) return send(res, 200, { rev: DOC.rev, unchanged: true });
@@ -577,7 +639,7 @@ async function api(req, res, url) {
       DOC.data = draft;
       let credsChanged = false;
       try {
-        if (b.ops.some(o => o.p[0] === 'teachers')) credsChanged = syncCreds();
+        if (b.ops.some(o => o.p[0] === 'teachers' || o.p[0] === 'students')) credsChanged = syncCreds();
       } catch (e) {
         DOC.data = prevDoc;
         CREDS = prevCreds;
@@ -593,74 +655,69 @@ async function api(req, res, url) {
     return send(res, 200, result);
   }
 
-  /* ---- o'qituvchi login/paroli (faqat admin) ---- */
+  /* ---- o'qituvchi / o'quvchi login va paroli (faqat admin) ---- */
   if (route === 'POST /api/credentials') {
     if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
     const b = await readBody(req);
-    const id = String(b.teacherId || '');
+    const isStu = !!b.studentId;
+    const role = isStu ? 'student' : 'teacher';
+    const id = String(isStu ? b.studentId : b.teacherId || '');
     const login = String(b.login || '').trim();
     const pw = String(b.password || '');
-    if (!id || BAD_KEYS.has(id)) return fail(res, 400, 'O‘qituvchi aniqlanmadi');
+    if (!id || BAD_KEYS.has(id)) return fail(res, 400, isStu ? 'O‘quvchi aniqlanmadi' : 'O‘qituvchi aniqlanmadi');
     if (!login || login.length > 60) return fail(res, 400, 'Login kiriting');
     if (login.toLowerCase() === ADMIN.user.toLowerCase()) {
       return fail(res, 409, 'Bu login administratorga tegishli. Boshqa login tanlang');
     }
     if (Object.entries(CREDS).some(([o, c]) => o !== id && c.login.toLowerCase() === login.toLowerCase())) {
-      return fail(res, 409, 'Bu login boshqa o‘qituvchida bor');
+      return fail(res, 409, isStu ? 'Bu login band. Boshqa login tanlang' : 'Bu login boshqa o‘qituvchida bor');
     }
     const cur = CREDS[id];
+    if (cur && (cur.role === 'student' ? 'student' : 'teacher') !== role) return fail(res, 409, 'Bu identifikator band');
     if (!cur && pw.length < 4) return fail(res, 400, 'Parol kamida 4 belgidan iborat bo‘lsin');
     if (pw && pw.length < 4) return fail(res, 400, 'Parol kamida 4 belgidan iborat bo‘lsin');
     const hash = pw ? await hashPassword(pw) : cur.hash;
-    CREDS[id] = { login, hash, ver: (cur ? cur.ver : 0) + 1, t: Date.now() };
+    CREDS[id] = { login, hash, ver: (cur ? cur.ver : 0) + 1, t: Date.now(), role };
     await persistCreds();
     return send(res, 200, { ok: true });
   }
 
-  /* ---- administrator parolini tasdiqlash (xavfli amallar oldidan) ---- */
+  /* ---- administrator parolini tasdiqlash (xavfli amallardan oldin) ---- */
   if (route === 'POST /api/auth/verify') {
     if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
+    const b = await readBody(req);
     const key = clientIp(req) + '|verify';
     if (tooMany(key)) return fail(res, 429, 'Juda ko‘p urinish. 15 daqiqadan keyin qayta urinib ko‘ring');
-    const b = await readBody(req);
     if (!(await verifyPassword(String(b.password || ''), ADMIN.hash))) {
       addAttempt(key);
-      return fail(res, 403, 'Parol noto‘g‘ri');
+      return fail(res, 400, 'Parol noto‘g‘ri');
     }
     return send(res, 200, { ok: true });
   }
 
-  /* ---- chat (administrator va o'qituvchilar) ---- */
+  /* ---- chat (administrator + o'qituvchilar) ---- */
   if (route === 'GET /api/chat') {
     const since = Number(url.searchParams.get('since')) || 0;
-    const msgs = since ? CHAT.msgs.filter(m => m.seq > since) : CHAT.msgs.slice(-100);
-    return send(res, 200, { last: CHAT.seq, msgs, me: sess.id });
+    const msgs = CHAT.msgs.filter(m => m.ver > since);
+    return send(res, 200, { msgs, last: CHAT.counter });
   }
   if (route === 'POST /api/chat') {
     const b = await readBody(req);
-    const text = String(b.text || '').replace(/\r\n/g, '\n').trim();
+    const text = String(b.text || '').trim().slice(0, 2000);
     if (!text) return fail(res, 400, 'Xabar bo‘sh');
-    if (text.length > 2000) return fail(res, 400, 'Xabar juda uzun (2000 belgigacha)');
-    let name = 'Administrator';
-    if (sess.role === 'admin') {
-      const pn = DOC.data.profile && String(DOC.data.profile.name || '').trim();
-      if (pn) name = pn;
-    } else {
+    const key = clientIp(req) + '|chat|' + sess.id;
+    if (chatRate(key)) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
+    let name = '';
+    if (sess.role === 'admin') name = (DOC.data.profile && DOC.data.profile.name) || ADMIN.user;
+    else {
       const t = (DOC.data.teachers || []).find(x => x && x.id === sess.id);
-      name = (t && t.name) || 'O‘qituvchi';
+      name = (t && t.name) || (CREDS[sess.id] && CREDS[sess.id].login) || 'O‘qituvchi';
     }
     const msg = await serial(async () => {
-      const m = {
-        id: crypto.randomBytes(6).toString('hex'),
-        seq: ++CHAT.seq,
-        uid: sess.id,
-        role: sess.role,
-        name: String(name).slice(0, 80),
-        text,
-        ts: Date.now()
-      };
+      const n = ++CHAT.counter;
+      const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, uid: sess.id, name, role: sess.role, text, ts: Date.now(), x: false };
       CHAT.msgs.push(m);
-      if (CHAT.msgs.length > 1000) CHAT.msgs = CHAT.msgs.slice(-1000);
+      if (CHAT.msgs.length > 500) CHAT.msgs.splice(0, CHAT.msgs.length - 500);
       await store.set('chat', CHAT);
       return m;
     });
@@ -669,16 +726,14 @@ async function api(req, res, url) {
   if (route === 'POST /api/chat/delete') {
     if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
     const b = await readBody(req);
-    const out = await serial(async () => {
+    await serial(async () => {
       const m = CHAT.msgs.find(x => x.id === String(b.id || ''));
-      if (!m) return null;
-      m.x = 1;
+      if (!m || m.x) return;
+      m.x = true;
       m.text = '';
-      m.seq = ++CHAT.seq;
+      m.ver = ++CHAT.counter;
       await store.set('chat', CHAT);
-      return m;
     });
-    if (!out) return fail(res, 404, 'Xabar topilmadi');
     return send(res, 200, { ok: true });
   }
 
@@ -785,6 +840,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(405);
       return res.end();
     }
+    if (PAY.isPage(url.pathname)) return PAY.page(req, res);
     return serveStatic(req, res, url);
   } catch (e) {
     const code = e.code && Number.isInteger(e.code) ? e.code : 500;
@@ -804,9 +860,9 @@ async function init() {
   if (d && isObj(d.data)) DOC = d;
   ADMIN = await store.get('admin');
   CREDS = (await store.get('creds')) || {};
+  const ch = await store.get('chat');
+  if (ch && Array.isArray(ch.msgs)) CHAT = ch;
   META = (await store.get('meta')) || { secret: '' };
-  CHAT = (await store.get('chat')) || { seq: 0, msgs: [] };
-  if (!Array.isArray(CHAT.msgs)) CHAT = { seq: 0, msgs: [] };
 
   if (!META.secret) {
     META.secret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString('hex');
