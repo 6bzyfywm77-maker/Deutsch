@@ -29,7 +29,7 @@ function monthsBetween(from, to) {
   return out;
 }
 
-module.exports = function buildStudentView(data, sid, pay) {
+module.exports = function buildStudentView(data, sid) {
   const students = Array.isArray(data.students) ? data.students : [];
   const st = students.find(s => s && s.id === sid);
   if (!st) return null;
@@ -157,6 +157,5 @@ module.exports = function buildStudentView(data, sid, pay) {
     labels,
     schedule: { periods: periodsOut, cells },
     payments,
-    pay: { payme: !!(pay && pay.payme), click: !!(pay && pay.click) }
   };
 };
