@@ -31,3 +31,10 @@ cp .env.example .env   # yoki o'zgaruvchilarni qo'lda bering
 ADMIN_USER=admin ADMIN_PASSWORD=parol1234 npm start
 npm test
 ```
+
+## Ota-onalar paneli va chat
+
+- Administrator **O‘quvchilar → tahrirlash** oynasida “Ota-ona logini” va “Ota-ona paroli”ni kiritadi. Ota-ona shu bilan kirib, farzandining natijalari, baholari, davomati, dars jadvali va to‘lovlarini ko‘radi.
+- Ota-onaning panelida **Chat** bo‘limi bor: u faqat administrator bilan, o‘z suhbatida yozishadi (boshqa ota-onalar va o‘qituvchilar ko‘rmaydi).
+- Administrator panelidagi **Ota-onalar chati** bo‘limida barcha suhbatlar ro‘yxati, o‘qilmagan xabarlar soni va ikki xil to‘xtatish bor: bitta ota-ona uchun (“Yozishni to‘xtatish”) yoki hamma uchun (“Hammasini to‘xtatish”). To‘xtatilganda ota-ona eski xabarlarni o‘qiy oladi, lekin yoza olmaydi; administrator esa yozishda davom etadi.
+- Onlayn to‘lov (Payme/Click) olib tashlangan: to‘lovlarni administrator “To‘lovlar” bo‘limida belgilaydi. `payments.js` endi kerak emas.
