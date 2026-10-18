@@ -3608,19 +3608,54 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 .nw-bar i{display:block;height:100%;background:var(--brand);transition:width .2s}
 .nw-rm{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:none;border:0;color:var(--mute);cursor:pointer}
 .nw-rm:hover{background:#fff;color:var(--bad)}
-.nw-list{display:flex;flex-direction:column;gap:14px;margin-top:16px}
-.nw-card{background:#fff;border:1px solid #E3E8F5;border-radius:20px;padding:16px;box-shadow:0 6px 20px rgba(30,60,160,.06);overflow:hidden}
-.nw-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.nw-top time{color:var(--mute);font-size:12.5px}
-.nw-card h3{margin:0 0 6px;font:700 17px/1.3 var(--display);letter-spacing:-.01em;word-break:break-word}
-.nw-card p{margin:0;white-space:pre-wrap;word-break:break-word;line-height:1.5;font-size:14.5px}
-.nw-md{display:grid;gap:6px;margin-top:12px}
-.nw-md.n1{grid-template-columns:1fr}.nw-md.n2,.nw-md.n3,.nw-md.n4{grid-template-columns:repeat(2,1fr)}
-.nw-md img,.nw-md video{display:block;width:100%;border-radius:14px;background:#0B1536;object-fit:cover;cursor:zoom-in}
-.nw-md.n1 img{max-height:420px;object-fit:contain;background:#EEF2FC}
-.nw-md.n1 video{max-height:420px}
-.nw-md.n2 img,.nw-md.n3 img,.nw-md.n4 img,.nw-md.n2 video,.nw-md.n3 video,.nw-md.n4 video{aspect-ratio:1/1}
-.nw-md video{cursor:auto}
+.nw-list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.nwp .nw-list{margin-top:0}
+.nw-use{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nw-use .nw-bar{flex:1;min-width:120px}
+.nw-use .nw-bar.hot i{background:var(--bad)}
+.nw-card{display:flex;gap:12px;align-items:center;padding:12px;background:#fff;border:1px solid #E3E8F5;border-radius:20px;box-shadow:0 6px 20px rgba(30,60,160,.06);cursor:pointer;transition:transform .12s,box-shadow .12s}
+.nw-card:active{transform:scale(.99)}
+.nw-tm{flex:none;width:92px;height:92px;border-radius:16px;overflow:hidden;background:#E6EEFF;display:grid;place-items:center;color:#2F62DB}
+.nw-tm img{width:100%;height:100%;object-fit:cover;display:block}
+.nw-tm .ic{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nw-bd{flex:1;min-width:0}
+.nw-top{display:flex;align-items:center;gap:8px}
+.nw-top time{color:var(--mute);font-size:12px}
+.nw-new{background:#F23C3C;color:#fff;font:700 10px var(--body);padding:2px 8px;border-radius:99px}
+.nw-card h3{margin:3px 0 4px;font:700 16px/1.25 var(--display);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.nw-card p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.nw-meta{display:flex;gap:12px;margin-top:6px;color:var(--mute);font-size:12px}
+.nw-meta span{display:inline-flex;align-items:center;gap:4px}
+.nw-meta .ic,.nw-ch .ic,.nw-del .ic{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nw-meta .ic{width:14px;height:14px}
+.nw-ch{flex:none;color:#B5BED6}.nw-ch .ic{width:18px;height:18px}
+.nw-del{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#FDECEA;border:0;color:var(--bad);cursor:pointer}
+.nw-del .ic{width:17px;height:17px}
+/* yangilik sahifasi */
+.nwp{position:fixed;inset:0;z-index:130;background:linear-gradient(180deg,#EEF2FC,#F6F8FD);display:flex;flex-direction:column;animation:nwpIn .22s ease-out}
+@keyframes nwpIn{from{transform:translateX(26px);opacity:.3}to{transform:none;opacity:1}}
+.nwp-h{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;background:#fff;border-bottom:1px solid #E3E8F5}
+.nwp-b{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#EEF2FC;border:0;color:var(--ink);cursor:pointer}
+.nwp-b .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nwp-d{background:#FDECEA;color:var(--bad)}
+.nwp-t{flex:1;min-width:0;font:700 18px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nwp-c{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+.nwp-w{max-width:720px;margin:0 auto}
+.nwd-g{position:relative;border-radius:22px;overflow:hidden;background:#0B1536;box-shadow:0 10px 30px rgba(20,40,120,.18)}
+.nwd-sl{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.nwd-sl::-webkit-scrollbar{display:none}
+.nwd-s{flex:none;width:100%;scroll-snap-align:center;aspect-ratio:3/2;max-height:60vh;display:grid;place-items:center;background:#0B1536}
+.nwd-s img,.nwd-s video{display:block;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.nwd-s video{cursor:auto}
+.nwd-cnt{position:absolute;top:12px;right:12px;padding:4px 11px;border-radius:99px;background:rgba(0,0,0,.55);color:#fff;font:600 12px var(--body);pointer-events:none}
+.nwd-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none}
+.nwd-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5);transition:width .2s,background .2s}
+.nwd-dots i.on{width:20px;border-radius:99px;background:#fff}
+.nwd-b{background:#fff;border:1px solid #E3E8F5;border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 6px 20px rgba(30,60,160,.06)}
+.nwd-g+.nwd-b{margin-top:14px}
+.nwd-b time{display:inline-block;padding:4px 12px;border-radius:99px;background:#E6EEFF;color:#1F4AD9;font:600 12.5px var(--body)}
+.nwd-b h1{margin:12px 0 10px;font:700 22px/1.25 var(--display);letter-spacing:-.02em;word-break:break-word}
+.nwd-t{white-space:pre-wrap;line-height:1.65;font-size:15.5px;word-break:break-word;color:var(--ink)}
 .nw-zoom{position:fixed;inset:0;z-index:200;background:rgba(5,10,30,.92);display:grid;place-items:center;padding:16px;cursor:zoom-out}
 .nw-zoom img{max-width:100%;max-height:100%;border-radius:10px;object-fit:contain}
 .nw-zoom button{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;border:0}
@@ -12651,38 +12686,7 @@ function stuBadges(){
   document.querySelectorAll('#stu [data-stu-tab="chat"] .sv-bd').forEach(b=>{b.hidden=!n;b.textContent=n>99?'99+':String(n)});
 }
 
-/* ---------- Yangiliklar oynasi (qo'ng'iroqcha) ---------- */
-async function stuNewsOpen(){
-  if(document.getElementById('stuNews'))return;
-  const o=document.createElement('div');
-  o.id='stuNews';o.className='nws';
-  o.innerHTML=`<div class="nws-box" role="dialog" aria-label="Yangiliklar"><div class="nws-h">${ic('bell')}<span>Yangiliklar</span><button type="button" class="nws-x" aria-label="Yopish">${ic('x')}</button></div><div class="nws-l" id="nwsL"><div class="chat-empty">Yuklanmoqda…</div></div></div>`;
-  document.body.appendChild(o);
-  document.body.style.overflow='hidden';
-  const close=()=>{o.remove();document.body.style.overflow='';document.removeEventListener('keydown',esc_)};
-  const esc_=e=>{if(e.key==='Escape')close()};
-  document.addEventListener('keydown',esc_);
-  o.addEventListener('click',e=>{
-    if(e.target===o||e.target.closest('.nws-x'))return close();
-    const z=e.target.closest('[data-zoom]');
-    if(z)nwZoom(z.dataset.zoom);
-  });
-  try{
-    const r=await API.get('/api/news');
-    const box=document.getElementById('nwsL');
-    if(box)box.innerHTML=r.items.length?r.items.map(i=>nwCard(i,false)).join(''):'<div class="chat-empty">Hali yangilik yo‘q.</div>';
-    if(window.DS_I18N)DS_I18N.mark();
-    if(r.unread){
-      await API.post('/api/news/seen',{});
-      if(STU.d&&STU.d.news)STU.d.news.unread=0;
-      stuBadges();
-    }
-  }catch(e){
-    const box=document.getElementById('nwsL');
-    if(box)box.innerHTML='<div class="chat-empty">Yuklab bo‘lmadi</div>';
-    if(e.status===401)stuLoad(true);
-  }
-}
+function stuNewsOpen(){nwpOpen(false)}
 
 function stuRender(){
   const d=STU.d;if(!d)return;
@@ -12945,7 +12949,7 @@ Object.assign(RU,{
 "Ma'lumotlar serverga ko'chirildi":"Данные перенесены на сервер","Ma'lumotlar tiklandi":"Данные восстановлены","Hisob yaratildi":"Аккаунт создан","Bosib holatni tanlang":"Нажмите и выберите статус",
 "O'zgartirmaslik uchun bo'sh qoldiring":"Оставьте пустым, чтобы не менять","Qarzdor":"Должник","To'langan":"Оплачено","Sababsiz":"Без причины","Kech qolgan":"Опоздал","Saqlanmadi":"Не сохранено",
 "Serverga ulanib bo'lmadi":"Не удалось подключиться к серверу","Sessiya tugadi. Qayta kiring":"Сессия истекла. Войдите снова","Tizimdan chiqdingiz":"Вы вышли из системы","Tiklash":"Восстановить",
-"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Yangiliklar":"Новости","Hali yangilik yo‘q.":"Новостей пока нет.","Yuklab bo‘lmadi":"Не удалось загрузить","Yuklanmoqda…":"Загрузка…","Ota-onalar va administrator":"Родители и администратор","Hali xabar yo‘q. Birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите первым.","Yopish":"Закрыть","Chat":"Чат","Ota-ona":"Родитель","Administrator":"Администратор","Administrator bilan yozishma":"Переписка с администратором","Xabar yozing…":"Напишите сообщение…","Yuborish":"Отправить","Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите администратору первым.","Xabar o‘chirilgan":"Сообщение удалено","Bugun":"Сегодня","Kecha":"Вчера","Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.":"Чат временно приостановлен. Сообщения можно читать.","Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.":"Администратор временно приостановил запись в этом чате.","To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.":"Оплату передайте администратору школы. Оплаченные месяцы отображаются здесь.","Kirish":"Войти",
+"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Yangilik":"Новость","Yangi":"Новое","Orqaga":"Назад","Yangiliklar":"Новости","Hali yangilik yo‘q.":"Новостей пока нет.","Yuklab bo‘lmadi":"Не удалось загрузить","Yuklanmoqda…":"Загрузка…","Ota-onalar va administrator":"Родители и администратор","Hali xabar yo‘q. Birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите первым.","Yopish":"Закрыть","Chat":"Чат","Ota-ona":"Родитель","Administrator":"Администратор","Administrator bilan yozishma":"Переписка с администратором","Xabar yozing…":"Напишите сообщение…","Yuborish":"Отправить","Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите администратору первым.","Xabar o‘chirilgan":"Сообщение удалено","Bugun":"Сегодня","Kecha":"Вчера","Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.":"Чат временно приостановлен. Сообщения можно читать.","Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.":"Администратор временно приостановил запись в этом чате.","To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.":"Оплату передайте администратору школы. Оплаченные месяцы отображаются здесь.","Kirish":"Войти",
 "Qidirish":"Поиск","Sana":"Дата","Yangilash":"Обновить","Yuklab olish":"Скачать","Ha":"Да","Yo'q":"Нет",
 "Algebra":"Алгебра","Biologiya":"Биология","Fizika":"Физика","Ingliz tili":"Английский язык","Kimyo":"Химия","Matematika":"Математика","Nemis tili":"Немецкий язык",
 "Alg":"Алг","Bio":"Био","Fiz":"Физ","Ing":"Англ","Mat":"Мат","Matem":"Матем","Nem":"Нем",
@@ -13000,7 +13004,7 @@ const DE={
 "Ma'lumotlar tiklandi":'Daten wiederhergestellt','Hisob yaratildi':'Konto erstellt',"O'zgartirmaslik uchun bo'sh qoldiring":'Zum Beibehalten leer lassen',"Qarzdor":'Schuldner',"To'langan":'Bezahlt',
 'Sababsiz':'Unentschuldigt','Kech qolgan':'Verspätet','Saqlanmadi':'Nicht gespeichert',"Serverga ulanib bo'lmadi":'Verbindung zum Server fehlgeschlagen',"Sessiya tugadi. Qayta kiring":'Sitzung abgelaufen. Bitte erneut anmelden',
 'Tizimdan chiqdingiz':'Sie wurden abgemeldet','Tiklash':'Wiederherstellen','Tozalash':'Leeren','Xatolik':'Fehler','Zaxiradan tiklash':'Aus Sicherung wiederherstellen','Vaqt yangilandi':'Zeit aktualisiert',
-"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Yangiliklar':'Neuigkeiten','Hali yangilik yo‘q.':'Noch keine Neuigkeiten.','Yuklab bo‘lmadi':'Laden fehlgeschlagen','Yuklanmoqda…':'Wird geladen…','Ota-onalar va administrator':'Eltern und Verwaltung','Hali xabar yo‘q. Birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie als Erste/r.','Yopish':'Schließen','Chat':'Chat','Ota-ona':'Elternteil','Administrator':'Administrator','Administrator bilan yozishma':'Chat mit der Verwaltung','Xabar yozing…':'Nachricht schreiben…','Yuborish':'Senden','Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie der Verwaltung zuerst.','Xabar o‘chirilgan':'Nachricht gelöscht','Bugun':'Heute','Kecha':'Gestern','Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Der Chat ist vorübergehend pausiert. Nachrichten können gelesen werden.','Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.':'Die Verwaltung hat das Schreiben in diesem Chat vorübergehend pausiert.','To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.':'Bitte zahlen Sie bei der Schulverwaltung. Bezahlte Monate werden hier angezeigt.','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
+"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Yangilik':'Neuigkeit','Yangi':'Neu','Orqaga':'Zurück','Yangiliklar':'Neuigkeiten','Hali yangilik yo‘q.':'Noch keine Neuigkeiten.','Yuklab bo‘lmadi':'Laden fehlgeschlagen','Yuklanmoqda…':'Wird geladen…','Ota-onalar va administrator':'Eltern und Verwaltung','Hali xabar yo‘q. Birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie als Erste/r.','Yopish':'Schließen','Chat':'Chat','Ota-ona':'Elternteil','Administrator':'Administrator','Administrator bilan yozishma':'Chat mit der Verwaltung','Xabar yozing…':'Nachricht schreiben…','Yuborish':'Senden','Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie der Verwaltung zuerst.','Xabar o‘chirilgan':'Nachricht gelöscht','Bugun':'Heute','Kecha':'Gestern','Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Der Chat ist vorübergehend pausiert. Nachrichten können gelesen werden.','Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.':'Die Verwaltung hat das Schreiben in diesem Chat vorübergehend pausiert.','To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.':'Bitte zahlen Sie bei der Schulverwaltung. Bezahlte Monate werden hier angezeigt.','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
 'Algebra':'Algebra','Biologiya':'Biologie','Fizika':'Physik','Ingliz tili':'Englisch','Kimyo':'Chemie','Matematika':'Mathematik','Nemis tili':'Deutsch','IT':'IT',
 'Alg':'Alg','Bio':'Bio','Fiz':'Phy','Ing':'Eng','Mat':'Mat','Matem':'Mathe','Nem':'Deu',
 'Yanvar':'Januar','Fevral':'Februar','Mart':'März','Aprel':'April','May':'Mai','Iyun':'Juni','Iyul':'Juli','Avgust':'August','Sentabr':'September','Oktabr':'Oktober','Noyabr':'November','Dekabr':'Dezember',
@@ -13575,6 +13579,7 @@ views.news=()=>head('Yangiliklar','E‘lon qilingan yangilik ota-onalar va o‘q
       <button type="button" class="btn primary" id="nwPost">E‘lon qilish</button>
     </div>
     <p class="hint">Rasm avtomatik kichraytiriladi. Video — MP4, MOV yoki WEBM, 40 MB gacha. Bitta yangilikka 10 tagacha fayl.</p>
+    <p class="hint nw-use" id="nwUsage"></p>
   </section>
   <div class="nw-list" id="nwList"><div class="chat-empty">Yuklanmoqda…</div></div>`;
 
@@ -13658,14 +13663,137 @@ async function nwPublish(){
   finally{NW.busy=false;nwRenderFiles()}
 }
 
-function nwCard(it,admin){
-  const d=new Date(it.ts);
-  const media=it.media.length?`<div class="nw-md n${Math.min(it.media.length,4)}">${it.media.map(m=>m.kind==='image'
-    ?`<img src="${m.url}" alt="" loading="lazy" data-zoom="${m.url}">`
-    :`<video src="${m.url}#t=0.1" controls playsinline preload="metadata"></video>`).join('')}</div>`:'';
-  return `<article class="nw-card">
-    <div class="nw-top"><time>${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}</time>${admin?`<button type="button" class="btn sm danger" data-del="${it.id}">${ic('trash')}O‘chirish</button>`:''}</div>
-    ${it.title?`<h3>${esc(it.title)}</h3>`:''}${it.text?`<p>${esc(it.text)}</p>`:''}${media}</article>`;
+const nwDate=ts=>{const d=new Date(ts);return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' · '+pad(d.getHours())+':'+pad(d.getMinutes())};
+
+function nwCard(it,admin,seen){
+  const ni=it.media.filter(m=>m.kind==='image').length,nv=it.media.length-ni;
+  const im=it.media.find(m=>m.kind==='image');
+  const thumb=im?`<span class="nw-tm"><img src="${im.url}" alt="" loading="lazy"></span>`
+    :`<span class="nw-tm none">${ic(it.media.length?'film':'bell')}</span>`;
+  const isNew=!admin&&seen!==undefined&&it.seq>seen;
+  return `<article class="nw-card" data-open="${it.id}" tabindex="0">
+    ${thumb}
+    <div class="nw-bd">
+      <div class="nw-top"><time>${nwDate(it.ts)}</time>${isNew?'<span class="nw-new">Yangi</span>':''}</div>
+      <h3>${esc(it.title||'Yangilik')}</h3>
+      ${it.text?`<p>${esc(it.text)}</p>`:''}
+      ${ni||nv?`<div class="nw-meta">${ni?`<span>${ic('image')}${ni}</span>`:''}${nv?`<span>${ic('film')}${nv}</span>`:''}</div>`:''}
+    </div>
+    ${admin?`<button type="button" class="nw-del" data-del="${it.id}" aria-label="O‘chirish">${ic('trash')}</button>`:`<span class="nw-ch">${ic('chevR')}</span>`}
+  </article>`;
+}
+
+function nwDetail(it){
+  const slides=it.media.map(m=>`<div class="nwd-s">${m.kind==='image'
+    ?`<img src="${m.url}" alt="" data-zoom="${m.url}">`
+    :`<video src="${m.url}#t=0.1" controls playsinline preload="metadata"></video>`}</div>`).join('');
+  const many=it.media.length>1;
+  return `${it.media.length?`<div class="nwd-g"><div class="nwd-sl" id="nwdSl">${slides}</div>${many?`<span class="nwd-cnt" id="nwdCnt">1 / ${it.media.length}</span><div class="nwd-dots" id="nwdDots">${it.media.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}</div>`:''}
+    <div class="nwd-b"><time>${nwDate(it.ts)}</time><h1>${esc(it.title||'Yangilik')}</h1>${it.text?`<div class="nwd-t">${esc(it.text)}</div>`:''}</div>`;
+}
+
+/* Yangiliklar: alohida sahifa (ro'yxat -> yangilik sahifasi). Orqaga tugmasi / telefon "orqaga"i ishlaydi */
+const NWP={el:null,items:[],view:'list',admin:false,seen:0,depth:0,loaded:false};
+
+function nwpBack(){if(NWP.el)history.back()}
+function nwpClose(fromPop){
+  if(!NWP.el)return;
+  NWP.el.remove();NWP.el=null;
+  document.body.style.overflow='';
+  const back=NWP.depth;NWP.depth=0;
+  if(!fromPop&&back>0)history.go(-back);
+}
+window.addEventListener('popstate',()=>{
+  if(!NWP.el)return;
+  NWP.depth=Math.max(0,NWP.depth-1);
+  if(NWP.view==='detail'&&NWP.depth>0)nwpShowList();
+  else nwpClose(true);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&NWP.el&&!document.querySelector('.nw-zoom'))nwpBack()});
+
+function nwpHead(title){
+  const h=NWP.el.querySelector('.nwp-t');
+  if(h)h.textContent=title;
+}
+function nwpShowList(){
+  NWP.view='list';
+  nwpHead('Yangiliklar');
+  const c=NWP.el.querySelector('.nwp-c');
+  c.innerHTML=`<div class="nwp-w">${NWP.loaded?(NWP.items.length?`<div class="nw-list">${NWP.items.map(i=>nwCard(i,NWP.admin,NWP.seen)).join('')}</div>`:'<div class="chat-empty">Hali yangilik yo‘q.</div>'):'<div class="chat-empty">Yuklanmoqda…</div>'}</div>`;
+  c.scrollTop=NWP.listScroll||0;
+  if(window.DS_I18N)DS_I18N.mark();
+}
+function nwpShowDetail(id,push){
+  const it=NWP.items.find(x=>x.id===id);
+  if(!it)return;
+  const c=NWP.el.querySelector('.nwp-c');
+  if(NWP.view==='list')NWP.listScroll=c.scrollTop;
+  NWP.view='detail';
+  if(push){history.pushState({nw:NWP.depth+1},'',location.href);NWP.depth++}
+  nwpHead('Yangilik');
+  c.innerHTML=`<div class="nwp-w">${nwDetail(it)}</div>`;
+  c.scrollTop=0;
+  const sl=c.querySelector('#nwdSl');
+  if(sl){
+    const cnt=c.querySelector('#nwdCnt'),dots=[...c.querySelectorAll('#nwdDots i')];
+    sl.addEventListener('scroll',()=>{
+      const i=Math.round(sl.scrollLeft/sl.clientWidth);
+      if(cnt)cnt.textContent=(i+1)+' / '+it.media.length;
+      dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    },{passive:true});
+  }
+  if(window.DS_I18N)DS_I18N.mark();
+}
+
+async function nwpOpen(admin,openId){
+  if(NWP.el)return;
+  NWP.admin=admin;NWP.view='list';NWP.loaded=false;NWP.items=admin?NW.items.slice():[];NWP.listScroll=0;
+  const o=document.createElement('div');
+  o.className='nwp';
+  o.innerHTML=`<div class="nwp-h"><button type="button" class="nwp-b" aria-label="Orqaga">${ic('chevL')}</button><div class="nwp-t">Yangiliklar</div>${admin?'<button type="button" class="nwp-b nwp-d" aria-label="O‘chirish" hidden>'+ic('trash')+'</button>':''}</div><div class="nwp-c"></div>`;
+  document.body.appendChild(o);
+  NWP.el=o;
+  document.body.style.overflow='hidden';
+  history.pushState({nw:1},'',location.href);NWP.depth=1;
+  o.querySelector('.nwp-b').onclick=nwpBack;
+  o.addEventListener('click',e=>{
+    const z=e.target.closest('[data-zoom]');
+    if(z){nwZoom(z.dataset.zoom);return}
+    const card=e.target.closest('[data-open]');
+    if(card&&!e.target.closest('[data-del]'))nwpShowDetail(card.dataset.open,true);
+  });
+  o.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-open]'))nwpShowDetail(e.target.dataset.open,true)});
+  if(admin){
+    NWP.loaded=true;
+    if(openId)nwpShowDetail(openId,false);else nwpShowList();
+    const d=o.querySelector('.nwp-d');
+    d.hidden=false;
+    d.onclick=()=>{
+      const it=NWP.items.find(x=>x.id===(NWP.cur||openId));
+      if(!it)return;
+      confirmBox('Yangilikni o‘chirish','Rasm va videolari bilan birga o‘chiriladi.',async()=>{
+        try{await API.post('/api/news/delete',{id:it.id});toast('O‘chirildi');nwpBack();nwLoad()}
+        catch(er){toast(er.message||'Xatolik','err')}
+      },'O‘chirish');
+    };
+    NWP.cur=openId;
+    return;
+  }
+  nwpShowList();
+  try{
+    const r=await API.get('/api/news');
+    if(!NWP.el)return;
+    NWP.items=r.items;NWP.seen=r.seen||0;NWP.loaded=true;
+    if(NWP.view==='list')nwpShowList();
+    if(r.unread){
+      await API.post('/api/news/seen',{});
+      if(STU.d&&STU.d.news)STU.d.news.unread=0;
+      stuBadges();
+    }
+  }catch(e){
+    if(NWP.el&&NWP.view==='list')NWP.el.querySelector('.nwp-c').innerHTML='<div class="chat-empty">Yuklab bo‘lmadi</div>';
+    if(e.status===401)stuLoad(true);
+  }
 }
 
 async function nwLoad(){
@@ -13675,6 +13803,11 @@ async function nwLoad(){
     const r=await API.get('/api/news');
     NW.items=r.items;
     box.innerHTML=r.items.length?r.items.map(i=>nwCard(i,true)).join(''):'<div class="chat-empty">Hali yangilik yo‘q.</div>';
+    const u=$('#nwUsage');
+    if(u&&r.usage){
+      const pc=Math.min(100,Math.round(r.usage.used/r.usage.limit*100));
+      u.innerHTML=`Fayllar xotirasi: <b>${fmtMB(r.usage.used)}</b> / ${fmtMB(r.usage.limit)} <i class="nw-bar${pc>85?' hot':''}"><i style="width:${pc}%"></i></i>`;
+    }
   }catch(e){box.innerHTML='<div class="chat-empty">Yuklab bo‘lmadi</div>'}
 }
 
@@ -13732,13 +13865,16 @@ function nwZoom(url){
         NW.files.splice(i,1);nwRenderFiles();
       });
       $('#nwList').addEventListener('click',e=>{
-        const z=e.target.closest('[data-zoom]');
-        if(z){nwZoom(z.dataset.zoom);return}
         const d=e.target.closest('[data-del]');
-        if(d)confirmBox('Yangilikni o‘chirish','Rasm va videolari bilan birga o‘chiriladi.',async()=>{
-          try{await API.post('/api/news/delete',{id:d.dataset.del});toast('O‘chirildi');nwLoad()}
-          catch(er){toast(er.message||'Xatolik','err')}
-        },'O‘chirish');
+        if(d){
+          confirmBox('Yangilikni o‘chirish','Rasm va videolari bilan birga o‘chiriladi.',async()=>{
+            try{await API.post('/api/news/delete',{id:d.dataset.del});toast('O‘chirildi');nwLoad()}
+            catch(er){toast(er.message||'Xatolik','err')}
+          },'O‘chirish');
+          return;
+        }
+        const c=e.target.closest('[data-open]');
+        if(c)nwpOpen(true,c.dataset.open);
       });
       nwRenderFiles();nwLoad();
     }
