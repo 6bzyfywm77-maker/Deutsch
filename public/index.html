@@ -7,7 +7,6 @@
 <title>Deutsch School — Boshqaruv paneli</title>
 <meta name="description" content="Deutsch School uchun ichki boshqaruv tizimi: sinflar, o‘quvchilar, haftalik natijalar va reyting.">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%231F46D8'/><rect y='46' width='64' height='6' fill='%23DD2B2B'/><rect y='52' width='64' height='12' fill='%23FFC928'/><text x='32' y='40' font-size='34' font-weight='800' text-anchor='middle' fill='white' font-family='Arial,sans-serif'>D</text></svg>">
 <meta name="theme-color" content="#0A1022">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
@@ -3583,11 +3582,60 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 #stu .nav-i .sv-bd{position:static;margin-left:auto;min-width:20px;height:20px;font-size:11px;line-height:20px;padding:0 6px}
 @media(max-width:560px){#stu .pcp-sl{display:none}}
 #stu .sv-tabs[data-n="7"]{gap:0;padding-left:2px;padding-right:2px}
-#stu .sv-tabs[data-n="7"] button span{font-size:8px;letter-spacing:-.03em;overflow-wrap:normal;min-height:2.2em}
-#stu .sv-tabs[data-n="7"] button{padding-left:0;padding-right:0}
-@media(max-width:380px){#stu .sv-tabs[data-n="7"] button span{font-size:7.3px}}
+#stu .sv-tabs[data-n="7"] button span{font-size:8.5px;letter-spacing:-.03em;overflow-wrap:normal}
+@media(max-width:380px){#stu .sv-tabs[data-n="7"] button span{font-size:7.5px}}
 @media(min-width:901px){#stu .pcp-panel{height:min(680px,calc((100dvh - 200px) / var(--z,1)))}}
+
+/* ===== yangiliklar + umumiy chat ===== */
+.pc-room{display:flex;flex-direction:column;height:min(720px,calc((100dvh - 250px) / var(--z,1)));min-height:420px;overflow:hidden;padding:0}
+.pc-room .pc-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+.pc-room .pc-hn{flex:1;min-width:140px}
+.pc-room .chat-list{flex:1;min-height:0}
+.nw-comp{display:flex;flex-direction:column;gap:14px;padding:18px}
+.nw-comp textarea{width:100%;resize:vertical;min-height:90px}
+.nw-act{display:flex;gap:10px;flex-wrap:wrap}
+.nw-files{display:flex;flex-direction:column;gap:8px}
+.nw-files:empty{display:none}
+.nw-f{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.nw-f.err{border-color:var(--bad);background:#FDECEA}
+.nw-th{flex:none;width:46px;height:46px;border-radius:10px;overflow:hidden;background:#fff;display:grid;place-items:center;color:var(--mute)}
+.nw-th img{width:100%;height:100%;object-fit:cover}
+.nw-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.nw-tx b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nw-tx small{color:var(--mute);font-size:12px}
+.nw-f.err .nw-tx small{color:var(--bad)}
+.nw-bar{display:block;height:5px;border-radius:99px;background:#DCE4F7;overflow:hidden}
+.nw-bar i{display:block;height:100%;background:var(--brand);transition:width .2s}
+.nw-rm{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:none;border:0;color:var(--mute);cursor:pointer}
+.nw-rm:hover{background:#fff;color:var(--bad)}
+.nw-list{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.nw-card{background:#fff;border:1px solid #E3E8F5;border-radius:20px;padding:16px;box-shadow:0 6px 20px rgba(30,60,160,.06);overflow:hidden}
+.nw-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.nw-top time{color:var(--mute);font-size:12.5px}
+.nw-card h3{margin:0 0 6px;font:700 17px/1.3 var(--display);letter-spacing:-.01em;word-break:break-word}
+.nw-card p{margin:0;white-space:pre-wrap;word-break:break-word;line-height:1.5;font-size:14.5px}
+.nw-md{display:grid;gap:6px;margin-top:12px}
+.nw-md.n1{grid-template-columns:1fr}.nw-md.n2,.nw-md.n3,.nw-md.n4{grid-template-columns:repeat(2,1fr)}
+.nw-md img,.nw-md video{display:block;width:100%;border-radius:14px;background:#0B1536;object-fit:cover;cursor:zoom-in}
+.nw-md.n1 img{max-height:420px;object-fit:contain;background:#EEF2FC}
+.nw-md.n1 video{max-height:420px}
+.nw-md.n2 img,.nw-md.n3 img,.nw-md.n4 img,.nw-md.n2 video,.nw-md.n3 video,.nw-md.n4 video{aspect-ratio:1/1}
+.nw-md video{cursor:auto}
+.nw-zoom{position:fixed;inset:0;z-index:200;background:rgba(5,10,30,.92);display:grid;place-items:center;padding:16px;cursor:zoom-out}
+.nw-zoom img{max-width:100%;max-height:100%;border-radius:10px;object-fit:contain}
+.nw-zoom button{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;border:0}
+.nw-zoom .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+.nws{position:fixed;inset:0;z-index:130;background:rgba(10,18,48,.55);display:flex;align-items:flex-end;justify-content:center}
+.nws-box{width:100%;max-width:640px;max-height:92dvh;background:#EEF2FC;border-radius:26px 26px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:nwsUp .22s ease-out}
+@keyframes nwsUp{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.nws-h{display:flex;align-items:center;gap:10px;padding:16px 18px;background:#fff;border-bottom:1px solid #E3E8F5;font:700 19px var(--display)}
+.nws-h .ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;color:#1F4AD9}
+.nws-x{margin-left:auto;width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#EEF2FC;border:0;color:var(--ink);cursor:pointer}
+.nws-x .ic{width:18px;height:18px;color:inherit}
+.nws-l{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+@media(min-width:700px){.nws{align-items:center}.nws-box{border-radius:24px;max-height:86vh}}
 </style>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
 </head>
 
 <body>
@@ -4944,7 +4992,7 @@ function confirmBox(title,text,onYes,label='O‘chirish'){
 
 /* ---------- nav / render shell ---------- */
 const NAV=[
-  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home'],['chat','Chat','chat'],['pchat','Ota-onalar chati','users']]},
+  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home'],['chat','Chat','chat'],['pchat','Ota-onalar chati','users'],['news','Yangiliklar','bell']]},
   {g:'Ta’lim',items:[['subjects','Fanlar','layers'],['groups','Sinflar','sliders'],['teachers','O‘qituvchilar','teacher'],['students','O‘quvchilar','users'],['schedule','Dars jadvali','calendar']]},
   {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy']]},
   {g:'Moliya',items:[['payments','To‘lovlar','wallet'],['attendance','Davomat','calendar']]},
@@ -12134,30 +12182,31 @@ const stuTabs=d=>d&&d.parent?STU_TABS.concat([['chat','Chat','chat']]):STU_TABS;
 #stu .ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* ---- yuqori panel (telefon) ---- */
-.sv-top{position:fixed;left:0;right:0;top:0;z-index:60;display:flex;align-items:center;gap:8px;height:calc(54px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 12px 0;color:#fff;background:radial-gradient(320px 160px at 0% 0%,rgba(31,70,216,.30),transparent 70%),linear-gradient(180deg,#0C1431,#080D1F);border-bottom:1px solid rgba(255,255,255,.06)}
-.sv-logo{width:34px;height:34px;border-radius:10px;flex:none;object-fit:cover;background:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.16)}
+.sv-top{position:relative;display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 38px;color:#fff;background:radial-gradient(420px 220px at 0% 0%,rgba(46,92,255,.40),transparent 70%),linear-gradient(180deg,#0B1536 0%,#0A1230 100%)}
+.sv-logo{width:40px;height:40px;border-radius:12px;flex:none;object-fit:cover;background:#2B6BFF;box-shadow:0 4px 14px rgba(20,60,200,.45)}
 .sv-brand{flex:1;min-width:0;line-height:1.2}
-.sv-brand b{display:block;font:600 14px var(--display);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sv-brand small{display:block;margin-top:2px;font:500 11.5px var(--body);color:#9DA7C6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-brand b{display:block;font:700 15px var(--display);letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-brand small{display:block;margin-top:3px;font:500 12px var(--body);color:#A8B3D6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sv-sp{display:none}
-#stu .lang-sw{display:flex;gap:2px;margin:0;padding:2px;border-radius:9px;background:rgba(255,255,255,.10);flex:none;width:auto}
-#stu .lang-sw button{flex:none;min-height:0;height:26px;padding:0 8px;border-radius:7px;font:700 11px var(--body);letter-spacing:.04em;color:#C7CBDA;background:transparent;box-shadow:none;transition:background .15s,color .15s}
+#stu .lang-sw{display:flex;gap:2px;margin:0;padding:2px;border-radius:10px;background:rgba(255,255,255,.12);flex:none;width:auto}
+#stu .lang-sw button{flex:none;min-height:0;height:26px;padding:0 6px;border-radius:8px;font:700 10.5px var(--body);letter-spacing:.04em;color:#C7CBDA;background:transparent;box-shadow:none;transition:background .15s,color .15s}
 #stu .lang-sw button.on{background:#fff;color:var(--navy);box-shadow:none}
-.sv-out{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.10)!important;color:#fff}
-.sv-out .ic{width:18px;height:18px}
+.sv-ib{flex:none;position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.12)!important;color:#fff;border:1px solid rgba(255,255,255,.08)!important}
+.sv-ib .ic{width:19px;height:19px}
+.sv-bell-bd{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#F23C3C;color:#fff;font:700 10.5px/19px var(--body);text-align:center;box-shadow:0 0 0 2px #0B1536}
+.sv-bell-bd[hidden]{display:none}
 .sv-prof,.sv-side{display:none}
 
 /* ---- pastki menyu (telefon) ---- */
-.sv-tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(15,23,40,.07)}
-.sv-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;padding:6px 2px 4px;border-radius:11px;color:var(--mute);font:600 10px/1.15 var(--body)}
-.sv-tabs button span{display:block;max-width:100%;min-height:2.3em;text-align:center;overflow:hidden;overflow-wrap:break-word;hyphens:none;font-size:9.5px;letter-spacing:-.02em}
-@media(max-width:430px){.sv-tabs button span{font-size:8.5px}.sv-tabs button{padding-left:0;padding-right:0}}
-.sv-tabs .ic{width:21px;height:21px}
-.sv-tabs button.on{color:var(--brand);background:var(--brand-soft)}
+.sv-tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));gap:2px;padding:7px 6px calc(7px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:22px 22px 0 0;border-top:1px solid var(--line);box-shadow:0 -8px 26px rgba(20,40,120,.10)}
+.sv-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;padding:7px 0 5px;border-radius:14px;color:var(--mute);font:600 10px/1.15 var(--body)}
+.sv-tabs button span{display:block;max-width:100%;text-align:center;overflow:hidden;overflow-wrap:break-word;hyphens:none;font-size:10px;letter-spacing:-.02em}
+.sv-tabs .ic{width:22px;height:22px}
+.sv-tabs button.on{color:#1F4AD9;background:#E6EEFF}
 
-.sv-main{min-width:0;padding-top:calc(54px + env(safe-area-inset-top,0px));padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-.stu-body{max-width:960px;margin:0 auto;padding:16px 12px 24px}
-.stu-body h2{font:600 22px/1.2 var(--display);letter-spacing:-.02em;margin:2px 0 14px}
+.sv-main{min-width:0;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.stu-body{max-width:960px;margin:-22px auto 0;padding:20px 14px 24px;position:relative;background:var(--bg);border-radius:26px 26px 0 0}
+.stu-body h2{font:700 22px/1.2 var(--display);letter-spacing:-.02em;margin:2px 0 14px}
 .stu-body h3{font:700 15px var(--body);margin:20px 0 9px;letter-spacing:-.01em}
 
 /* ---- kartalar / jadvallar ---- */
@@ -12225,6 +12274,48 @@ table.stu-tbl td{font-size:13.5px;line-height:1.35}
 table.stu-tbl th{font-size:12px}
 @media(max-width:359px){.sg-c{width:25px;height:25px;font-size:12px}.sg-s{width:26px}}
 
+/* ---- bosh sahifa (yangi dizayn) ---- */
+#stu{background:linear-gradient(180deg,#EEF2FC 0%,#F6F8FD 100%)}
+.hm-prof{display:flex;align-items:center;gap:14px;padding:16px;background:linear-gradient(135deg,#fff 0%,#F1F5FF 100%);border:1px solid #DFE6F7;border-radius:24px;box-shadow:0 8px 26px rgba(30,60,160,.08);margin-bottom:14px}
+.hm-ava{flex:none;width:78px;height:78px;border-radius:50%;background:#C9D8FF;overflow:hidden;box-shadow:0 0 0 4px #E6EEFF}
+.hm-ava svg{display:block;width:100%;height:100%}
+.hm-pn{min-width:0}
+.hm-pn h2{margin:0;font:700 22px/1.15 var(--display);letter-spacing:-.02em;word-break:break-word}
+.hm-cls{display:flex;align-items:center;gap:7px;margin-top:6px;color:var(--ink2);font-weight:600}
+.hm-cls svg,.hm-chip svg{width:19px;height:19px;flex:none}
+.hm-chip{display:inline-flex;align-items:center;gap:6px;margin:8px 6px 0 0;padding:5px 12px;border-radius:99px;background:#E6EEFF;color:#1F4AD9;font:600 13px var(--body)}
+.hm-chip.par{background:#FFF0D6;color:#9A5B00}
+.hm-chip svg{width:16px;height:16px}
+.hm-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:6px}
+.hm-k{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:14px;background:#fff;border:1px solid #E3E8F5;border-radius:22px;box-shadow:0 6px 20px rgba(30,60,160,.06);min-width:0}
+.hm-kt{display:flex;align-items:center;gap:12px;min-width:0}
+.hm-ic{flex:none;width:48px;height:48px;border-radius:15px;display:grid;place-items:center}
+.hm-ic svg{width:25px;height:25px}
+.hm-ic.b{background:#E6EEFF;color:#2F62DB}.hm-ic.g{background:#DDF3E6;color:#1E9A55}.hm-ic.p{background:#EBE5FF;color:#6A4DE0}.hm-ic.o{background:#FFEBCF;color:#F08A00}.hm-ic.r{background:#FFE1E1;color:#E5484D}.hm-ic.i{background:#E5E8FF;color:#4C5AE6}
+.hm-kl{color:var(--mute);font-size:13px}
+.hm-kv{font:700 26px/1.15 var(--display);letter-spacing:-.02em;word-break:break-word}
+.hm-kv.ok{color:#14883F}.hm-kv.bad{color:var(--bad);font-size:17px;white-space:nowrap}
+.hm-ring{position:relative;width:60px;height:60px;flex:none}
+.hm-ring svg{display:block;width:60px;height:60px;transform:rotate(-90deg)}
+.hm-ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 12.5px var(--body)}
+.hm-pb{height:8px;border-radius:99px;background:#E3EAFB;overflow:hidden}
+.hm-pb i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2F62DB,#4E86FF)}
+.hm-h{display:flex;align-items:center;gap:10px;margin:22px 2px 10px;font:700 18px var(--display);letter-spacing:-.01em;cursor:pointer}
+.hm-h>svg,.hm-h .ic{width:23px;height:23px;flex:none}
+.hm-h .ch{margin-left:auto;color:var(--mute);display:grid}
+.hm-h .ch svg{width:20px;height:20px}
+.hm-att{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hm-a{display:flex;align-items:center;gap:12px;width:100%;padding:14px;background:#fff!important;border:1px solid #E3E8F5!important;border-radius:22px;box-shadow:0 6px 20px rgba(30,60,160,.06);text-align:left}
+.hm-a .hm-ic{width:46px;height:46px;border-radius:50%}
+.hm-a .hm-t{flex:1;min-width:0}
+.hm-a .hm-t small{display:block;color:var(--mute);font-size:13px;line-height:1.2}
+.hm-a .hm-t b{font:700 24px/1.2 var(--display)}
+.hm-a .ch{color:#B5BED6;display:grid}.hm-a .ch svg{width:18px;height:18px}
+@media(max-width:480px){.hm-a .ch{display:none}.hm-a{padding:12px;gap:10px}.hm-a .hm-ic{width:42px;height:42px}}
+.stu-box{border-radius:22px!important;box-shadow:0 6px 20px rgba(30,60,160,.06)!important;border-color:#E3E8F5!important}
+.stu-tbl th{background:#EAF0FF!important;color:#3C4E7A!important}
+.stu-card,.stu-who,.sg-wrap,#stu .pcp-panel{border-radius:22px;box-shadow:0 6px 20px rgba(30,60,160,.06);border-color:#E3E8F5}
+
 /* ---- kompyuter ---- */
 @media(min-width:901px){
   #stu{display:grid;grid-template-columns:248px minmax(0,1fr);overflow:visible;min-height:calc(100dvh / var(--z,1))}
@@ -12238,8 +12329,14 @@ table.stu-tbl th{font-size:12px}
   #stu .sv-sf .lang-sw button{flex:1;height:30px;font-size:12px}
   .sv-sideout{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.06)!important;color:#F0B8B2!important;font:600 13px var(--body)}
   .sv-sideout:hover{background:rgba(255,255,255,.11)!important}
-  .sv-top{position:sticky;left:auto;right:auto;top:0;height:56px;padding:0 28px;color:var(--ink);background:var(--bg);border-bottom:1px solid var(--line)}
-  .sv-top .sv-logo,.sv-top .sv-brand,#stu .sv-top .lang-sw,.sv-top .sv-out{display:none}
+  .sv-top{position:sticky;left:auto;right:auto;top:0;z-index:40;height:56px;padding:0 28px;color:var(--ink);background:var(--bg);border-bottom:1px solid var(--line)}
+  .sv-top .sv-ib{background:var(--surface)!important;color:var(--ink);border:1px solid var(--line)!important}
+  .sv-bell-bd{box-shadow:0 0 0 2px var(--bg)}
+  #stu .sv-top .sv-out{display:none}
+  .stu-body{margin:0 auto;border-radius:0;background:none}
+  .hm-g2{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .hm-att{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .sv-top .sv-logo,.sv-top .sv-brand,#stu .sv-top .lang-sw{display:none}
   .sv-sp{display:block;flex:1}
   .sv-prof{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
   .sv-prof .stu-ava{width:32px;height:32px;font-size:12px}
@@ -12290,7 +12387,8 @@ function stuDom(){
     <div class="sv-brand"><b id="stuSchool"></b><small id="stuWho"></small></div>
     <span class="sv-sp"></span>
     ${langSw}
-    <button type="button" class="sv-out" data-stu="logout" aria-label="Chiqish">${ic('logout')}</button>
+    <button type="button" class="sv-ib sv-bell" data-stu="news" aria-label="Yangiliklar">${ic('bell')}<b class="sv-bell-bd" hidden></b></button>
+    <button type="button" class="sv-ib sv-out" data-stu="logout" aria-label="Chiqish">${ic('logout')}</button>
     <div class="sv-prof" id="stuProf"></div>
   </header>
   <main class="stu-body" id="stuMain"></main>
@@ -12303,6 +12401,7 @@ function stuDom(){
     const wk=e.target.closest('[data-stu-wk]');
     if(wk){const m=parseD(STU.week||iso(mondayOf(new Date())));m.setDate(m.getDate()+Number(wk.dataset.stuWk));STU.week=iso(m);stuRender();return}
     if(e.target.closest('[data-stu-now]')){STU.week=iso(mondayOf(new Date()));stuRender();return}
+    if(e.target.closest('[data-stu="news"]')){stuNewsOpen();return}
     if(e.target.closest('[data-stu="logout"]'))stuLogoutAsk();
   });
   return el;
@@ -12316,6 +12415,22 @@ const stuCard=(k,v,cls='')=>`<div class="stu-card ${cls}"><div class="k">${k}</d
 const stuSub=s=>s?esc(s):'Umumiy';
 const gradeCls=n=>n>=4?'ok':n===3?'warn':n>0?'bad':'mute';
 
+const SI={
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.2c2.6.3 4.5 2.1 4.5 4.8"/>',
+  shield:'<path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12.2 2.2 2.2 4.2-4.4"/>',
+  star:'<path d="m12 3.2 2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z"/>',
+  ok:'<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8 5.5-5.6"/>',
+  no:'<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3 1.8"/>',
+  late:'<circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.4 6.4"/>',
+  chart:'<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  building:'<path d="M4 20V6l8-3 8 3v14"/><path d="M9 20v-4h6v4M9 9.5h.01M12 9.5h.01M15 9.5h.01M9 13h.01M12 13h.01M15 13h.01"/>',
+  cap:'<path d="m2.5 9 9.5-4.5L21.5 9 12 13.5z"/><path d="M6.5 11.2V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.8"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>'
+};
+const si=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SI[n]}</svg>`;
+const STU_AVA='<svg viewBox="0 0 80 80" aria-hidden="true"><rect width="80" height="80" fill="#C9D8FF"/><path d="M12 80c0-17 12-26 28-26s28 9 28 26z" fill="#3F6FEA"/><path d="M33 52h14v8c0 3-3 6-7 6s-7-3-7-6z" fill="#F2C9A5"/><ellipse cx="40" cy="34" rx="13" ry="15" fill="#F7D6B8"/><path d="M26 33c-2-14 9-20 17-18 8 1 13 8 11 18-2-6-5-9-10-9-6 0-14 2-18 9z" fill="#1B2A5C"/></svg>';
+
 function stuHome(d){
   const pcs=d.weekly.slice(0,12).map(x=>stuPct(x.correct,x.total)).filter(x=>x!==null);
   const avg=pcs.length?Math.round(pcs.reduce((a,b)=>a+b,0)/pcs.length):null;
@@ -12323,16 +12438,26 @@ function stuHome(d){
   const gavg=gs.length?(Math.round(gs.reduce((a,b)=>a+b,0)/gs.length*10)/10).toString().replace('.',','):'—';
   const cnt={ok:0,s:0,dq:0,k:0};d.attendance.forEach(a=>{if(a.code in cnt)cnt[a.code]++});
   const cur=d.payments.find(p=>p.mk===d.thisMonth);
-  const _nm=(d.first+' '+d.last).trim();
-  let h=`<h2>Bosh sahifa</h2><div class="stu-who"><span class="stu-ava">${esc(initials(_nm))}</span><div><div class="stu-wn">${esc(_nm)}</div><div class="stu-ws">${d.parent?'<span class="tag sm">Ota-ona</span> ':''}${esc(d.group||'')}</div></div></div><div class="stu-grid">`
-    +stuCard('Sinf',esc(d.group||'—'))
-    +(d.debt>0?stuCard('Qarzdorlik',money(d.debt),'bad'):stuCard('Qarzdorlik','Yo‘q','ok'))
-    +stuCard('O‘rtacha natija',avg===null?'—':avg+'%')
-    +stuCard('O‘rtacha baho',gavg)
+  const nm=(d.first+' '+d.last).trim();
+  const C=2*Math.PI*26,pv=avg===null?0:Math.max(0,Math.min(100,avg));
+  const ring=`<div class="hm-ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#E3EAFB" stroke-width="7"/><circle cx="32" cy="32" r="26" fill="none" stroke="#2F62DB" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C*pv/100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${avg===null?'—':avg+'%'}</b></div>`;
+  const attMeta={ok:['g','ok'],s:['r','no'],dq:['o','clock'],k:['i','late']};
+  let h=`<div class="hm-prof"><div class="hm-ava">${STU_AVA}</div><div class="hm-pn"><h2>${esc(nm)}</h2>
+      <div class="hm-cls">${si('cap')}<span>${esc(d.group||'—')}</span></div>
+      <div>${d.parent?`<span class="hm-chip par"><span>Ota-ona</span></span>`:''}<span class="hm-chip">${si('building')}<span>${esc(d.school)}</span></span></div></div></div>
+    <div class="hm-g2">
+      <div class="hm-k"><div class="hm-kt"><span class="hm-ic b">${si('users')}</span><div><div class="hm-kl">Sinf</div><div class="hm-kv">${esc(d.group||'—')}</div></div></div></div>
+      ${d.debt>0
+        ?`<div class="hm-k"><div class="hm-kt"><span class="hm-ic r">${si('shield')}</span><div class="hm-kl">Qarzdorlik</div></div><div class="hm-kv bad">${money(d.debt)}</div></div>`
+        :`<div class="hm-k"><div class="hm-kt"><span class="hm-ic g">${si('shield')}</span><div><div class="hm-kl">Qarzdorlik</div><div class="hm-kv ok">Yo‘q</div></div></div></div>`}
+      <div class="hm-k"><div class="hm-kt">${ring}<div><div class="hm-kl">O‘rtacha natija</div><div class="hm-kv">${avg===null?'—':avg+'%'}</div></div></div><div class="hm-pb"><i style="width:${pv}%"></i></div></div>
+      <div class="hm-k"><div class="hm-kt"><span class="hm-ic p">${si('star')}</span><div><div class="hm-kl">O‘rtacha baho</div><div class="hm-kv">${gavg}</div></div></div></div>
+    </div>`;
+  if(d.debt>0)h+=`<div class="stu-note" style="margin-top:12px">${cur&&!cur.paid?'Joriy oy uchun to‘lov qilinmagan.':'To‘lanmagan oylar bor.'} <button class="btn sm primary" data-stu-tab="pay" style="margin-left:6px">To‘lovlar</button></div>`;
+  h+=`<div class="hm-h" data-stu-tab="att">${ic('calendar')}<span>Davomat</span><span class="ch">${si('chev')}</span></div><div class="hm-att">`
+    +['ok','s','dq','k'].map(c=>`<button type="button" class="hm-a" data-stu-tab="att"><span class="hm-ic ${attMeta[c][0]}">${si(attMeta[c][1])}</span><span class="hm-t"><small>${ATT_CODES[c].label}</small><b>${cnt[c]}</b></span><span class="ch">${si('chev')}</span></button>`).join('')
     +`</div>`;
-  if(d.debt>0)h+=`<div class="stu-note">${cur&&!cur.paid?'Joriy oy uchun to‘lov qilinmagan.':'To‘lanmagan oylar bor.'} <button class="btn sm primary" data-stu-tab="pay" style="margin-left:6px">To‘lovlar</button></div>`;
-  h+=`<h3>Davomat</h3><div class="stu-att">`+['ok','s','dq','k'].map(c=>stuCard(ATT_CODES[c].label,cnt[c])).join('')+`</div>`;
-  h+=`<h3>So‘nggi natijalar</h3>`+stuResTable(d.weekly.slice(0,5));
+  h+=`<div class="hm-h" data-stu-tab="results">${si('chart')}<span>So‘nggi natijalar</span><span class="ch">${si('chev')}</span></div>`+stuResTable(d.weekly.slice(0,5));
   return h;
 }
 
@@ -12425,7 +12550,7 @@ function stuChatStop(){clearInterval(PCP.timer);PCP.timer=null}
 
 function stuChatView(d){
   return `<h2>Chat</h2><div class="pcp-panel">
-    <div class="pcp-bar"><b>Administrator bilan yozishma</b></div>
+    <div class="pcp-bar"><b>Ota-onalar va administrator</b></div>
     <div class="chat-list" id="pcpList"><div class="chat-empty">Yuklanmoqda…</div></div>
     <div class="pcp-lock" id="pcpLock" hidden></div>
     <form class="chat-form" id="pcpForm" autocomplete="off">
@@ -12450,13 +12575,13 @@ function pcpRender(stick){
   const box=document.getElementById('pcpList');
   if(!box)return;
   const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
-  if(!PCP.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.</div>';return}
+  if(!PCP.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q. Birinchi bo‘lib yozing.</div>';return}
   let day='',html='';
   PCP.msgs.forEach(m=>{
     const dl=chatDayLabel(m.ts);
     if(dl!==day){day=dl;html+=`<div class="chat-day">${dl}</div>`}
-    const me=m.role==='parent';
-    const who=me?'':`<div class="chat-who">Administrator</div>`;
+    const me=!!m.me;
+    const who=me?'':`<div class="chat-who">${esc(m.name)}${m.role==='admin'?'':' <span class="tag sm">Ota-ona</span>'}</div>`;
     html+=`<div class="chat-m${me?' me':''}${m.x?' gone':''}">${who}<div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}</time></div></div>`;
   });
   box.innerHTML=html;
@@ -12475,8 +12600,8 @@ async function pcpPull(force){
     });
     PCP.msgs.sort((a,b)=>a.seq-b.seq);
     PCP.last=Math.max(PCP.last,r.last||0);
-    const st=(r.enabled!==false)!==PCP.enabled||!!r.locked!==PCP.locked;
-    PCP.enabled=r.enabled!==false;PCP.locked=!!r.locked;
+    const st=(r.enabled!==false)!==PCP.enabled;
+    PCP.enabled=r.enabled!==false;
     if(changed||force)pcpRender(force);
     if(st||force)pcpRenderState();
     if(STU.d&&STU.d.chat&&STU.d.chat.unread){STU.d.chat.unread=0;stuBadges()}
@@ -12516,9 +12641,47 @@ function stuChatInit(){
   PCP.timer=setInterval(()=>{if(!document.hidden)pcpPull()},4000);
 }
 
+function stuBadgesBell(){
+  const n=STU.d&&STU.d.news?STU.d.news.unread:0;
+  document.querySelectorAll('#stu .sv-bell-bd').forEach(b=>{b.hidden=!n;b.textContent=n>99?'99+':String(n)});
+}
 function stuBadges(){
+  stuBadgesBell();
   const n=STU.d&&STU.d.chat&&STU.tab!=='chat'?STU.d.chat.unread:0;
   document.querySelectorAll('#stu [data-stu-tab="chat"] .sv-bd').forEach(b=>{b.hidden=!n;b.textContent=n>99?'99+':String(n)});
+}
+
+/* ---------- Yangiliklar oynasi (qo'ng'iroqcha) ---------- */
+async function stuNewsOpen(){
+  if(document.getElementById('stuNews'))return;
+  const o=document.createElement('div');
+  o.id='stuNews';o.className='nws';
+  o.innerHTML=`<div class="nws-box" role="dialog" aria-label="Yangiliklar"><div class="nws-h">${ic('bell')}<span>Yangiliklar</span><button type="button" class="nws-x" aria-label="Yopish">${ic('x')}</button></div><div class="nws-l" id="nwsL"><div class="chat-empty">Yuklanmoqda…</div></div></div>`;
+  document.body.appendChild(o);
+  document.body.style.overflow='hidden';
+  const close=()=>{o.remove();document.body.style.overflow='';document.removeEventListener('keydown',esc_)};
+  const esc_=e=>{if(e.key==='Escape')close()};
+  document.addEventListener('keydown',esc_);
+  o.addEventListener('click',e=>{
+    if(e.target===o||e.target.closest('.nws-x'))return close();
+    const z=e.target.closest('[data-zoom]');
+    if(z)nwZoom(z.dataset.zoom);
+  });
+  try{
+    const r=await API.get('/api/news');
+    const box=document.getElementById('nwsL');
+    if(box)box.innerHTML=r.items.length?r.items.map(i=>nwCard(i,false)).join(''):'<div class="chat-empty">Hali yangilik yo‘q.</div>';
+    if(window.DS_I18N)DS_I18N.mark();
+    if(r.unread){
+      await API.post('/api/news/seen',{});
+      if(STU.d&&STU.d.news)STU.d.news.unread=0;
+      stuBadges();
+    }
+  }catch(e){
+    const box=document.getElementById('nwsL');
+    if(box)box.innerHTML='<div class="chat-empty">Yuklab bo‘lmadi</div>';
+    if(e.status===401)stuLoad(true);
+  }
 }
 
 function stuRender(){
@@ -12782,7 +12945,7 @@ Object.assign(RU,{
 "Ma'lumotlar serverga ko'chirildi":"Данные перенесены на сервер","Ma'lumotlar tiklandi":"Данные восстановлены","Hisob yaratildi":"Аккаунт создан","Bosib holatni tanlang":"Нажмите и выберите статус",
 "O'zgartirmaslik uchun bo'sh qoldiring":"Оставьте пустым, чтобы не менять","Qarzdor":"Должник","To'langan":"Оплачено","Sababsiz":"Без причины","Kech qolgan":"Опоздал","Saqlanmadi":"Не сохранено",
 "Serverga ulanib bo'lmadi":"Не удалось подключиться к серверу","Sessiya tugadi. Qayta kiring":"Сессия истекла. Войдите снова","Tizimdan chiqdingiz":"Вы вышли из системы","Tiklash":"Восстановить",
-"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Chat":"Чат","Ota-ona":"Родитель","Administrator":"Администратор","Administrator bilan yozishma":"Переписка с администратором","Xabar yozing…":"Напишите сообщение…","Yuborish":"Отправить","Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите администратору первым.","Xabar o‘chirilgan":"Сообщение удалено","Bugun":"Сегодня","Kecha":"Вчера","Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.":"Чат временно приостановлен. Сообщения можно читать.","Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.":"Администратор временно приостановил запись в этом чате.","To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.":"Оплату передайте администратору школы. Оплаченные месяцы отображаются здесь.","Kirish":"Войти",
+"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Yangiliklar":"Новости","Hali yangilik yo‘q.":"Новостей пока нет.","Yuklab bo‘lmadi":"Не удалось загрузить","Yuklanmoqda…":"Загрузка…","Ota-onalar va administrator":"Родители и администратор","Hali xabar yo‘q. Birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите первым.","Yopish":"Закрыть","Chat":"Чат","Ota-ona":"Родитель","Administrator":"Администратор","Administrator bilan yozishma":"Переписка с администратором","Xabar yozing…":"Напишите сообщение…","Yuborish":"Отправить","Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите администратору первым.","Xabar o‘chirilgan":"Сообщение удалено","Bugun":"Сегодня","Kecha":"Вчера","Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.":"Чат временно приостановлен. Сообщения можно читать.","Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.":"Администратор временно приостановил запись в этом чате.","To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.":"Оплату передайте администратору школы. Оплаченные месяцы отображаются здесь.","Kirish":"Войти",
 "Qidirish":"Поиск","Sana":"Дата","Yangilash":"Обновить","Yuklab olish":"Скачать","Ha":"Да","Yo'q":"Нет",
 "Algebra":"Алгебра","Biologiya":"Биология","Fizika":"Физика","Ingliz tili":"Английский язык","Kimyo":"Химия","Matematika":"Математика","Nemis tili":"Немецкий язык",
 "Alg":"Алг","Bio":"Био","Fiz":"Физ","Ing":"Англ","Mat":"Мат","Matem":"Матем","Nem":"Нем",
@@ -12837,7 +13000,7 @@ const DE={
 "Ma'lumotlar tiklandi":'Daten wiederhergestellt','Hisob yaratildi':'Konto erstellt',"O'zgartirmaslik uchun bo'sh qoldiring":'Zum Beibehalten leer lassen',"Qarzdor":'Schuldner',"To'langan":'Bezahlt',
 'Sababsiz':'Unentschuldigt','Kech qolgan':'Verspätet','Saqlanmadi':'Nicht gespeichert',"Serverga ulanib bo'lmadi":'Verbindung zum Server fehlgeschlagen',"Sessiya tugadi. Qayta kiring":'Sitzung abgelaufen. Bitte erneut anmelden',
 'Tizimdan chiqdingiz':'Sie wurden abgemeldet','Tiklash':'Wiederherstellen','Tozalash':'Leeren','Xatolik':'Fehler','Zaxiradan tiklash':'Aus Sicherung wiederherstellen','Vaqt yangilandi':'Zeit aktualisiert',
-"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Chat':'Chat','Ota-ona':'Elternteil','Administrator':'Administrator','Administrator bilan yozishma':'Chat mit der Verwaltung','Xabar yozing…':'Nachricht schreiben…','Yuborish':'Senden','Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie der Verwaltung zuerst.','Xabar o‘chirilgan':'Nachricht gelöscht','Bugun':'Heute','Kecha':'Gestern','Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Der Chat ist vorübergehend pausiert. Nachrichten können gelesen werden.','Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.':'Die Verwaltung hat das Schreiben in diesem Chat vorübergehend pausiert.','To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.':'Bitte zahlen Sie bei der Schulverwaltung. Bezahlte Monate werden hier angezeigt.','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
+"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Yangiliklar':'Neuigkeiten','Hali yangilik yo‘q.':'Noch keine Neuigkeiten.','Yuklab bo‘lmadi':'Laden fehlgeschlagen','Yuklanmoqda…':'Wird geladen…','Ota-onalar va administrator':'Eltern und Verwaltung','Hali xabar yo‘q. Birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie als Erste/r.','Yopish':'Schließen','Chat':'Chat','Ota-ona':'Elternteil','Administrator':'Administrator','Administrator bilan yozishma':'Chat mit der Verwaltung','Xabar yozing…':'Nachricht schreiben…','Yuborish':'Senden','Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie der Verwaltung zuerst.','Xabar o‘chirilgan':'Nachricht gelöscht','Bugun':'Heute','Kecha':'Gestern','Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Der Chat ist vorübergehend pausiert. Nachrichten können gelesen werden.','Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.':'Die Verwaltung hat das Schreiben in diesem Chat vorübergehend pausiert.','To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.':'Bitte zahlen Sie bei der Schulverwaltung. Bezahlte Monate werden hier angezeigt.','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
 'Algebra':'Algebra','Biologiya':'Biologie','Fizika':'Physik','Ingliz tili':'Englisch','Kimyo':'Chemie','Matematika':'Mathematik','Nemis tili':'Deutsch','IT':'IT',
 'Alg':'Alg','Bio':'Bio','Fiz':'Phy','Ing':'Eng','Mat':'Mat','Matem':'Mathe','Nem':'Deu',
 'Yanvar':'Januar','Fevral':'Februar','Mart':'März','Aprel':'April','May':'Mai','Iyun':'Juni','Iyul':'Juli','Avgust':'August','Sentabr':'September','Oktabr':'Oktober','Noyabr':'November','Dekabr':'Dezember',
@@ -13292,10 +13455,14 @@ function chatHook(key){
 setInterval(()=>{if(S.d&&!document.hidden)chatPull()},4000);
 
 /* ============================================================
-   OTA-ONALAR CHATI (administrator panelida) — har bir ota-ona bilan alohida suhbat
+   OTA-ONALAR CHATI (administrator) — ota-onalar va administrator uchun bitta umumiy chat
    ============================================================ */
-Object.assign(IC,{chat:IC.chat,send:IC.send});
-const PC={threads:[],enabled:true,sid:'',name:'',msgs:[],last:0,locked:false,busy:false,q:'',timer:null,open:false};
+Object.assign(IC,{
+  bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/>',
+  film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3z"/>'
+});
+const PC={msgs:[],last:0,enabled:true,busy:false,open:false};
 
 function pcBadge(n){
   const b=document.querySelector('.nav-i .pc-bd');
@@ -13304,137 +13471,48 @@ function pcBadge(n){
   b.textContent=n>99?'99+':String(n);
 }
 
-views.pchat=()=>head('Ota-onalar chati','Har bir ota-ona administrator bilan alohida yozishadi')+
-  `<section class="panel pc-wrap" id="pcWrap">
-    <div class="pc-side">
-      <div class="pc-tools">
-        <div class="pc-global"><span class="pc-st" id="pcState"></span><button type="button" class="btn sm" id="pcGlobal">…</button></div>
-        <input class="pc-search" id="pcSearch" type="search" placeholder="Qidirish…" autocomplete="off">
-      </div>
-      <div class="pc-th" id="pcThreads"><div class="chat-empty">Yuklanmoqda…</div></div>
+views.pchat=()=>head('Ota-onalar chati','Ota-onalar va administrator uchun bitta umumiy chat')+
+  `<section class="panel pc-room">
+    <div class="pc-head">
+      <div class="pc-hn"><b>Umumiy chat</b><small>Hamma ota-onalar va administrator</small></div>
+      <span id="pcState"></span><button type="button" class="btn sm" id="pcGlobal">…</button>
     </div>
-    <div class="pc-main" id="pcMain"><div class="chat-empty">Suhbatni tanlang</div></div>
+    <div class="chat-list" id="pcList"><div class="chat-empty">Yuklanmoqda…</div></div>
+    <form class="chat-form" id="pcForm" autocomplete="off">
+      <textarea id="pcIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
+      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
+    </form>
   </section>`;
-
-function pcAgo(ts){
-  if(!ts)return '';
-  const d=new Date(ts),t=new Date();
-  const same=d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();
-  return same?chatTime(ts):pad(d.getDate())+'.'+pad(d.getMonth()+1);
-}
 
 function pcRenderState(){
   const st=$('#pcState'),g=$('#pcGlobal');
   if(!st||!g)return;
-  st.innerHTML=PC.enabled?'<span class="pill ok">Chat yoqilgan</span>':'<span class="pill bad">Hamma uchun to‘xtatilgan</span>';
-  g.textContent=PC.enabled?'Hammasini to‘xtatish':'Hammasini yoqish';
+  st.innerHTML=PC.enabled?'<span class="pill ok">Ota-onalar yoza oladi</span>':'<span class="pill bad">Yozish to‘xtatilgan</span>';
+  g.textContent=PC.enabled?'Yozishni to‘xtatish':'Yozishni yoqish';
   g.className='btn sm'+(PC.enabled?'':' primary');
-}
-
-function pcRenderThreads(){
-  const box=$('#pcThreads');
-  if(!box)return;
-  const q=PC.q.trim().toLowerCase();
-  const list=PC.threads.filter(t=>!q||(t.name+' '+t.group).toLowerCase().includes(q));
-  if(!list.length){
-    box.innerHTML=`<div class="chat-empty">${PC.threads.length?'Hech narsa topilmadi':'Hali ota-ona akkaunti yo‘q. O‘quvchini tahrirlab, “Ota-ona logini” va parolini kiriting.'}</div>`;
-    return;
-  }
-  box.innerHTML=list.map(t=>{
-    const pre=t.last?(t.last.x?'Xabar o‘chirilgan':((t.last.role==='admin'?'Siz: ':'')+t.last.text)):(t.hasAccount?'Hali yozishma yo‘q':'Akkaunt o‘chirilgan');
-    return `<button type="button" class="pc-item${t.sid===PC.sid?' on':''}" data-sid="${esc(t.sid)}">
-      <span class="pc-ava">${esc(initials(t.name))}</span>
-      <span class="pc-tx"><span class="pc-nm">${esc(t.name)} <span class="tag sm">${esc(t.group||'—')}</span>${t.locked?' <span class="pill bad pc-lk">to‘xtatilgan</span>':''}</span>
-        <span class="pc-pv">${esc(pre)}</span></span>
-      <span class="pc-mt"><time>${pcAgo(t.last&&t.last.ts)}</time>${t.unread?`<b class="pc-bd2">${t.unread>99?'99+':t.unread}</b>`:''}</span>
-    </button>`;
-  }).join('');
-}
-
-async function pcLoadThreads(){
-  if(!S.d||S.role!=='admin')return;
-  try{
-    const r=await API.get('/api/pchat/threads');
-    PC.threads=r.threads||[];PC.enabled=r.enabled!==false;
-    pcBadge(PC.threads.reduce((a,t)=>a+(t.sid===PC.sid&&PC.open?0:t.unread),0));
-    if(PC.open){pcRenderState();pcRenderThreads()}
-  }catch(e){}
 }
 
 function pcRenderMsgs(stick){
   const box=$('#pcList');
   if(!box)return;
   const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
-  if(!PC.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q.</div>';return}
+  if(!PC.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q. Birinchi bo‘lib yozing.</div>';return}
   let day='',html='';
   PC.msgs.forEach(m=>{
     const dl=chatDayLabel(m.ts);
     if(dl!==day){day=dl;html+=`<div class="chat-day">${dl}</div>`}
-    const me=m.role==='admin';
-    const who=me?'':`<div class="chat-who">${esc(m.name)} <span class="tag sm">Ota-ona</span></div>`;
+    const who=m.me?'':`<div class="chat-who">${esc(m.name)}${m.role==='admin'?'':' <span class="tag sm">Ota-ona</span>'}</div>`;
     const del=!m.x?` <button type="button" class="chat-x" data-id="${m.id}" title="O‘chirish">o‘chirish</button>`:'';
-    html+=`<div class="chat-m${me?' me':''}${m.x?' gone':''}">${who}<div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}${del}</time></div></div>`;
+    html+=`<div class="chat-m${m.me?' me':''}${m.x?' gone':''}">${who}<div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}${del}</time></div></div>`;
   });
   box.innerHTML=html;
   if(stick||near)box.scrollTop=box.scrollHeight;
 }
 
-function pcRenderHead(){
-  const h=$('#pcLockBtn'),s=$('#pcLockSt');
-  if(!h||!s)return;
-  s.innerHTML=PC.locked?'<span class="pill bad">Ota-ona yozolmaydi</span>':'<span class="pill ok">Yozish ochiq</span>';
-  h.textContent=PC.locked?'Yozishni yoqish':'Yozishni to‘xtatish';
-  h.className='btn sm'+(PC.locked?' primary':'');
-}
-
-function pcOpenThread(sid){
-  const t=PC.threads.find(x=>x.sid===sid);
-  PC.sid=sid;PC.name=t?t.name:'';PC.msgs=[];PC.last=0;PC.locked=t?t.locked:false;
-  const wrap=$('#pcWrap');
-  if(wrap)wrap.classList.add('open');
-  const main=$('#pcMain');
-  if(!main)return;
-  main.innerHTML=`<div class="pc-head">
-      <button type="button" class="ib plain pc-back" id="pcBack" aria-label="Orqaga">${ic('chevL')}</button>
-      <div class="pc-hn"><b>${esc(PC.name)}</b><small>${esc(t?t.group:'')} · ota-ona</small></div>
-      <span id="pcLockSt"></span><button type="button" class="btn sm" id="pcLockBtn"></button>
-    </div>
-    <div class="chat-list" id="pcList"><div class="chat-empty">Yuklanmoqda…</div></div>
-    <form class="chat-form" id="pcForm" autocomplete="off">
-      <textarea id="pcIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
-      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
-    </form>`;
-  pcRenderHead();pcRenderThreads();
-  $('#pcBack').onclick=()=>{PC.sid='';wrap&&wrap.classList.remove('open');pcRenderThreads();pcLoadThreads()};
-  $('#pcLockBtn').onclick=async()=>{
-    try{
-      await API.post('/api/pchat/lock',{sid:PC.sid,locked:!PC.locked});
-      PC.locked=!PC.locked;pcRenderHead();pcLoadThreads();
-      toast(PC.locked?'Bu suhbatda ota-ona yozishi to‘xtatildi':'Yozish yoqildi');
-    }catch(e){toast(e.message||'Xatolik','err')}
-  };
-  const inp=$('#pcIn');
-  $('#pcForm').addEventListener('submit',e=>{e.preventDefault();pcSend()});
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();pcSend()}});
-  inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'});
-  $('#pcList').addEventListener('click',e=>{
-    const b=e.target.closest('.chat-x');
-    if(!b)return;
-    confirmBox('Xabarni o‘chirish','Bu xabar ota-onaning ham yozishmasidan o‘chiriladi.',async()=>{
-      try{await API.post('/api/pchat/delete',{sid:PC.sid,id:b.dataset.id});await pcPull(true)}
-      catch(er){toast(er.message||'Xatolik','err')}
-    });
-  });
-  pcPull(true);
-  if(window.matchMedia('(hover:hover)').matches)inp.focus();
-}
-
 async function pcPull(force){
-  if(!PC.sid||!PC.open)return;
-  const sid=PC.sid;
+  if(!PC.open||!$('#pcList'))return;
   try{
-    const r=await API.get('/api/pchat/thread?sid='+encodeURIComponent(sid)+'&since='+PC.last);
-    if(sid!==PC.sid)return;
+    const r=await API.get('/api/pchat?since='+PC.last);
     let changed=false;
     (r.msgs||[]).forEach(m=>{
       const i=PC.msgs.findIndex(x=>x.id===m.id);
@@ -13443,27 +13521,169 @@ async function pcPull(force){
     });
     PC.msgs.sort((a,b)=>a.seq-b.seq);
     PC.last=Math.max(PC.last,r.last||0);
-    if(r.locked!==PC.locked){PC.locked=r.locked;pcRenderHead()}
+    if((r.enabled!==false)!==PC.enabled){PC.enabled=r.enabled!==false;pcRenderState()}
     if(changed||force)pcRenderMsgs(force);
+    pcBadge(0);
   }catch(e){}
 }
 
 async function pcSend(){
   const inp=$('#pcIn');
-  if(!inp||PC.busy||!PC.sid)return;
+  if(!inp||PC.busy)return;
   const text=inp.value.trim();
   if(!text)return;
   PC.busy=true;
   try{
-    const r=await API.post('/api/pchat/send',{sid:PC.sid,text});
+    const r=await API.post('/api/pchat',{text});
     inp.value='';inp.style.height='';
     if(r.msg&&!PC.msgs.some(x=>x.id===r.msg.id)){
       PC.msgs.push(r.msg);PC.msgs.sort((a,b)=>a.seq-b.seq);PC.last=Math.max(PC.last,r.msg.seq);
     }
-    pcRenderMsgs(true);pcLoadThreads();
+    pcRenderMsgs(true);
   }catch(e){
     if(e.status===401)sessionExpired();else toast(e.message||'Yuborilmadi','err');
   }finally{PC.busy=false;inp.focus()}
+}
+
+function pcPoll(){
+  if(!S.d||S.role!=='admin'||document.hidden)return;
+  if(PC.open)pcPull();
+  else API.get('/api/pchat/unread').then(r=>pcBadge(r.unread||0)).catch(()=>{});
+}
+setInterval(pcPoll,5000);
+(function(){
+  const nb=buildNav;
+  buildNav=function(){nb();if(S.role==='admin')setTimeout(pcPoll,300)};
+})();
+
+/* ============================================================
+   YANGILIKLAR (administrator yozadi: matn + rasm + video)
+   ============================================================ */
+const NW={files:[],items:[],busy:false};
+const NW_MAX_VIDEO=40*1024*1024;
+const NW_OK_IMG=['image/jpeg','image/png','image/webp','image/gif'];
+const NW_OK_VID=['video/mp4','video/webm','video/quicktime'];
+const fmtMB=b=>(b/1048576).toFixed(b<10485760?1:0)+' MB';
+
+views.news=()=>head('Yangiliklar','E‘lon qilingan yangilik ota-onalar va o‘quvchilar panelidagi qo‘ng‘iroqchada ko‘rinadi')+
+  `<section class="panel nw-comp">
+    <div class="f"><label for="nwTitle">Sarlavha (ixtiyoriy)</label><input id="nwTitle" maxlength="150" autocomplete="off"></div>
+    <div class="f"><label for="nwText">Matn</label><textarea id="nwText" rows="4" maxlength="5000" placeholder="Yangilik matnini yozing…"></textarea></div>
+    <div class="nw-files" id="nwFiles"></div>
+    <div class="nw-act">
+      <label class="btn">${ic('image')}Rasm / video qo‘shish<input type="file" id="nwPick" accept="image/*,video/mp4,video/quicktime,video/webm" multiple hidden></label>
+      <button type="button" class="btn primary" id="nwPost">E‘lon qilish</button>
+    </div>
+    <p class="hint">Rasm avtomatik kichraytiriladi. Video — MP4, MOV yoki WEBM, 40 MB gacha. Bitta yangilikka 10 tagacha fayl.</p>
+  </section>
+  <div class="nw-list" id="nwList"><div class="chat-empty">Yuklanmoqda…</div></div>`;
+
+function nwShrink(file){
+  return new Promise(res=>{
+    if(file.type==='image/gif'||file.size<500000)return res(file);
+    const url=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{
+      const k=Math.min(1,1600/Math.max(im.width,im.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>res(b&&b.size<file.size?b:file),'image/jpeg',.82);
+    };
+    im.onerror=()=>{URL.revokeObjectURL(url);res(file)};
+    im.src=url;
+  });
+}
+
+function nwRenderFiles(){
+  const box=$('#nwFiles');
+  if(!box)return;
+  box.innerHTML=NW.files.map(f=>`<div class="nw-f ${f.state}" data-k="${f.key}">
+    <span class="nw-th">${f.kind==='image'&&f.local?`<img src="${f.local}" alt="">`:ic('film')}</span>
+    <span class="nw-tx"><b>${esc(f.name)}</b><small>${f.state==='up'?`Yuklanmoqda… ${f.pct}%`:f.state==='err'?esc(f.err||'Xatolik'):fmtMB(f.size)}</small>
+      ${f.state==='up'?`<i class="nw-bar"><i style="width:${f.pct}%"></i></i>`:''}</span>
+    <button type="button" class="nw-rm" aria-label="Olib tashlash">${ic('x')}</button></div>`).join('');
+  const post=$('#nwPost');
+  if(post)post.disabled=NW.busy||NW.files.some(f=>f.state==='up');
+}
+
+function nwUpload(f,blob){
+  return new Promise(res=>{
+    const x=new XMLHttpRequest();
+    f.xhr=x;
+    x.open('POST','/api/news/media');
+    x.setRequestHeader('Content-Type',blob.type);
+    x.upload.onprogress=e=>{if(e.lengthComputable){f.pct=Math.round(e.loaded/e.total*100);nwRenderFiles()}};
+    x.onload=()=>{
+      let j={};try{j=JSON.parse(x.responseText)}catch(e){}
+      if(x.status===200&&j.id){f.state='ok';f.id=j.id;f.size=j.size}
+      else{f.state='err';f.err=j.error||('Xatolik '+x.status)}
+      nwRenderFiles();res();
+    };
+    x.onerror=()=>{f.state='err';f.err='Tarmoq xatosi';nwRenderFiles();res()};
+    x.onabort=()=>res();
+    x.send(blob);
+  });
+}
+
+async function nwAdd(list){
+  for(const file of list){
+    if(NW.files.length>=10){toast('Bitta yangilikka 10 tagacha fayl','err');break}
+    const isImg=NW_OK_IMG.includes(file.type),isVid=NW_OK_VID.includes(file.type);
+    const f={key:uid(),name:file.name||'fayl',kind:isImg?'image':'video',state:'up',pct:0,size:file.size,local:isImg?URL.createObjectURL(file):''};
+    NW.files.push(f);
+    if(!isImg&&!isVid){f.state='err';f.err='Bu formatga ruxsat yo‘q';continue}
+    if(isVid&&file.size>NW_MAX_VIDEO){f.state='err';f.err='Video 40 MB dan oshmasin ('+fmtMB(file.size)+')';continue}
+    nwRenderFiles();
+    const blob=isImg?await nwShrink(file):file;
+    f.size=blob.size;
+    nwUpload(f,blob);
+  }
+  nwRenderFiles();
+}
+
+async function nwPublish(){
+  const title=$('#nwTitle').value.trim(),text=$('#nwText').value.trim();
+  const ids=NW.files.filter(f=>f.state==='ok').map(f=>f.id);
+  if(!title&&!text&&!ids.length){toast('Matn yoki rasm/video kiriting','err');return}
+  if(NW.files.some(f=>f.state==='err')){toast('Xatolik bor faylni olib tashlang','err');return}
+  NW.busy=true;nwRenderFiles();
+  try{
+    await API.post('/api/news',{title,text,media:ids});
+    NW.files.forEach(f=>f.local&&URL.revokeObjectURL(f.local));
+    NW.files=[];$('#nwTitle').value='';$('#nwText').value='';
+    toast('Yangilik e‘lon qilindi');
+    nwLoad();
+  }catch(e){toast(e.message||'Xatolik','err')}
+  finally{NW.busy=false;nwRenderFiles()}
+}
+
+function nwCard(it,admin){
+  const d=new Date(it.ts);
+  const media=it.media.length?`<div class="nw-md n${Math.min(it.media.length,4)}">${it.media.map(m=>m.kind==='image'
+    ?`<img src="${m.url}" alt="" loading="lazy" data-zoom="${m.url}">`
+    :`<video src="${m.url}#t=0.1" controls playsinline preload="metadata"></video>`).join('')}</div>`:'';
+  return `<article class="nw-card">
+    <div class="nw-top"><time>${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}</time>${admin?`<button type="button" class="btn sm danger" data-del="${it.id}">${ic('trash')}O‘chirish</button>`:''}</div>
+    ${it.title?`<h3>${esc(it.title)}</h3>`:''}${it.text?`<p>${esc(it.text)}</p>`:''}${media}</article>`;
+}
+
+async function nwLoad(){
+  const box=$('#nwList');
+  if(!box)return;
+  try{
+    const r=await API.get('/api/news');
+    NW.items=r.items;
+    box.innerHTML=r.items.length?r.items.map(i=>nwCard(i,true)).join(''):'<div class="chat-empty">Hali yangilik yo‘q.</div>';
+  }catch(e){box.innerHTML='<div class="chat-empty">Yuklab bo‘lmadi</div>'}
+}
+
+function nwZoom(url){
+  const o=document.createElement('div');
+  o.className='nw-zoom';
+  o.innerHTML=`<img src="${url}" alt=""><button type="button" aria-label="Yopish">${ic('x')}</button>`;
+  o.onclick=()=>o.remove();
+  document.body.appendChild(o);
 }
 
 (function(){
@@ -13471,38 +13691,60 @@ async function pcSend(){
   chatHook=function(key){
     prev(key);
     PC.open=(key==='pchat');
-    if(!PC.open)return;
-    const s=$('#pcSearch');
-    if(s){s.value=PC.q;s.addEventListener('input',()=>{PC.q=s.value;pcRenderThreads()})}
-    const g=$('#pcGlobal');
-    if(g)g.onclick=()=>{
-      const stop=PC.enabled;
-      confirmBox(stop?'Chatni to‘xtatish':'Chatni yoqish',
-        stop?'Barcha ota-onalar uchun yozish to‘xtatiladi. Eski xabarlarni ular o‘qiy oladi.':'Ota-onalar yana yoza oladi.',
-        async()=>{
-          try{await API.post('/api/pchat/lock',{locked:stop});PC.enabled=!stop;pcRenderState();toast(stop?'Chat to‘xtatildi':'Chat yoqildi')}
-          catch(e){toast(e.message||'Xatolik','err')}
-        },stop?'To‘xtatish':'Yoqish');
-    };
-    const th=$('#pcThreads');
-    if(th)th.addEventListener('click',e=>{const b=e.target.closest('.pc-item');if(b)pcOpenThread(b.dataset.sid)});
-    pcRenderState();pcRenderThreads();
-    pcLoadThreads().then(()=>{
-      if(PC.sid){const w=$('#pcWrap');if(w)w.classList.add('open');pcOpenThread(PC.sid)}
-    });
+    if(PC.open){
+      const g=$('#pcGlobal');
+      if(g)g.onclick=()=>{
+        const stop=PC.enabled;
+        confirmBox(stop?'Yozishni to‘xtatish':'Yozishni yoqish',
+          stop?'Ota-onalar vaqtincha yoza olmaydi. Xabarlarni o‘qiy oladilar, siz esa yozishda davom etasiz.':'Ota-onalar yana yoza oladi.',
+          async()=>{
+            try{await API.post('/api/pchat/lock',{locked:stop});PC.enabled=!stop;pcRenderState();toast(stop?'Yozish to‘xtatildi':'Yozish yoqildi')}
+            catch(e){toast(e.message||'Xatolik','err')}
+          },stop?'To‘xtatish':'Yoqish');
+      };
+      const inp=$('#pcIn');
+      $('#pcForm').addEventListener('submit',e=>{e.preventDefault();pcSend()});
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();pcSend()}});
+      inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'});
+      $('#pcList').addEventListener('click',e=>{
+        const b=e.target.closest('.chat-x');
+        if(!b)return;
+        confirmBox('Xabarni o‘chirish','Bu xabar hamma uchun o‘chiriladi.',async()=>{
+          try{await API.post('/api/pchat/delete',{id:b.dataset.id});PC.last=0;PC.msgs=[];await pcPull(true)}
+          catch(er){toast(er.message||'Xatolik','err')}
+        });
+      });
+      PC.msgs=[];PC.last=0;
+      pcRenderState();pcPull(true);
+      API.get('/api/pchat/unread').then(r=>{PC.enabled=r.enabled!==false;pcRenderState()}).catch(()=>{});
+    }
+    if(key==='news'){
+      $('#nwPick').addEventListener('change',e=>{nwAdd([...e.target.files]);e.target.value=''});
+      $('#nwPost').addEventListener('click',nwPublish);
+      $('#nwFiles').addEventListener('click',async e=>{
+        const rm=e.target.closest('.nw-rm');
+        if(!rm)return;
+        const k=rm.closest('.nw-f').dataset.k,i=NW.files.findIndex(f=>f.key===k),f=NW.files[i];
+        if(!f)return;
+        if(f.xhr&&f.state==='up')f.xhr.abort();
+        if(f.state==='ok'&&f.id)API.post('/api/news/media-delete',{id:f.id}).catch(()=>{});
+        if(f.local)URL.revokeObjectURL(f.local);
+        NW.files.splice(i,1);nwRenderFiles();
+      });
+      $('#nwList').addEventListener('click',e=>{
+        const z=e.target.closest('[data-zoom]');
+        if(z){nwZoom(z.dataset.zoom);return}
+        const d=e.target.closest('[data-del]');
+        if(d)confirmBox('Yangilikni o‘chirish','Rasm va videolari bilan birga o‘chiriladi.',async()=>{
+          try{await API.post('/api/news/delete',{id:d.dataset.del});toast('O‘chirildi');nwLoad()}
+          catch(er){toast(er.message||'Xatolik','err')}
+        },'O‘chirish');
+      });
+      nwRenderFiles();nwLoad();
+    }
   };
 })();
 
-function pcPoll(){
-  if(!S.d||S.role!=='admin'||document.hidden)return;
-  if(PC.open){pcLoadThreads();pcPull()}
-  else API.get('/api/pchat/unread').then(r=>pcBadge(r.total||0)).catch(()=>{});
-}
-setInterval(pcPoll,5000);
-(function(){
-  const nb=buildNav;
-  buildNav=function(){nb();if(S.role==='admin')setTimeout(pcPoll,300)};
-})();
 
 /* ---------- Tahrirlar tarixini tozalash (administrator parolini so‘raydi) ---------- */
 acts['clear-history']=()=>{
