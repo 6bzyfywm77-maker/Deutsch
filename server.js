@@ -88,6 +88,10 @@ async function createStore() {
       async delMedia(id) {
         await pool.query('delete from media where id=$1', [id]);
       },
+      async mediaTotal() {
+        const r = await pool.query('select coalesce(sum(size),0)::bigint as n from media');
+        return Number(r.rows[0].n);
+      },
       async close() {
         await pool.end();
       }
@@ -145,6 +149,15 @@ async function createStore() {
       } finally {
         fs.closeSync(fd);
       }
+    },
+    async mediaTotal() {
+      let n = 0;
+      try {
+        for (const f of fs.readdirSync(path.join(DATA_DIR, 'media'))) {
+          if (f.endsWith('.json')) n += JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'media', f), 'utf8')).size || 0;
+        }
+      } catch (e) {}
+      return n;
     },
     async delMedia(id) {
       for (const ext of ['.bin', '.json']) {
@@ -650,6 +663,7 @@ const NEWS_IMG = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const NEWS_VID = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
 const MAX_IMG = 8 * 1024 * 1024;
 const MAX_VID = 40 * 1024 * 1024;
+const MEDIA_LIMIT = (Number(process.env.MEDIA_LIMIT_MB) || 400) * 1024 * 1024; // jami fayllar hajmi (bepul baza to'lib qolmasligi uchun)
 const MEDIA_ID = /^[a-f0-9]{24}$/;
 
 function readRaw(req, max) {
@@ -730,7 +744,9 @@ async function newsApi(req, res, url, route, sess) {
 
   if (route === 'GET /api/news') {
     const items = NEWS.items.slice().sort((a, b) => b.seq - a.seq).slice(0, 100).map(view);
-    return send(res, 200, { items, last: NEWS.counter, unread: newsUnread(acc) });
+    const out = { items, last: NEWS.counter, unread: newsUnread(acc), seen: NEWS.seen[acc] || 0 };
+    if (admin) out.usage = { used: await store.mediaTotal(), limit: MEDIA_LIMIT };
+    return send(res, 200, out);
   }
 
   if (route === 'POST /api/news/seen') {
@@ -749,8 +765,19 @@ async function newsApi(req, res, url, route, sess) {
     const mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
     const isImg = NEWS_IMG.has(mime);
     if (!isImg && !NEWS_VID.has(mime)) return fail(res, 415, 'Faqat rasm (JPG, PNG, WEBP, GIF) yoki video (MP4, WEBM, MOV)');
+    const used = await store.mediaTotal();
+    const declared = Number(req.headers['content-length']) || 0;
+    if (declared > (isImg ? MAX_IMG : MAX_VID)) {
+      req.resume();
+      return fail(res, 413, 'Fayl juda katta (rasm 8 MB, video 40 MB gacha)');
+    }
+    if (used + declared > MEDIA_LIMIT) {
+      req.resume();
+      return fail(res, 507, 'Fayllar uchun xotira to‘ldi. Eski yangilik yoki videolarni o‘chiring');
+    }
     const buf = await readRaw(req, isImg ? MAX_IMG : MAX_VID);
     if (!buf.length) return fail(res, 400, 'Fayl bo‘sh');
+    if (used + buf.length > MEDIA_LIMIT) return fail(res, 507, 'Fayllar uchun xotira to‘ldi. Eski yangilik yoki videolarni o‘chiring');
     const id = crypto.randomBytes(12).toString('hex');
     await store.putMedia(id, mime, buf);
     const info = { id, kind: isImg ? 'image' : 'video', mime, size: buf.length };
