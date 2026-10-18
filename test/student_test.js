@@ -3,6 +3,7 @@
 const os = require('os'), path = require('path'), fs = require('fs');
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'dss-'));
 process.env.PORT = '3913';
+process.env.MEDIA_LIMIT_MB = '1';
 process.env.ADMIN_USER = 'boss';
 process.env.ADMIN_PASSWORD = 'secret123';
 delete process.env.DATABASE_URL;
@@ -214,6 +215,7 @@ class Client {
   const vid = Buffer.alloc(300000, 7);
   r = await admin.call('POST', '/api/news/media', vid, { 'Content-Type': 'video/mp4' }); ok(r.s === 200 && r.j.kind === 'video', 'video yuklandi');
   const vidMeta = r.j;
+  r = await admin.call('POST', '/api/news/media', Buffer.alloc(800000, 3), { 'Content-Type': 'video/mp4' }); ok(r.s === 507, 'xotira limiti oshsa yuklash rad');
   r = await admin.call('POST', '/api/news', { title: '', text: '', media: [] }); ok(r.s === 400, 'bo‘sh yangilik rad');
   r = await admin.call('POST', '/api/news', { text: 'x', media: ['0'.repeat(24)] }); ok(r.s === 400, 'noma‘lum fayl rad');
   r = await admin.call('POST', '/api/news', { title: 'Bayram', text: 'Ertaga dars yo‘q', media: [img.id, vidMeta.id] });
@@ -222,7 +224,8 @@ class Client {
   r = await admin.call('POST', '/api/news', { text: 'Ikkinchi', media: [img.id] }); ok(r.s === 400, 'biriktirilgan fayl qayta ishlatilmaydi');
   r = await par.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'ota-onada 1 ta yangi yangilik');
   r = await stuV.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'o‘quvchida ham 1 ta');
-  r = await par.call('GET', '/api/news'); ok(r.j.items.length === 1 && r.j.items[0].title === 'Bayram' && r.j.unread === 1, 'ro‘yxat o‘qilganni belgilamaydi');
+  r = await par.call('GET', '/api/news'); ok(r.j.items.length === 1 && r.j.items[0].title === 'Bayram' && r.j.unread === 1 && r.j.seen === 0 && r.j.usage === undefined, 'ro‘yxat o‘qilganni belgilamaydi, hajm ma‘lumoti faqat adminga');
+  r = await admin.call('GET', '/api/news'); ok(r.j.usage && r.j.usage.limit === 1048576 && r.j.usage.used > 300000, 'admin fayllar hajmini ko‘radi');
   r = await par.call('POST', '/api/news/seen', {}); r = await par.call('GET', '/api/me'); ok(r.j.news.unread === 0, 'ko‘rilgach belgilandi');
   r = await stuV.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'boshqa akkauntda alohida hisoblanadi');
   // media xizmati
