@@ -3533,6 +3533,61 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
   .btn.primary:hover{transform:none}
 }
 </style>
+<style>
+/* ===== Ota-onalar chati ===== */
+.nav-i .pc-bd{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--flag-r);color:#fff;font:700 11px/20px var(--body);text-align:center}
+.nav-i .pc-bd[hidden]{display:none}
+.pc-wrap{display:grid;grid-template-columns:330px minmax(0,1fr);height:min(720px,calc((100dvh - 250px) / var(--z,1)));min-height:440px;overflow:hidden;padding:0}
+.pc-side{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line);background:var(--surface)}
+.pc-tools{display:flex;flex-direction:column;gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+.pc-global{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pc-search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);font:inherit;font-size:14px}
+.pc-search:focus{outline:none;border-color:var(--brand);background:#fff}
+.pc-th{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pc-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.pc-item:hover{background:var(--surface2)}
+.pc-item.on{background:var(--brand-soft)}
+.pc-ava{flex:none;width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font:700 13px var(--body)}
+.pc-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pc-nm{font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-lk{font-size:10px;padding:1px 7px}
+.pc-pv{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-mt{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px;font-size:11px;color:var(--mute)}
+.pc-bd2{min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--flag-r);color:#fff;font:700 11px/20px var(--body);text-align:center}
+.pc-main{display:flex;flex-direction:column;min-height:0;min-width:0}
+.pc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pc-hn{flex:1;min-width:0}
+.pc-hn b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-hn small{color:var(--mute);font-size:12px}
+.pc-back{display:none}
+.pc-main .chat-list{flex:1}
+@media(max-width:860px){
+  .pc-wrap{grid-template-columns:1fr;height:calc(100dvh - 200px);min-height:360px}
+  .pc-wrap .pc-main{display:none}
+  .pc-wrap.open .pc-side{display:none}
+  .pc-wrap.open .pc-main{display:flex}
+  .pc-back{display:grid}
+  .pc-head .btn.sm{padding:6px 10px}
+  .pc-head #pcLockSt{display:none}
+}
+/* o'quvchi/ota-ona paneli ichidagi chat */
+#stu .pcp-panel{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(17,26,51,.05);height:calc(100dvh - 215px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:300px}
+#stu .pcp-bar{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+#stu .pcp-lock{padding:10px 14px;background:var(--warn-soft);color:var(--warn);font-size:13px;border-top:1px solid var(--line)}
+#stu .pcp-lock[hidden]{display:none}
+#stu .pcp-panel .chat-list{flex:1;min-height:0}
+#stu .pcp-panel .chat-form textarea:disabled,#stu .pcp-panel .chat-form .btn:disabled{opacity:.55;cursor:not-allowed}
+#stu .sv-ic{position:relative;display:grid;place-items:center;font-style:normal}
+#stu .sv-bd{position:absolute;top:-5px;right:-9px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--flag-r);color:#fff;font:700 9.5px/16px var(--body);text-align:center}
+#stu .sv-bd[hidden]{display:none}
+#stu .nav-i .sv-bd{position:static;margin-left:auto;min-width:20px;height:20px;font-size:11px;line-height:20px;padding:0 6px}
+@media(max-width:560px){#stu .pcp-sl{display:none}}
+#stu .sv-tabs[data-n="7"]{gap:0;padding-left:2px;padding-right:2px}
+#stu .sv-tabs[data-n="7"] button span{font-size:8px;letter-spacing:-.03em;overflow-wrap:normal;min-height:2.2em}
+#stu .sv-tabs[data-n="7"] button{padding-left:0;padding-right:0}
+@media(max-width:380px){#stu .sv-tabs[data-n="7"] button span{font-size:7.3px}}
+@media(min-width:901px){#stu .pcp-panel{height:min(680px,calc((100dvh - 200px) / var(--z,1)))}}
+</style>
 </head>
 
 <body>
@@ -4889,7 +4944,7 @@ function confirmBox(title,text,onYes,label='O‘chirish'){
 
 /* ---------- nav / render shell ---------- */
 const NAV=[
-  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home'],['chat','Chat','chat']]},
+  {g:'Umumiy',items:[['dashboard','Boshqaruv paneli','home'],['chat','Chat','chat'],['pchat','Ota-onalar chati','users']]},
   {g:'Ta’lim',items:[['subjects','Fanlar','layers'],['groups','Sinflar','sliders'],['teachers','O‘qituvchilar','teacher'],['students','O‘quvchilar','users'],['schedule','Dars jadvali','calendar']]},
   {g:'Natijalar',items:[['weekly','Haftalik natijalar','clipboard'],['grades','Baho','clipboard'],['ranking','Reyting','trophy']]},
   {g:'Moliya',items:[['payments','To‘lovlar','wallet'],['attendance','Davomat','calendar']]},
@@ -4914,7 +4969,7 @@ function buildNav(){
       g.items.map(([k,l,i])=>
         `<button class="nav-i" data-act="go" data-page="${k}">
           ${ic(i)}
-          <span>${l}</span>${k==='chat'?'<b class="chat-bd" hidden></b>':''}
+          <span>${l}</span>${k==='chat'?'<b class="chat-bd" hidden></b>':k==='pchat'?'<b class="pc-bd" hidden></b>':''}
         </button>`
       ).join('')
     ).join('');
@@ -7122,8 +7177,44 @@ function studentForm(s){
 
           <p class="hint">
             O‘quvchi shu login va parol bilan kirib, o‘z natijalari, baholari,
-            davomati, dars jadvali va to‘lovlarini ko‘radi hamda onlayn to‘lov qiladi.
-            Login bo‘sh bo‘lsa — kirish yo‘q.
+            davomati, dars jadvali va to‘lovlarini ko‘radi. Login bo‘sh bo‘lsa — kirish yo‘q.
+          </p>
+
+        </div>
+
+        <div class="f full">
+
+          <label for="stf-plogin">
+            Ota-ona logini
+          </label>
+
+          <input
+            id="stf-plogin"
+            name="plogin"
+            value="${esc(x.pLogin||'')}"
+            autocomplete="off"
+            autocapitalize="off"
+          >
+
+        </div>
+
+        <div class="f full">
+
+          <label for="stf-ppw">
+            Ota-ona paroli
+          </label>
+
+          <input
+            id="stf-ppw"
+            name="ppw"
+            type="text"
+            placeholder="${x.pSet?'O‘zgartirmaslik uchun bo‘sh qoldiring':'Kamida 4 belgi'}"
+            autocomplete="off"
+          >
+
+          <p class="hint">
+            Ota-ona shu login va parol bilan farzandining natijalarini ko‘radi va
+            administrator bilan alohida chatda yozishadi. Login bo‘sh bo‘lsa — kirish yo‘q.
           </p>
 
         </div>
@@ -8644,7 +8735,7 @@ function paymentRows(list,mk){
           }
           ${
             paid&&(p.method==='payme'||p.method==='click')
-              ?`<span class="tag sm" style="margin-left:6px">${p.method==='payme'?'Payme':'Click'}</span>`
+              ?''
               :''
           }
         </td>
@@ -8665,16 +8756,6 @@ function paymentRows(list,mk){
                 </button>
               `
               :`
-                <button
-                  class="btn sm"
-                  style="margin-right:6px"
-                  data-act="pay-link"
-                  data-id="${s.id}"
-                  data-mk="${mk}"
-                  title="To‘lov havolasini nusxalash"
-                >
-                  ${ic('wallet')}Havola
-                </button>
                 <button
                   class="btn sm primary"
                   data-act="toggle-payment"
@@ -9194,7 +9275,7 @@ views.grades=()=>{
 
 
 /* ---------- Tahrirlar tarixi ---------- */
-const ELBL={first:'Ism',last:'Familiya',phone:'Telefon',login:'Login',pwHash:'Parol',subjectIds:'Fan(lar)',groupId:'Sinf',color:'Rang',track:'Yo‘nalish'};
+const ELBL={first:'Ism',last:'Familiya',phone:'Telefon',login:'Login',pwHash:'Parol',pLogin:'Ota-ona logini',pSet:'Ota-ona paroli',subjectIds:'Fan(lar)',groupId:'Sinf',color:'Rang',track:'Yo‘nalish'};
 const ENAME={subject:'Fan nomi',group:'Sinf nomi',teacher:'Ism familiya'};
 const EKIND={student:'O‘quvchi',teacher:'O‘qituvchi',group:'Sinf',subject:'Fan'};
 const eFind=(k,id)=>(S.d[EDITK[k]]||[]).find(x=>x.id===id);
@@ -9210,7 +9291,7 @@ function editPost(pre){
   if(!pre)return;
   const x=eFind(pre.k,pre.id);if(!x)return;
   const show=(key,v)=>{
-    if(key==='pwHash')return '••••';
+    if(key==='pwHash'||key==='pSet')return '••••';
     if(key==='groupId')return (grp(v)||{}).name||'—';
     if(key==='subjectIds')return (v||[]).map(i=>(sub(i)||{}).name).filter(Boolean).join(', ')||'—';
     return v===undefined||v===''?'—':String(v);
@@ -9840,6 +9921,33 @@ group:(fd,f)=>{
     const sid=id||uid();
     let pwHash=cur&&cur.pwHash?cur.pwHash:'';
 
+    const plogin=(fd.get('plogin')||'').trim();
+    const ppw=fd.get('ppw')||'';
+    const hadP=!!(cur&&cur.pSet);
+    if(plogin){
+      if(plogin.toLowerCase()===String(SRV.adminUser||'').toLowerCase())
+        return void(err.textContent='Ota-ona logini administratorga tegishli. Boshqa login tanlang');
+      if(login&&plogin.toLowerCase()===login.toLowerCase())
+        return void(err.textContent='Ota-ona logini o‘quvchinikidan farq qilsin');
+      if(!ppw&&!hadP)
+        return void(err.textContent='Ota-ona uchun parol kiriting');
+      if(ppw&&ppw.length<4)
+        return void(err.textContent='Ota-ona paroli kamida 4 belgidan iborat bo‘lsin');
+      if(ppw||!hadP||(cur&&cur.pLogin!==plogin)){
+        try{
+          await API.post('/api/credentials',{parentOf:sid,login:plogin,password:ppw});
+        }catch(e){
+          return void(err.textContent=e.message||'Xatolik');
+        }
+      }
+    }else if(hadP){
+      try{
+        await API.post('/api/credentials',{parentOf:sid,remove:true});
+      }catch(e){
+        return void(err.textContent=e.message||'Xatolik');
+      }
+    }
+
     if(login){
       const lc=login.toLowerCase();
       if(lc===String(SRV.adminUser||'').toLowerCase())
@@ -9871,6 +9979,8 @@ group:(fd,f)=>{
       s.fee=fee;
       s.login=login;
       s.pwHash=pwHash;
+      s.pLogin=plogin;
+      s.pSet=plogin?'set':'';
     }else{
       S.d.students.push({
         id:sid,
@@ -9880,7 +9990,9 @@ group:(fd,f)=>{
         joined:iso(),
         fee,
         login,
-        pwHash
+        pwHash,
+        pLogin:plogin,
+        pSet:plogin?'set':''
       });
     }
 
@@ -12010,6 +12122,7 @@ function offerMigration(){
 
 const STU={d:null,json:'',tab:'home',timer:null};
 const STU_TABS=[['home','Bosh sahifa','home'],['results','Natijalar','trophy'],['grades','Baholar','clipboard'],['att','Davomat','check'],['sched','Dars jadvali','calendar'],['pay','To‘lovlar','wallet']];
+const stuTabs=d=>d&&d.parent?STU_TABS.concat([['chat','Chat','chat']]):STU_TABS;
 
 (function(){
   const css=document.createElement('style');
@@ -12035,7 +12148,7 @@ const STU_TABS=[['home','Bosh sahifa','home'],['results','Natijalar','trophy'],[
 .sv-prof,.sv-side{display:none}
 
 /* ---- pastki menyu (telefon) ---- */
-.sv-tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(15,23,40,.07)}
+.sv-tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(15,23,40,.07)}
 .sv-tabs button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;padding:6px 2px 4px;border-radius:11px;color:var(--mute);font:600 10px/1.15 var(--body)}
 .sv-tabs button span{display:block;max-width:100%;min-height:2.3em;text-align:center;overflow:hidden;overflow-wrap:break-word;hyphens:none;font-size:9.5px;letter-spacing:-.02em}
 @media(max-width:430px){.sv-tabs button span{font-size:8.5px}.sv-tabs button{padding-left:0;padding-right:0}}
@@ -12190,8 +12303,6 @@ function stuDom(){
     const wk=e.target.closest('[data-stu-wk]');
     if(wk){const m=parseD(STU.week||iso(mondayOf(new Date())));m.setDate(m.getDate()+Number(wk.dataset.stuWk));STU.week=iso(m);stuRender();return}
     if(e.target.closest('[data-stu-now]')){STU.week=iso(mondayOf(new Date()));stuRender();return}
-    const p=e.target.closest('[data-stu-pay]');
-    if(p){stuPay(p);return}
     if(e.target.closest('[data-stu="logout"]'))stuLogoutAsk();
   });
   return el;
@@ -12213,7 +12324,7 @@ function stuHome(d){
   const cnt={ok:0,s:0,dq:0,k:0};d.attendance.forEach(a=>{if(a.code in cnt)cnt[a.code]++});
   const cur=d.payments.find(p=>p.mk===d.thisMonth);
   const _nm=(d.first+' '+d.last).trim();
-  let h=`<h2>Bosh sahifa</h2><div class="stu-who"><span class="stu-ava">${esc(initials(_nm))}</span><div><div class="stu-wn">${esc(_nm)}</div><div class="stu-ws">${esc(d.group||'')}</div></div></div><div class="stu-grid">`
+  let h=`<h2>Bosh sahifa</h2><div class="stu-who"><span class="stu-ava">${esc(initials(_nm))}</span><div><div class="stu-wn">${esc(_nm)}</div><div class="stu-ws">${d.parent?'<span class="tag sm">Ota-ona</span> ':''}${esc(d.group||'')}</div></div></div><div class="stu-grid">`
     +stuCard('Sinf',esc(d.group||'—'))
     +(d.debt>0?stuCard('Qarzdorlik',money(d.debt),'bad'):stuCard('Qarzdorlik','Yo‘q','ok'))
     +stuCard('O‘rtacha natija',avg===null?'—':avg+'%')
@@ -12297,32 +12408,143 @@ function stuPayView(d){
   let h=`<h2>To‘lovlar</h2><div class="stu-grid">`
     +stuCard('Oylik to‘lov',d.fee?money(d.fee):'Belgilanmagan')
     +(d.debt>0?stuCard('Qarzdorlik',money(d.debt),'bad'):stuCard('Qarzdorlik','Yo‘q','ok'))+`</div>`;
-  const online=d.pay.payme||d.pay.click;
-  if(d.debt>0&&!online)h+=`<div class="stu-note">Onlayn to‘lov hozircha yoqilmagan. Administratorga murojaat qiling.</div>`;
+  if(d.debt>0)h+=`<div class="stu-note">To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.</div>`;
   h+=`<div class="stu-box">`+d.payments.map(p=>{
     const left=`<div><div class="m">${esc(monthLabel(p.mk))}</div><div class="s">${d.fee||p.amount?money(p.amount):'Belgilanmagan'}</div></div>`;
-    if(p.paid)return `<div class="stu-pay">${left}<div><span class="pill ok">To‘langan</span> <span class="s">${stuDate(p.date)}</span>${p.method?` <span class="tag sm">${p.method==='payme'?'Payme':p.method==='click'?'Click':''}</span>`:''}</div></div>`;
-    const btns=(d.fee>0&&online)?`<div class="stu-btns">`
-      +(d.pay.payme?`<button class="btn primary sm" data-stu-pay="payme" data-mk="${p.mk}">Payme</button>`:'')
-      +(d.pay.click?`<button class="btn primary sm" data-stu-pay="click" data-mk="${p.mk}">Click</button>`:'')+`</div>`:'';
-    return `<div class="stu-pay">${left}<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="pill bad">Qarzdor</span>${btns}</div></div>`;
+    if(p.paid)return `<div class="stu-pay">${left}<div><span class="pill ok">To‘langan</span> <span class="s">${stuDate(p.date)}</span></div></div>`;
+    return `<div class="stu-pay">${left}<div><span class="pill bad">Qarzdor</span></div></div>`;
   }).join('')+`</div>`;
   if(!d.payments.length)h=h.replace(/<div class="stu-box"><\/div>$/,`<div class="stu-box">${stuEmpty('To‘lovlar topilmadi.')}</div>`);
   return h;
 }
 
+/* ---------- Ota-ona: administrator bilan chat ---------- */
+const PCP={msgs:[],last:0,busy:false,timer:null,enabled:true,locked:false};
+
+function stuChatStop(){clearInterval(PCP.timer);PCP.timer=null}
+
+function stuChatView(d){
+  return `<h2>Chat</h2><div class="pcp-panel">
+    <div class="pcp-bar"><b>Administrator bilan yozishma</b></div>
+    <div class="chat-list" id="pcpList"><div class="chat-empty">Yuklanmoqda…</div></div>
+    <div class="pcp-lock" id="pcpLock" hidden></div>
+    <form class="chat-form" id="pcpForm" autocomplete="off">
+      <textarea id="pcpIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
+      <button class="btn primary" type="submit" aria-label="Yuborish">${ic('send')}<span class="pcp-sl">Yuborish</span></button>
+    </form></div>`;
+}
+
+function pcpRenderState(){
+  const lock=document.getElementById('pcpLock'),inp=document.getElementById('pcpIn');
+  if(!lock||!inp)return;
+  const off=!PCP.enabled||PCP.locked;
+  lock.hidden=!off;
+  lock.textContent=!PCP.enabled?'Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.';
+  inp.disabled=off;
+  const b=document.querySelector('#pcpForm button');
+  if(b)b.disabled=off;
+  if(window.DS_I18N)DS_I18N.mark();
+}
+
+function pcpRender(stick){
+  const box=document.getElementById('pcpList');
+  if(!box)return;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  if(!PCP.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.</div>';return}
+  let day='',html='';
+  PCP.msgs.forEach(m=>{
+    const dl=chatDayLabel(m.ts);
+    if(dl!==day){day=dl;html+=`<div class="chat-day">${dl}</div>`}
+    const me=m.role==='parent';
+    const who=me?'':`<div class="chat-who">Administrator</div>`;
+    html+=`<div class="chat-m${me?' me':''}${m.x?' gone':''}">${who}<div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}</time></div></div>`;
+  });
+  box.innerHTML=html;
+  if(stick||near)box.scrollTop=box.scrollHeight;
+}
+
+async function pcpPull(force){
+  if(STU.tab!=='chat'||!document.getElementById('pcpList'))return;
+  try{
+    const r=await API.get('/api/pchat?since='+PCP.last);
+    let changed=false;
+    (r.msgs||[]).forEach(m=>{
+      const i=PCP.msgs.findIndex(x=>x.id===m.id);
+      if(i>=0)PCP.msgs[i]=m;else PCP.msgs.push(m);
+      changed=true;
+    });
+    PCP.msgs.sort((a,b)=>a.seq-b.seq);
+    PCP.last=Math.max(PCP.last,r.last||0);
+    const st=(r.enabled!==false)!==PCP.enabled||!!r.locked!==PCP.locked;
+    PCP.enabled=r.enabled!==false;PCP.locked=!!r.locked;
+    if(changed||force)pcpRender(force);
+    if(st||force)pcpRenderState();
+    if(STU.d&&STU.d.chat&&STU.d.chat.unread){STU.d.chat.unread=0;stuBadges()}
+  }catch(e){
+    if(e.status===401||e.status===403)stuLoad(true);
+  }
+}
+
+async function pcpSend(){
+  const inp=document.getElementById('pcpIn');
+  if(!inp||PCP.busy||inp.disabled)return;
+  const text=inp.value.trim();
+  if(!text)return;
+  PCP.busy=true;
+  try{
+    const r=await API.post('/api/pchat',{text});
+    inp.value='';inp.style.height='';
+    if(r.msg&&!PCP.msgs.some(x=>x.id===r.msg.id)){
+      PCP.msgs.push(r.msg);PCP.msgs.sort((a,b)=>a.seq-b.seq);PCP.last=Math.max(PCP.last,r.msg.seq);
+    }
+    pcpRender(true);
+  }catch(e){
+    if(e.status===401)stuLoad(true);
+    else{toast(e.message||'Yuborilmadi','err');pcpPull(true)}
+  }finally{PCP.busy=false;inp.focus()}
+}
+
+function stuChatInit(){
+  stuChatStop();
+  PCP.msgs=[];PCP.last=0;
+  const inp=document.getElementById('pcpIn'),f=document.getElementById('pcpForm');
+  if(!inp||!f)return;
+  f.addEventListener('submit',e=>{e.preventDefault();pcpSend()});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();pcpSend()}});
+  inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,120)+'px'});
+  pcpPull(true);
+  PCP.timer=setInterval(()=>{if(!document.hidden)pcpPull()},4000);
+}
+
+function stuBadges(){
+  const n=STU.d&&STU.d.chat&&STU.tab!=='chat'?STU.d.chat.unread:0;
+  document.querySelectorAll('#stu [data-stu-tab="chat"] .sv-bd').forEach(b=>{b.hidden=!n;b.textContent=n>99?'99+':String(n)});
+}
+
 function stuRender(){
   const d=STU.d;if(!d)return;
   const nm=(d.first+' '+d.last).trim();
-  const sub=nm+(d.group?' · '+d.group:'');
+  const sub=(d.parent?'Ota-ona · ':'')+nm+(d.group?' · '+d.group:'');
   const set=(id,t)=>{const x=document.getElementById(id);if(x&&x.textContent!==t)x.textContent=t};
-  set('stuSchool',d.school);set('stuSchoolS',d.school);set('stuWho',sub);set('stuWhoS',sub);
+  const setH=(id,h)=>{const x=document.getElementById(id);if(x&&x.dataset.h!==h){x.dataset.h=h;x.innerHTML=h}};
+  const subH=(d.parent?'<span>Ota-ona</span> · ':'')+esc(nm)+(d.group?' · '+esc(d.group):'');
+  set('stuSchool',d.school);set('stuSchoolS',d.school);setH('stuWho',subH);setH('stuWhoS',subH);
   const prof=document.getElementById('stuProf');
-  if(prof)prof.innerHTML=`<span class="stu-ava">${esc(initials(nm))}</span><span><b>${esc(nm)}</b><small>${esc(d.group||'')}</small></span>`;
-  document.getElementById('stuNav').innerHTML=STU_TABS.map(([k,l,i])=>`<button type="button" class="nav-i ${STU.tab===k?'on':''}" data-stu-tab="${k}">${ic(i)}<span>${l}</span></button>`).join('');
-  document.getElementById('stuTabs').innerHTML=STU_TABS.map(([k,l,i])=>`<button type="button" class="${STU.tab===k?'on':''}" data-stu-tab="${k}">${ic(i)}<span>${l}</span></button>`).join('');
-  const v={home:stuHome,results:stuResults,grades:stuGrades,att:stuAtt,sched:stuSched,pay:stuPayView}[STU.tab]||stuHome;
+  if(prof)prof.innerHTML=`<span class="stu-ava">${esc(initials(nm))}</span><span><b>${esc(nm)}</b><small>${d.parent?'<span>Ota-ona</span> · ':''}${esc(d.group||'')}</small></span>`;
+  const tabs=stuTabs(d);
+  if(STU.tab==='chat'&&!d.parent)STU.tab='home';
+  const bd=k=>k==='chat'?'<b class="sv-bd" hidden></b>':'';
+  document.getElementById('stuNav').innerHTML=tabs.map(([k,l,i])=>`<button type="button" class="nav-i ${STU.tab===k?'on':''}" data-stu-tab="${k}">${ic(i)}<span>${l}</span>${bd(k)}</button>`).join('');
+  const tb=document.getElementById('stuTabs');
+  tb.style.setProperty('--n',tabs.length);tb.dataset.n=tabs.length;
+  tb.innerHTML=tabs.map(([k,l,i])=>`<button type="button" class="${STU.tab===k?'on':''}" data-stu-tab="${k}"><i class="sv-ic">${ic(i)}${bd(k)}</i><span>${l}</span></button>`).join('');
+  stuBadges();
+  // chat ochiq bo'lsa, yozilayotgan matn yo'qolmasligi uchun sahifa qayta chizilmaydi
+  if(STU.tab==='chat'&&document.getElementById('pcpList'))return;
+  if(STU.tab!=='chat')stuChatStop();
+  const v={home:stuHome,results:stuResults,grades:stuGrades,att:stuAtt,sched:stuSched,pay:stuPayView,chat:stuChatView}[STU.tab]||stuHome;
   document.getElementById('stuMain').innerHTML=v(d);
+  if(STU.tab==='chat')stuChatInit();
 }
 
 async function stuLoad(quiet){
@@ -12339,26 +12561,13 @@ async function stuLoad(quiet){
   }
 }
 
-async function stuPay(btn){
-  if(btn.disabled)return;
-  btn.disabled=true;
-  try{
-    const r=await API.post('/api/me/pay',{mk:btn.dataset.mk});
-    const url=r[btn.dataset.stuPay];
-    if(!url)throw new Error('Bu to‘lov usuli yoqilmagan');
-    location.href=url;
-  }catch(e){
-    btn.disabled=false;
-    toast(e.message||'Xatolik','err');
-  }
-}
-
 function stuLogoutAsk(){
   confirmBox('Chiqish','Tizimdan chiqmoqchimisiz?',()=>{stuLogout()},'Chiqish');
 }
 
 async function stuLogout(){
   try{await API.post('/api/auth/logout')}catch(e){}
+  stuChatStop();
   clearInterval(STU.timer);STU.d=null;STU.json='';STU.tab='home';
   document.getElementById('stu').hidden=true;
   $('#login').hidden=false;
@@ -12381,7 +12590,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&STU.d)stu
 async function openSession(){
 
   const s=await API.get('/api/session');
-  if(s.role==='student'){await openStudent();return}
+  if(s.role==='student'||s.role==='parent'){await openStudent();return}
   const r=await API.get('/api/data');
 
   SRV.adminUser=s.adminUser||'';
@@ -12573,7 +12782,7 @@ Object.assign(RU,{
 "Ma'lumotlar serverga ko'chirildi":"Данные перенесены на сервер","Ma'lumotlar tiklandi":"Данные восстановлены","Hisob yaratildi":"Аккаунт создан","Bosib holatni tanlang":"Нажмите и выберите статус",
 "O'zgartirmaslik uchun bo'sh qoldiring":"Оставьте пустым, чтобы не менять","Qarzdor":"Должник","To'langan":"Оплачено","Sababsiz":"Без причины","Kech qolgan":"Опоздал","Saqlanmadi":"Не сохранено",
 "Serverga ulanib bo'lmadi":"Не удалось подключиться к серверу","Sessiya tugadi. Qayta kiring":"Сессия истекла. Войдите снова","Tizimdan chiqdingiz":"Вы вышли из системы","Tiklash":"Восстановить",
-"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Kirish":"Войти",
+"Tozalash":"Очистить","Xatolik":"Ошибка","Zaxiradan tiklash":"Восстановить из резервной копии","Vaqt yangilandi":"Время обновлено","Kim":"Кто","Escape":"Esc","Qo'shish":"Добавить","Chiqish":"Выйти","Tizimdan chiqmoqchimisiz?":"Вы действительно хотите выйти?","Bu hafta":"Эта неделя","Chat":"Чат","Ota-ona":"Родитель","Administrator":"Администратор","Administrator bilan yozishma":"Переписка с администратором","Xabar yozing…":"Напишите сообщение…","Yuborish":"Отправить","Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.":"Сообщений пока нет. Напишите администратору первым.","Xabar o‘chirilgan":"Сообщение удалено","Bugun":"Сегодня","Kecha":"Вчера","Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.":"Чат временно приостановлен. Сообщения можно читать.","Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.":"Администратор временно приостановил запись в этом чате.","To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.":"Оплату передайте администратору школы. Оплаченные месяцы отображаются здесь.","Kirish":"Войти",
 "Qidirish":"Поиск","Sana":"Дата","Yangilash":"Обновить","Yuklab olish":"Скачать","Ha":"Да","Yo'q":"Нет",
 "Algebra":"Алгебра","Biologiya":"Биология","Fizika":"Физика","Ingliz tili":"Английский язык","Kimyo":"Химия","Matematika":"Математика","Nemis tili":"Немецкий язык",
 "Alg":"Алг","Bio":"Био","Fiz":"Физ","Ing":"Англ","Mat":"Мат","Matem":"Матем","Nem":"Нем",
@@ -12628,7 +12837,7 @@ const DE={
 "Ma'lumotlar tiklandi":'Daten wiederhergestellt','Hisob yaratildi':'Konto erstellt',"O'zgartirmaslik uchun bo'sh qoldiring":'Zum Beibehalten leer lassen',"Qarzdor":'Schuldner',"To'langan":'Bezahlt',
 'Sababsiz':'Unentschuldigt','Kech qolgan':'Verspätet','Saqlanmadi':'Nicht gespeichert',"Serverga ulanib bo'lmadi":'Verbindung zum Server fehlgeschlagen',"Sessiya tugadi. Qayta kiring":'Sitzung abgelaufen. Bitte erneut anmelden',
 'Tizimdan chiqdingiz':'Sie wurden abgemeldet','Tiklash':'Wiederherstellen','Tozalash':'Leeren','Xatolik':'Fehler','Zaxiradan tiklash':'Aus Sicherung wiederherstellen','Vaqt yangilandi':'Zeit aktualisiert',
-"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
+"Qo'shish":'Hinzufügen','Chiqish':'Abmelden','Tizimdan chiqmoqchimisiz?':'Möchten Sie sich wirklich abmelden?','Bu hafta':'Diese Woche','Chat':'Chat','Ota-ona':'Elternteil','Administrator':'Administrator','Administrator bilan yozishma':'Chat mit der Verwaltung','Xabar yozing…':'Nachricht schreiben…','Yuborish':'Senden','Hali xabar yo‘q. Administratorga birinchi bo‘lib yozing.':'Noch keine Nachrichten. Schreiben Sie der Verwaltung zuerst.','Xabar o‘chirilgan':'Nachricht gelöscht','Bugun':'Heute','Kecha':'Gestern','Chat vaqtincha to‘xtatilgan. Xabarlarni o‘qish mumkin.':'Der Chat ist vorübergehend pausiert. Nachrichten können gelesen werden.','Administrator bu suhbatda yozishni vaqtincha to‘xtatgan.':'Die Verwaltung hat das Schreiben in diesem Chat vorübergehend pausiert.','To‘lovni maktab administratoriga topshiring. To‘langan oylar shu yerda ko‘rinadi.':'Bitte zahlen Sie bei der Schulverwaltung. Bezahlte Monate werden hier angezeigt.','Kirish':'Anmelden','Qidirish':'Suchen','Sana':'Datum','Yangilash':'Aktualisieren','Yuklab olish':'Herunterladen','Ha':'Ja',"Yo'q":'Nein',
 'Algebra':'Algebra','Biologiya':'Biologie','Fizika':'Physik','Ingliz tili':'Englisch','Kimyo':'Chemie','Matematika':'Mathematik','Nemis tili':'Deutsch','IT':'IT',
 'Alg':'Alg','Bio':'Bio','Fiz':'Phy','Ing':'Eng','Mat':'Mat','Matem':'Mathe','Nem':'Deu',
 'Yanvar':'Januar','Fevral':'Februar','Mart':'März','Aprel':'April','May':'Mai','Iyun':'Juni','Iyul':'Juli','Avgust':'August','Sentabr':'September','Oktabr':'Oktober','Noyabr':'November','Dekabr':'Dezember',
@@ -13082,21 +13291,218 @@ function chatHook(key){
 
 setInterval(()=>{if(S.d&&!document.hidden)chatPull()},4000);
 
-/* ---------- To‘lov havolasi (ota-onaga yuborish uchun) ---------- */
-acts['pay-link']=async dd=>{
+/* ============================================================
+   OTA-ONALAR CHATI (administrator panelida) — har bir ota-ona bilan alohida suhbat
+   ============================================================ */
+Object.assign(IC,{chat:IC.chat,send:IC.send});
+const PC={threads:[],enabled:true,sid:'',name:'',msgs:[],last:0,locked:false,busy:false,q:'',timer:null,open:false};
+
+function pcBadge(n){
+  const b=document.querySelector('.nav-i .pc-bd');
+  if(!b)return;
+  b.hidden=!n;
+  b.textContent=n>99?'99+':String(n);
+}
+
+views.pchat=()=>head('Ota-onalar chati','Har bir ota-ona administrator bilan alohida yozishadi')+
+  `<section class="panel pc-wrap" id="pcWrap">
+    <div class="pc-side">
+      <div class="pc-tools">
+        <div class="pc-global"><span class="pc-st" id="pcState"></span><button type="button" class="btn sm" id="pcGlobal">…</button></div>
+        <input class="pc-search" id="pcSearch" type="search" placeholder="Qidirish…" autocomplete="off">
+      </div>
+      <div class="pc-th" id="pcThreads"><div class="chat-empty">Yuklanmoqda…</div></div>
+    </div>
+    <div class="pc-main" id="pcMain"><div class="chat-empty">Suhbatni tanlang</div></div>
+  </section>`;
+
+function pcAgo(ts){
+  if(!ts)return '';
+  const d=new Date(ts),t=new Date();
+  const same=d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();
+  return same?chatTime(ts):pad(d.getDate())+'.'+pad(d.getMonth()+1);
+}
+
+function pcRenderState(){
+  const st=$('#pcState'),g=$('#pcGlobal');
+  if(!st||!g)return;
+  st.innerHTML=PC.enabled?'<span class="pill ok">Chat yoqilgan</span>':'<span class="pill bad">Hamma uchun to‘xtatilgan</span>';
+  g.textContent=PC.enabled?'Hammasini to‘xtatish':'Hammasini yoqish';
+  g.className='btn sm'+(PC.enabled?'':' primary');
+}
+
+function pcRenderThreads(){
+  const box=$('#pcThreads');
+  if(!box)return;
+  const q=PC.q.trim().toLowerCase();
+  const list=PC.threads.filter(t=>!q||(t.name+' '+t.group).toLowerCase().includes(q));
+  if(!list.length){
+    box.innerHTML=`<div class="chat-empty">${PC.threads.length?'Hech narsa topilmadi':'Hali ota-ona akkaunti yo‘q. O‘quvchini tahrirlab, “Ota-ona logini” va parolini kiriting.'}</div>`;
+    return;
+  }
+  box.innerHTML=list.map(t=>{
+    const pre=t.last?(t.last.x?'Xabar o‘chirilgan':((t.last.role==='admin'?'Siz: ':'')+t.last.text)):(t.hasAccount?'Hali yozishma yo‘q':'Akkaunt o‘chirilgan');
+    return `<button type="button" class="pc-item${t.sid===PC.sid?' on':''}" data-sid="${esc(t.sid)}">
+      <span class="pc-ava">${esc(initials(t.name))}</span>
+      <span class="pc-tx"><span class="pc-nm">${esc(t.name)} <span class="tag sm">${esc(t.group||'—')}</span>${t.locked?' <span class="pill bad pc-lk">to‘xtatilgan</span>':''}</span>
+        <span class="pc-pv">${esc(pre)}</span></span>
+      <span class="pc-mt"><time>${pcAgo(t.last&&t.last.ts)}</time>${t.unread?`<b class="pc-bd2">${t.unread>99?'99+':t.unread}</b>`:''}</span>
+    </button>`;
+  }).join('');
+}
+
+async function pcLoadThreads(){
+  if(!S.d||S.role!=='admin')return;
   try{
-    const r=await API.post('/api/pay/order',{sid:dd.id,mk:dd.mk});
-    let ok=false;
-    try{await navigator.clipboard.writeText(r.url);ok=true}catch(e){}
-    if(ok){toast('To‘lov havolasi nusxalandi');return}
-    openModal(`<div class="scrim" data-scrim="1"><div class="modal sm" role="dialog" aria-modal="true">
-      <div class="modal-h"><h3>To‘lov havolasi</h3><button class="ib plain" data-act="close-modal" aria-label="Yopish">${ic('x')}</button></div>
-      <div class="modal-b"><input class="pwbox" id="payLinkBox" readonly value="${esc(r.url)}"></div>
-      <div class="modal-f"><button type="button" class="btn" data-act="close-modal">Yopish</button></div>
-    </div></div>`);
-    const b=$('#payLinkBox');if(b)b.select();
-  }catch(e){toast(e.message||'Xatolik','err')}
-};
+    const r=await API.get('/api/pchat/threads');
+    PC.threads=r.threads||[];PC.enabled=r.enabled!==false;
+    pcBadge(PC.threads.reduce((a,t)=>a+(t.sid===PC.sid&&PC.open?0:t.unread),0));
+    if(PC.open){pcRenderState();pcRenderThreads()}
+  }catch(e){}
+}
+
+function pcRenderMsgs(stick){
+  const box=$('#pcList');
+  if(!box)return;
+  const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  if(!PC.msgs.length){box.innerHTML='<div class="chat-empty">Hali xabar yo‘q.</div>';return}
+  let day='',html='';
+  PC.msgs.forEach(m=>{
+    const dl=chatDayLabel(m.ts);
+    if(dl!==day){day=dl;html+=`<div class="chat-day">${dl}</div>`}
+    const me=m.role==='admin';
+    const who=me?'':`<div class="chat-who">${esc(m.name)} <span class="tag sm">Ota-ona</span></div>`;
+    const del=!m.x?` <button type="button" class="chat-x" data-id="${m.id}" title="O‘chirish">o‘chirish</button>`:'';
+    html+=`<div class="chat-m${me?' me':''}${m.x?' gone':''}">${who}<div class="chat-b">${m.x?'Xabar o‘chirilgan':esc(m.text)}<time>${chatTime(m.ts)}${del}</time></div></div>`;
+  });
+  box.innerHTML=html;
+  if(stick||near)box.scrollTop=box.scrollHeight;
+}
+
+function pcRenderHead(){
+  const h=$('#pcLockBtn'),s=$('#pcLockSt');
+  if(!h||!s)return;
+  s.innerHTML=PC.locked?'<span class="pill bad">Ota-ona yozolmaydi</span>':'<span class="pill ok">Yozish ochiq</span>';
+  h.textContent=PC.locked?'Yozishni yoqish':'Yozishni to‘xtatish';
+  h.className='btn sm'+(PC.locked?' primary':'');
+}
+
+function pcOpenThread(sid){
+  const t=PC.threads.find(x=>x.sid===sid);
+  PC.sid=sid;PC.name=t?t.name:'';PC.msgs=[];PC.last=0;PC.locked=t?t.locked:false;
+  const wrap=$('#pcWrap');
+  if(wrap)wrap.classList.add('open');
+  const main=$('#pcMain');
+  if(!main)return;
+  main.innerHTML=`<div class="pc-head">
+      <button type="button" class="ib plain pc-back" id="pcBack" aria-label="Orqaga">${ic('chevL')}</button>
+      <div class="pc-hn"><b>${esc(PC.name)}</b><small>${esc(t?t.group:'')} · ota-ona</small></div>
+      <span id="pcLockSt"></span><button type="button" class="btn sm" id="pcLockBtn"></button>
+    </div>
+    <div class="chat-list" id="pcList"><div class="chat-empty">Yuklanmoqda…</div></div>
+    <form class="chat-form" id="pcForm" autocomplete="off">
+      <textarea id="pcIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
+      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
+    </form>`;
+  pcRenderHead();pcRenderThreads();
+  $('#pcBack').onclick=()=>{PC.sid='';wrap&&wrap.classList.remove('open');pcRenderThreads();pcLoadThreads()};
+  $('#pcLockBtn').onclick=async()=>{
+    try{
+      await API.post('/api/pchat/lock',{sid:PC.sid,locked:!PC.locked});
+      PC.locked=!PC.locked;pcRenderHead();pcLoadThreads();
+      toast(PC.locked?'Bu suhbatda ota-ona yozishi to‘xtatildi':'Yozish yoqildi');
+    }catch(e){toast(e.message||'Xatolik','err')}
+  };
+  const inp=$('#pcIn');
+  $('#pcForm').addEventListener('submit',e=>{e.preventDefault();pcSend()});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();pcSend()}});
+  inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,140)+'px'});
+  $('#pcList').addEventListener('click',e=>{
+    const b=e.target.closest('.chat-x');
+    if(!b)return;
+    confirmBox('Xabarni o‘chirish','Bu xabar ota-onaning ham yozishmasidan o‘chiriladi.',async()=>{
+      try{await API.post('/api/pchat/delete',{sid:PC.sid,id:b.dataset.id});await pcPull(true)}
+      catch(er){toast(er.message||'Xatolik','err')}
+    });
+  });
+  pcPull(true);
+  if(window.matchMedia('(hover:hover)').matches)inp.focus();
+}
+
+async function pcPull(force){
+  if(!PC.sid||!PC.open)return;
+  const sid=PC.sid;
+  try{
+    const r=await API.get('/api/pchat/thread?sid='+encodeURIComponent(sid)+'&since='+PC.last);
+    if(sid!==PC.sid)return;
+    let changed=false;
+    (r.msgs||[]).forEach(m=>{
+      const i=PC.msgs.findIndex(x=>x.id===m.id);
+      if(i>=0)PC.msgs[i]=m;else PC.msgs.push(m);
+      changed=true;
+    });
+    PC.msgs.sort((a,b)=>a.seq-b.seq);
+    PC.last=Math.max(PC.last,r.last||0);
+    if(r.locked!==PC.locked){PC.locked=r.locked;pcRenderHead()}
+    if(changed||force)pcRenderMsgs(force);
+  }catch(e){}
+}
+
+async function pcSend(){
+  const inp=$('#pcIn');
+  if(!inp||PC.busy||!PC.sid)return;
+  const text=inp.value.trim();
+  if(!text)return;
+  PC.busy=true;
+  try{
+    const r=await API.post('/api/pchat/send',{sid:PC.sid,text});
+    inp.value='';inp.style.height='';
+    if(r.msg&&!PC.msgs.some(x=>x.id===r.msg.id)){
+      PC.msgs.push(r.msg);PC.msgs.sort((a,b)=>a.seq-b.seq);PC.last=Math.max(PC.last,r.msg.seq);
+    }
+    pcRenderMsgs(true);pcLoadThreads();
+  }catch(e){
+    if(e.status===401)sessionExpired();else toast(e.message||'Yuborilmadi','err');
+  }finally{PC.busy=false;inp.focus()}
+}
+
+(function(){
+  const prev=chatHook;
+  chatHook=function(key){
+    prev(key);
+    PC.open=(key==='pchat');
+    if(!PC.open)return;
+    const s=$('#pcSearch');
+    if(s){s.value=PC.q;s.addEventListener('input',()=>{PC.q=s.value;pcRenderThreads()})}
+    const g=$('#pcGlobal');
+    if(g)g.onclick=()=>{
+      const stop=PC.enabled;
+      confirmBox(stop?'Chatni to‘xtatish':'Chatni yoqish',
+        stop?'Barcha ota-onalar uchun yozish to‘xtatiladi. Eski xabarlarni ular o‘qiy oladi.':'Ota-onalar yana yoza oladi.',
+        async()=>{
+          try{await API.post('/api/pchat/lock',{locked:stop});PC.enabled=!stop;pcRenderState();toast(stop?'Chat to‘xtatildi':'Chat yoqildi')}
+          catch(e){toast(e.message||'Xatolik','err')}
+        },stop?'To‘xtatish':'Yoqish');
+    };
+    const th=$('#pcThreads');
+    if(th)th.addEventListener('click',e=>{const b=e.target.closest('.pc-item');if(b)pcOpenThread(b.dataset.sid)});
+    pcRenderState();pcRenderThreads();
+    pcLoadThreads().then(()=>{
+      if(PC.sid){const w=$('#pcWrap');if(w)w.classList.add('open');pcOpenThread(PC.sid)}
+    });
+  };
+})();
+
+function pcPoll(){
+  if(!S.d||S.role!=='admin'||document.hidden)return;
+  if(PC.open){pcLoadThreads();pcPull()}
+  else API.get('/api/pchat/unread').then(r=>pcBadge(r.total||0)).catch(()=>{});
+}
+setInterval(pcPoll,5000);
+(function(){
+  const nb=buildNav;
+  buildNav=function(){nb();if(S.role==='admin')setTimeout(pcPoll,300)};
+})();
 
 /* ---------- Tahrirlar tarixini tozalash (administrator parolini so‘raydi) ---------- */
 acts['clear-history']=()=>{
