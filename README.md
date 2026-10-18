@@ -32,9 +32,9 @@ ADMIN_USER=admin ADMIN_PASSWORD=parol1234 npm start
 npm test
 ```
 
-## Ota-onalar paneli va chat
+## Ota-onalar paneli, umumiy chat va yangiliklar
 
-- Administrator **O‘quvchilar → tahrirlash** oynasida “Ota-ona logini” va “Ota-ona paroli”ni kiritadi. Ota-ona shu bilan kirib, farzandining natijalari, baholari, davomati, dars jadvali va to‘lovlarini ko‘radi.
-- Ota-onaning panelida **Chat** bo‘limi bor: u faqat administrator bilan, o‘z suhbatida yozishadi (boshqa ota-onalar va o‘qituvchilar ko‘rmaydi).
-- Administrator panelidagi **Ota-onalar chati** bo‘limida barcha suhbatlar ro‘yxati, o‘qilmagan xabarlar soni va ikki xil to‘xtatish bor: bitta ota-ona uchun (“Yozishni to‘xtatish”) yoki hamma uchun (“Hammasini to‘xtatish”). To‘xtatilganda ota-ona eski xabarlarni o‘qiy oladi, lekin yoza olmaydi; administrator esa yozishda davom etadi.
+- **Ota-ona akkaunti:** administrator *O‘quvchilar → tahrirlash* oynasida “Ota-ona logini” va “Ota-ona paroli”ni kiritadi. Ota-ona shu bilan kirib, farzandining natijalari, baholari, davomati, dars jadvali va to‘lovlarini ko‘radi.
+- **Umumiy chat:** ota-onalar va administrator uchun bitta umumiy chat (ota-ona panelida “Chat”, admin panelida “Ota-onalar chati”). O‘qituvchilar va o‘quvchilar ko‘rmaydi. Administrator “Yozishni to‘xtatish” tugmasi bilan ota-onalar yozishini vaqtincha to‘xtata oladi (ular o‘qiy oladi, admin yozaveradi) va xabarni o‘chira oladi.
+- **Yangiliklar:** admin panelidagi “Yangiliklar” bo‘limida matn, rasm (8 MB gacha, avtomatik kichraytiriladi) va video (MP4/MOV/WEBM, 40 MB gacha) bilan yangilik e‘lon qiladi. U ota-ona va o‘quvchi panelidagi yuqori o‘ng burchakdagi qo‘ng‘iroqchada ko‘rinadi, yangi bo‘lsa qizil son chiqadi. Fayllar bazada (Neon) saqlanadi; Render’da `DATABASE_URL` bo‘lishi shart, aks holda yuklangan fayllar qayta ishga tushganda yo‘qoladi.
 - Onlayn to‘lov (Payme/Click) olib tashlangan: to‘lovlarni administrator “To‘lovlar” bo‘limida belgilaydi. `payments.js` endi kerak emas.
