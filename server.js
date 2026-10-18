@@ -142,6 +142,7 @@ let DOC = { rev: 0, data: {} }; // asosiy ma'lumot
 let ADMIN = null; // { user, hash, ver }
 let CREDS = {}; // id (o'qituvchi yoki o'quvchi) -> { login, hash, ver, t, role }
 let CHAT = { counter: 0, msgs: [] }; // umumiy chat (admin + o'qituvchilar)
+let PCHAT = { enabled: true, threads: {} }; // ota-onalar chati: threads[studentId] = { counter, msgs, locked, aRead, pRead }
 let META = { secret: '' };
 
 const persistDoc = () => serial(() => store.set('doc', DOC));
@@ -215,7 +216,8 @@ function sessionOf(req) {
   }
   const c = CREDS[p.w];
   if (!c || c.ver !== p.v) return null;
-  return { role: c.role === 'student' ? 'student' : 'teacher', id: p.w };
+  const role = c.role === 'student' ? 'student' : c.role === 'parent' ? 'parent' : 'teacher';
+  return { role, id: p.w };
 }
 
 /* ---------------- login urinishlarini cheklash ---------------- */
@@ -374,10 +376,15 @@ function viewFor(sess) {
       const o = { ...st };
       delete o.pwHash;
       delete o.login;
+      delete o.pLogin;
+      delete o.pSet;
       const c = CREDS[st.id];
       if (sess.role === 'admin') {
         o.pwHash = c && c.role === 'student' ? 'set' : '';
         if (c && c.role === 'student') o.login = c.login;
+        const pc = CREDS['p:' + st.id];
+        o.pSet = pc && pc.role === 'parent' ? 'set' : '';
+        if (pc && pc.role === 'parent') o.pLogin = pc.login;
       }
       return o;
     });
@@ -438,6 +445,14 @@ function syncCreds() {
   const taken = new Set();
   if (ADMIN) taken.add(ADMIN.user.toLowerCase());
   for (const [id, c] of Object.entries(CREDS)) {
+    if (c.role === 'parent') {
+      // ota-ona akkaunti o'quvchiga bog'langan; o'quvchi o'chsa, akkaunt ham o'chadi
+      if (!byId.student.has(id.slice(2)) && Date.now() - (c.t || 0) > 120000) {
+        delete CREDS[id];
+        changed = true;
+      }
+      continue;
+    }
     const t = byId[c.role === 'student' ? 'student' : 'teacher'].get(id);
     if (!t) {
       if (Date.now() - (c.t || 0) > 120000) {
@@ -464,7 +479,11 @@ function syncCreds() {
   }
   // doimiy xesh maydonlarini hujjatdan olib tashlash
   for (const t of tList) if ('pwHash' in t) delete t.pwHash;
-  for (const x of sList) if ('pwHash' in x) delete x.pwHash;
+  for (const x of sList) {
+    if ('pwHash' in x) delete x.pwHash;
+    if ('pLogin' in x) delete x.pLogin;
+    if ('pSet' in x) delete x.pSet;
+  }
   return changed;
 }
 
@@ -485,39 +504,128 @@ async function dailyBackup() {
   }
 }
 
-/* ---------------- to'lov tizimlari (Payme + Click) ---------------- */
+const buildStudentView = require('./student');
 
-/* To'lov tizimi hozircha o'chirilgan. Fayllar (payments.js / student.js)
-   bo'lsa ishlatiladi, bo'lmasa xavfsiz "bo'sh" variant ishlaydi. */
-function tryRequire(name) {
-  try { return require(name); }
-  catch (e) {
-    if (e && e.code === 'MODULE_NOT_FOUND' && String(e.message).includes(name)) return null;
-    throw e;
+
+/* ---------------- ota-onalar chati (faqat ota-ona + administrator) ---------------- */
+
+const pcThread = sid =>
+  PCHAT.threads[sid] || (PCHAT.threads[sid] = { counter: 0, msgs: [], locked: false, aRead: 0, pRead: 0 });
+const pcUnreadAdmin = th => th.msgs.filter(m => m.role === 'parent' && !m.x && m.seq > th.aRead).length;
+
+async function pchatAdmin(req, res, url, route) {
+  const students = Array.isArray(DOC.data.students) ? DOC.data.students.filter(isObj) : [];
+  const groups = Array.isArray(DOC.data.groups) ? DOC.data.groups.filter(isObj) : [];
+  const gName = id => (groups.find(g => g.id === id) || {}).name || '';
+  const stuOf = sid => students.find(x => x.id === sid);
+  const nameOf = st => ((st.first || '') + ' ' + (st.last || '')).trim();
+  const sidOf = v => {
+    const sid = String(v || '');
+    return sid && !BAD_KEYS.has(sid) && stuOf(sid) ? sid : '';
+  };
+
+  if (route === 'GET /api/pchat/unread') {
+    let total = 0;
+    for (const th of Object.values(PCHAT.threads)) total += pcUnreadAdmin(th);
+    return send(res, 200, { enabled: PCHAT.enabled, total });
   }
+
+  if (route === 'GET /api/pchat/threads') {
+    const rows = [];
+    for (const st of students) {
+      const has = !!(CREDS['p:' + st.id] && CREDS['p:' + st.id].role === 'parent');
+      const th = PCHAT.threads[st.id];
+      if (!has && !(th && th.msgs.length)) continue;
+      const lm = th && th.msgs.length ? th.msgs[th.msgs.length - 1] : null;
+      rows.push({
+        sid: st.id,
+        name: nameOf(st),
+        group: gName(st.groupId),
+        hasAccount: has,
+        locked: !!(th && th.locked),
+        unread: th ? pcUnreadAdmin(th) : 0,
+        last: lm ? { role: lm.role, ts: lm.ts, x: !!lm.x, text: lm.x ? '' : String(lm.text).slice(0, 90) } : null
+      });
+    }
+    rows.sort((a, b) => (b.last ? b.last.ts : 0) - (a.last ? a.last.ts : 0) || a.name.localeCompare(b.name));
+    return send(res, 200, { enabled: PCHAT.enabled, threads: rows });
+  }
+
+  if (route === 'GET /api/pchat/thread') {
+    const sid = sidOf(url.searchParams.get('sid'));
+    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
+    const since = Number(url.searchParams.get('since')) || 0;
+    const th = PCHAT.threads[sid];
+    const msgs = th ? th.msgs.filter(m => m.ver > since) : [];
+    if (th && url.searchParams.get('peek') !== '1' && th.aRead !== th.counter) {
+      await serial(async () => {
+        th.aRead = th.counter;
+        await store.set('pchat:' + sid, th);
+      });
+    }
+    return send(res, 200, { msgs, last: th ? th.counter : 0, locked: !!(th && th.locked), enabled: PCHAT.enabled });
+  }
+
+  if (route === 'POST /api/pchat/send') {
+    const b = await readBody(req);
+    const sid = sidOf(b.sid);
+    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
+    const text = String(b.text || '').trim().slice(0, 2000);
+    if (!text) return fail(res, 400, 'Xabar bo‘sh');
+    if (chatRate(clientIp(req) + '|pchat|admin')) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
+    const name = (DOC.data.profile && DOC.data.profile.name) || ADMIN.user;
+    const msg = await serial(async () => {
+      const th = pcThread(sid);
+      const n = ++th.counter;
+      const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, role: 'admin', name, text, ts: Date.now(), x: false };
+      th.msgs.push(m);
+      if (th.msgs.length > 400) th.msgs.splice(0, th.msgs.length - 400);
+      th.aRead = n;
+      await store.set('pchat:' + sid, th);
+      return m;
+    });
+    return send(res, 200, { ok: true, msg });
+  }
+
+  if (route === 'POST /api/pchat/delete') {
+    const b = await readBody(req);
+    const sid = sidOf(b.sid);
+    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
+    await serial(async () => {
+      const th = PCHAT.threads[sid];
+      const m = th && th.msgs.find(x => x.id === String(b.id || ''));
+      if (!m || m.x) return;
+      m.x = true;
+      m.text = '';
+      m.ver = ++th.counter;
+      await store.set('pchat:' + sid, th);
+    });
+    return send(res, 200, { ok: true });
+  }
+
+  /* yozishni to'xtatish / yoqish: sid bo'lsa — bitta ota-ona, bo'lmasa — hamma uchun */
+  if (route === 'POST /api/pchat/lock') {
+    const b = await readBody(req);
+    const locked = b.locked === true;
+    if (b.sid) {
+      const sid = sidOf(b.sid);
+      if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
+      await serial(async () => {
+        const th = pcThread(sid);
+        th.locked = locked;
+        await store.set('pchat:' + sid, th);
+      });
+    } else {
+      await serial(async () => {
+        PCHAT.enabled = !locked;
+        await store.set('pchatmeta', { enabled: PCHAT.enabled });
+      });
+    }
+    return send(res, 200, { ok: true, enabled: PCHAT.enabled });
+  }
+
+  return fail(res, 404, 'Topilmadi');
 }
-
-const studentMod = tryRequire('./student');
-const buildStudentView = studentMod || function (data, id) {
-  const list = Array.isArray(data && data.students) ? data.students : [];
-  const st = list.find(x => x && String(x.id) === String(id));
-  if (!st) return null;
-  const o = Object.assign({}, st);
-  delete o.pwHash;
-  delete o.payments;
-  return { student: o, payments: null };
-};
-
-const paymentsMod = tryRequire('./payments');
-const PAY = paymentsMod
-  ? paymentsMod({ getStore: () => store, getDoc: () => DOC, serial, log, send, fail, readBody, sessionOf, isHttps })
-  : {
-      config: () => ({ enabled: false }),
-      isPage: () => false,
-      page: (req, res) => fail(res, 404, 'Topilmadi'),
-      route: async (req, res) => { fail(res, 503, "To'lov tizimi hozircha o'chirilgan"); return true; },
-      studentPay: (req, res) => fail(res, 503, "To'lov tizimi hozircha o'chirilgan")
-    };
 
 /* ---------------- API ---------------- */
 
@@ -531,10 +639,6 @@ async function api(req, res, url) {
 
   if (req.method !== 'GET' && req.method !== 'HEAD' && !sameOrigin(req)) {
     return fail(res, 403, 'Ruxsat etilmagan manba');
-  }
-
-  if (url.pathname.startsWith('/api/pay/')) {
-    if (await PAY.route(req, res, url)) return;
   }
 
   if (route === 'GET /api/status') {
@@ -591,7 +695,8 @@ async function api(req, res, url) {
       return fail(res, 401, 'Login yoki parol noto‘g‘ri');
     }
     setSessionCookie(req, res, who, ver, !!b.remember);
-    const role = who === 'admin' ? 'admin' : CREDS[who].role === 'student' ? 'student' : 'teacher';
+    const cr = who === 'admin' ? null : CREDS[who].role;
+    const role = who === 'admin' ? 'admin' : cr === 'student' ? 'student' : cr === 'parent' ? 'parent' : 'teacher';
     return send(res, 200, { ok: true, role, id: who });
   }
 
@@ -629,17 +734,80 @@ async function api(req, res, url) {
   /* ---- o'quvchi: faqat o'z paneli ---- */
   if (sess.role === 'student') {
     if (route === 'GET /api/me') {
-      const v = buildStudentView(DOC.data, sess.id, PAY.config());
+      const v = buildStudentView(DOC.data, sess.id);
       if (!v) return fail(res, 404, 'O‘quvchi topilmadi');
       return send(res, 200, v);
     }
-    if (route === 'POST /api/me/pay') return PAY.studentPay(req, res, sess);
+    if (route === 'POST /api/auth/password') return fail(res, 403, 'Faqat administrator');
+    return fail(res, 403, 'Bu bo‘limga ruxsat yo‘q');
+  }
+
+  /* ---- ota-ona: farzandining paneli + administrator bilan alohida chat ---- */
+  if (sess.role === 'parent') {
+    const sid = sess.id.slice(2);
+    if (route === 'GET /api/me') {
+      const v = buildStudentView(DOC.data, sid);
+      if (!v) return fail(res, 404, 'O‘quvchi topilmadi');
+      const th = PCHAT.threads[sid];
+      v.parent = true;
+      v.chat = {
+        enabled: PCHAT.enabled,
+        locked: !!(th && th.locked),
+        unread: th ? th.msgs.filter(m => m.role === 'admin' && !m.x && m.seq > th.pRead).length : 0
+      };
+      return send(res, 200, v);
+    }
+    if (route === 'GET /api/pchat') {
+      const since = Number(url.searchParams.get('since')) || 0;
+      const th = PCHAT.threads[sid];
+      const msgs = th ? th.msgs.filter(m => m.ver > since) : [];
+      if (th && url.searchParams.get('peek') !== '1' && th.pRead !== th.counter) {
+        await serial(async () => {
+          th.pRead = th.counter;
+          await store.set('pchat:' + sid, th);
+        });
+      }
+      return send(res, 200, {
+        msgs,
+        last: th ? th.counter : 0,
+        enabled: PCHAT.enabled,
+        locked: !!(th && th.locked),
+        unread: th ? th.msgs.filter(m => m.role === 'admin' && !m.x && m.seq > th.pRead).length : 0
+      });
+    }
+    if (route === 'POST /api/pchat') {
+      const b = await readBody(req);
+      const text = String(b.text || '').trim().slice(0, 2000);
+      if (!text) return fail(res, 400, 'Xabar bo‘sh');
+      if (!PCHAT.enabled) return fail(res, 403, 'Chat vaqtincha to‘xtatilgan');
+      const th0 = PCHAT.threads[sid];
+      if (th0 && th0.locked) return fail(res, 403, 'Administrator bu chatda yozishni vaqtincha to‘xtatgan');
+      if (chatRate(clientIp(req) + '|pchat|' + sess.id)) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
+      const st = (DOC.data.students || []).find(x => x && x.id === sid);
+      const name = st ? ((st.first || '') + ' ' + (st.last || '')).trim() : 'Ota-ona';
+      const msg = await serial(async () => {
+        const th = pcThread(sid);
+        const n = ++th.counter;
+        const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, role: 'parent', name, text, ts: Date.now(), x: false };
+        th.msgs.push(m);
+        if (th.msgs.length > 400) th.msgs.splice(0, th.msgs.length - 400);
+        th.pRead = n;
+        await store.set('pchat:' + sid, th);
+        return m;
+      });
+      return send(res, 200, { ok: true, msg });
+    }
     if (route === 'POST /api/auth/password') return fail(res, 403, 'Faqat administrator');
     return fail(res, 403, 'Bu bo‘limga ruxsat yo‘q');
   }
 
   if (url.pathname === '/api/me' || url.pathname.startsWith('/api/me/')) {
     return fail(res, 403, 'Bu bo‘lim faqat o‘quvchilar uchun');
+  }
+
+  if (url.pathname.startsWith('/api/pchat')) {
+    if (sess.role !== 'admin') return fail(res, 403, 'Bu bo‘lim faqat administrator va ota-onalar uchun');
+    return pchatAdmin(req, res, url, route);
   }
 
   if (route === 'GET /api/data') {
@@ -678,21 +846,31 @@ async function api(req, res, url) {
   if (route === 'POST /api/credentials') {
     if (sess.role !== 'admin') return fail(res, 403, 'Faqat administrator');
     const b = await readBody(req);
-    const isStu = !!b.studentId;
-    const role = isStu ? 'student' : 'teacher';
-    const id = String(isStu ? b.studentId : b.teacherId || '');
+    const isPar = !!b.parentOf;
+    const isStu = !isPar && !!b.studentId;
+    const role = isPar ? 'parent' : isStu ? 'student' : 'teacher';
+    const id = isPar ? 'p:' + String(b.parentOf || '') : String(isStu ? b.studentId : b.teacherId || '');
+    if (isPar && b.remove === true) {
+      if (CREDS[id] && CREDS[id].role === 'parent') {
+        delete CREDS[id];
+        await persistCreds();
+      }
+      return send(res, 200, { ok: true });
+    }
     const login = String(b.login || '').trim();
     const pw = String(b.password || '');
-    if (!id || BAD_KEYS.has(id)) return fail(res, 400, isStu ? 'O‘quvchi aniqlanmadi' : 'O‘qituvchi aniqlanmadi');
+    if (!id || id === 'p:' || BAD_KEYS.has(id) || BAD_KEYS.has(id.slice(2))) {
+      return fail(res, 400, isStu || isPar ? 'O‘quvchi aniqlanmadi' : 'O‘qituvchi aniqlanmadi');
+    }
     if (!login || login.length > 60) return fail(res, 400, 'Login kiriting');
     if (login.toLowerCase() === ADMIN.user.toLowerCase()) {
       return fail(res, 409, 'Bu login administratorga tegishli. Boshqa login tanlang');
     }
     if (Object.entries(CREDS).some(([o, c]) => o !== id && c.login.toLowerCase() === login.toLowerCase())) {
-      return fail(res, 409, isStu ? 'Bu login band. Boshqa login tanlang' : 'Bu login boshqa o‘qituvchida bor');
+      return fail(res, 409, isStu || isPar ? 'Bu login band. Boshqa login tanlang' : 'Bu login boshqa o‘qituvchida bor');
     }
     const cur = CREDS[id];
-    if (cur && (cur.role === 'student' ? 'student' : 'teacher') !== role) return fail(res, 409, 'Bu identifikator band');
+    if (cur && (cur.role || 'teacher') !== role) return fail(res, 409, 'Bu identifikator band');
     if (!cur && pw.length < 4) return fail(res, 400, 'Parol kamida 4 belgidan iborat bo‘lsin');
     if (pw && pw.length < 4) return fail(res, 400, 'Parol kamida 4 belgidan iborat bo‘lsin');
     const hash = pw ? await hashPassword(pw) : cur.hash;
@@ -859,7 +1037,6 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(405);
       return res.end();
     }
-    if (PAY.isPage(url.pathname)) return PAY.page(req, res);
     return serveStatic(req, res, url);
   } catch (e) {
     const code = e.code && Number.isInteger(e.code) ? e.code : 500;
@@ -882,6 +1059,15 @@ async function init() {
   const ch = await store.get('chat');
   if (ch && Array.isArray(ch.msgs)) CHAT = ch;
   META = (await store.get('meta')) || { secret: '' };
+  const pm = await store.get('pchatmeta');
+  if (pm && typeof pm.enabled === 'boolean') PCHAT.enabled = pm.enabled;
+  for (const k of await store.keys('pchat:')) {
+    const sid = k.slice(6);
+    const th = await store.get(k);
+    if (sid && !BAD_KEYS.has(sid) && th && Array.isArray(th.msgs)) {
+      PCHAT.threads[sid] = { counter: th.counter || 0, msgs: th.msgs, locked: !!th.locked, aRead: th.aRead || 0, pRead: th.pRead || 0 };
+    }
+  }
 
   if (!META.secret) {
     META.secret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString('hex');
