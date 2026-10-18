@@ -1,0 +1,191 @@
+'use strict';
+/*
+  Shanba baholash o'zgarishi:
+  - shanba ustuni ixchamroq, DU/SE... ostidagi sana olib tashlanadi
+  - Ingliz tili va Nemis tilida shanba kuni 2 ta baholash: Test + Speaking
+    (foiz = ikkalasining o'rtachasi, masalan 98% va 90% -> 94%)
+  - boshqa fanlar o'zgarmaydi
+
+  Ishlatish (loyiha papkasida):
+    node apply-saturday.js
+  yoki yo'llarni berib:
+    node apply-saturday.js public/index.html student.js
+  Asl fayllar .bak nusxasi bilan saqlanadi.
+*/
+const fs = require('fs');
+const idxPath = process.argv[2] || 'public/index.html';
+const stuPath = process.argv[3] || 'student.js';
+let ok = 0, bad = 0;
+
+function patch(file, steps) {
+  let s = fs.readFileSync(file, 'utf8');
+  const crlf = s.includes('\r\n');
+  if (crlf) s = s.replace(/\r\n/g, '\n');
+  if (s.includes('SAT-SPEAKING-PATCH')) {
+    console.log(file + ': allaqachon qo\'llangan, o\'tkazib yuborildi');
+    return;
+  }
+  fs.writeFileSync(file + '.bak', fs.readFileSync(file));
+  for (const [name, from, to] of steps) {
+    if (from instanceof RegExp) {
+      if (!from.test(s)) { console.log('TOPILMADI:', name); bad++; continue; }
+      s = s.replace(from, () => to);
+    } else {
+      const i = s.indexOf(from);
+      if (i < 0) { console.log('TOPILMADI:', name); bad++; continue; }
+      if (s.indexOf(from, i + 1) >= 0) { console.log('BIR NECHTA JOY:', name); bad++; continue; }
+      s = s.slice(0, i) + to + s.slice(i + from.length);
+    }
+    ok++;
+  }
+  if (crlf) s = s.replace(/\n/g, '\r\n');
+  fs.writeFileSync(file, s);
+}
+
+/* ================= public/index.html ================= */
+patch(idxPath, [
+  ['1. yordamchi funksiyalar',
+    `function attWeekDates(weekStart){`,
+    `/* SAT-SPEAKING-PATCH */
+const isLangSub=k=>k==='Ingliz tili'||k==='Nemis tili';
+function satPct(rec,sid,lang){
+  const one=b=>{
+    if(!b||!(b.total>0))return null;
+    const c=(b.r||{})[sid];
+    return c===undefined?null:Math.round(c/b.total*100);
+  };
+  const a=[one(rec)];
+  if(lang)a.push(one(rec&&rec.spk));
+  const v=a.filter(x=>x!==null);
+  return v.length?Math.round(v.reduce((x,y)=>x+y,0)/v.length):null;
+}
+function attWeekDates(weekStart){`],
+
+  ['2. syncWeekly',
+`  const put=id=>{const c=r.r[id];
+    if(c!==undefined&&r.total>0)ex[id]={correct:c,total:r.total};else delete ex[id]};
+  if(sid)put(sid);else Object.keys(r.r).forEach(put);`,
+`  const put=id=>{
+    if(isLangSub(subKey)){
+      const p=satPct(r,id,true);
+      if(p!==null)ex[id]={correct:p,total:100};else delete ex[id];
+      return;
+    }
+    const c=r.r[id];
+    if(c!==undefined&&r.total>0)ex[id]={correct:c,total:r.total};else delete ex[id]};
+  if(sid)put(sid);else new Set([...Object.keys(r.r),...Object.keys((r.spk&&r.spk.r)||{})]).forEach(put);`],
+
+  ['3. gradeStats',
+`  list.forEach(st=>{const c=sr.r[st.id];if(sr.total>0&&c!==undefined)pcs.push(Math.round(c/sr.total*100))});`,
+`  list.forEach(st=>{const p=satPct(sr,st.id,isLangSub(subKey));if(p!==null)pcs.push(p)});`],
+
+  ['4a. sarlavha (sanasiz)',
+`  const head1=days.map((x,i)=>{const q=parseD(x);const w=DOW[i];
+    return \`<th class="\${x===today?'tod':''} \${i===5?'satc':''}">\${esc(w.s)}<small>\${q.getDate()}/\${q.getMonth()+1}</small></th>\`}).join('');`,
+`  const lang=isLangSub(S.ui.gS);
+  const sp=sr.spk||{total:0,r:{}};
+  const head1=days.map((x,i)=>\`<th class="\${x===today?'tod':''} \${i===5?'satc':''}">\${esc(DOW[i].s)}</th>\`).join('');`],
+
+  ['4b. qator foizi',
+`    const c=sr.r[st.id];
+    const pc=(sr.total>0&&c!==undefined)?Math.round(c/sr.total*100):null;`,
+`    const c=sr.r[st.id], cs=sp.r[st.id];
+    const pc=satPct(sr,st.id,lang);`],
+
+  ['4c. shanba katagi',
+`<td class="satc"><div class="satbox"><input class="satIn" type="number" min="0" inputmode="numeric" data-id="\${st.id}" value="\${c===undefined?'':c}" placeholder="—"></div></td>`,
+`<td class="satc"><div class="satbox\${lang?' two':''}">
+        <input class="satIn" data-p="m" type="number" min="0" inputmode="numeric" data-id="\${st.id}" value="\${c===undefined?'':c}" placeholder="\${lang?'Test':'—'}">
+        \${lang?\`<input class="satIn" data-p="s" type="number" min="0" inputmode="numeric" data-id="\${st.id}" value="\${cs===undefined?'':cs}" placeholder="Spk">\`:''}
+      </div></td>`],
+
+  ['4d. savol soni paneli',
+`    <div class="totbar"><label for="satTotal">Shanba testi — umumiy savol soni</label>
+      <input id="satTotal" type="number" min="0" inputmode="numeric" value="\${sr.total||''}" placeholder="20"></div>`,
+`    <div class="totbar\${lang?' two':''}"><label for="satTotal">Shanba testi — savol soni</label>
+      <input id="satTotal" type="number" min="0" inputmode="numeric" value="\${sr.total||''}" placeholder="20">
+      \${lang?\`<label for="satTotalSpk">Speaking — savol soni</label>
+      <input id="satTotalSpk" type="number" min="0" inputmode="numeric" value="\${sp.total||''}" placeholder="10">\`:''}</div>`],
+
+  ['5. change handler',
+   /  if\(t\.id==='satTotal'\|\|\(t\.classList&&t\.classList\.contains\('satIn'\)\)\)\{[\s\S]*?pc\.className='bavg'\+\(v===null\?'':' pc-'\+pctColor\(v\)\);\n    \}\n  \}\n/,
+`  if(t.id==='satTotal'||t.id==='satTotalSpk'||(t.classList&&t.classList.contains('satIn'))){
+    const k=S.ui.gG+'|'+S.ui.gS+'|'+attWeekDates(S.ui.gWeek)[5];
+    S.d.satRes=S.d.satRes||{};
+    const r=S.d.satRes[k]=S.d.satRes[k]||{total:0,r:{}};
+    const spk=t.id==='satTotalSpk'||(t.dataset&&t.dataset.p==='s');
+    const box=spk?(r.spk=r.spk||{total:0,r:{}}):r;
+    if(t.id==='satTotal'||t.id==='satTotalSpk'){
+      box.total=Math.max(0,Number(t.value)||0);
+      syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,null);save();render();return}
+    if(t.value==='')delete box.r[t.dataset.id];
+    else box.r[t.dataset.id]=Math.min(Math.max(0,Number(t.value)),box.total||Infinity);
+    syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,t.dataset.id);
+    save();
+    const c=box.r[t.dataset.id];
+    if(c!==undefined)t.value=c;
+    const pc=document.querySelector('.bavg[data-id="'+t.dataset.id+'"]');
+    if(pc){
+      const v=satPct(r,t.dataset.id,isLangSub(S.ui.gS));
+      pc.textContent=v===null?'—':v+'%';
+      pc.className='bavg'+(v===null?'':' pc-'+pctColor(v));
+    }
+  }
+`],
+
+  ['6a. o\'quvchi oylik oynasi (foiz)',
+`        const c=sr.r[st.id];
+        const pc=(sr.total>0&&c!==undefined)?Math.round(c/sr.total*100):null;`,
+`        const c=sr.r[st.id];
+        const pc=satPct(sr,st.id,isLangSub(sb));`],
+
+  ['6b. o\'quvchi oylik oynasi (kichik yozuv)',
+`<small>\${c}/\${sr.total}</small>`,
+`<small>\${isLangSub(sb)?'':c+'/'+sr.total}</small>`],
+
+  ['7. CSS',
+`</head>`,
+`<style id="sat-speaking-css">
+/* shanba ustuni ixchamroq */
+.gwrap table.gtab th.satc,.gwrap table.gtab td.satc{width:62px!important;min-width:0!important;padding:0 2px!important}
+.gwrap table.gtab .satbox input{width:100%!important;max-width:44px!important;height:26px!important;min-height:0!important;font-size:12px!important}
+.gwrap table.gtab td{height:40px!important}
+/* Ingliz / Nemis tili: ikkita maydon (Test + Speaking) */
+.gwrap table.gtab .satbox.two{flex-direction:column;gap:3px;padding:3px 0}
+.gwrap table.gtab .satbox.two input{max-width:46px!important;height:24px!important;font-size:11.5px!important}
+.gwrap table.gtab td:has(.satbox.two){height:62px!important}
+.totbar.two{flex-wrap:wrap!important}
+.totbar.two label{flex:1 1 140px}
+.totbar.two input{width:70px!important}
+@media(min-width:701px){
+ .gwrap table.gtab th.satc,.gwrap table.gtab td.satc{width:84px!important}
+ .gwrap table.gtab .satbox input{max-width:60px!important}
+ .gwrap table.gtab .satbox.two input{max-width:64px!important}
+}
+</style>
+</head>`]
+]);
+
+/* ================= student.js ================= */
+patch(stuPath, [
+  ['8. o\'quvchi paneli: shanba natijasi',
+`    if (g !== gid || !rec || !rec.r || typeof rec.r[sid] !== 'number' || !(num(rec.total) > 0)) continue;
+    sat.push({ date, subject: sb, total: num(rec.total), correct: Math.min(rec.r[sid], num(rec.total)) });`,
+`    /* SAT-SPEAKING-PATCH */
+    if (g !== gid || !rec || !rec.r) continue;
+    const one = b => (b && b.r && typeof b.r[sid] === 'number' && num(b.total) > 0
+      ? Math.round(Math.min(b.r[sid], num(b.total)) / num(b.total) * 100) : null);
+    if (rec.spk && (sb === 'Ingliz tili' || sb === 'Nemis tili')) {
+      const v = [one(rec), one(rec.spk)].filter(x => x !== null);
+      if (v.length) {
+        sat.push({ date, subject: sb, total: 100, correct: Math.round(v.reduce((a, b) => a + b, 0) / v.length) });
+        continue;
+      }
+    }
+    if (typeof rec.r[sid] !== 'number' || !(num(rec.total) > 0)) continue;
+    sat.push({ date, subject: sb, total: num(rec.total), correct: Math.min(rec.r[sid], num(rec.total)) });`]
+]);
+
+console.log('\nQo\'llandi: ' + ok + ', muammo: ' + bad);
+if (bad) console.log('Muammoli bandlar uchun .bak nusxadan qayta urinib ko\'ring yoki menga xabar bering.');
+process.exit(bad ? 1 : 0);
