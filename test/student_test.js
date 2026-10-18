@@ -14,16 +14,22 @@ let pass = 0, failN = 0;
 const ok = (c, m) => { if (c) pass++; else { failN++; console.log('XATO:', m); } };
 
 class Client {
-  async call(method, url, body) {
+  async call(method, url, body, headers) {
+    const isBuf = Buffer.isBuffer(body);
     const r = await fetch(base + url, {
       method,
-      headers: { 'Content-Type': 'application/json', Cookie: this.cookie || '', Origin: base },
-      body: body ? JSON.stringify(body) : undefined
+      headers: { 'Content-Type': 'application/json', Cookie: this.cookie || '', Origin: base, ...(headers || {}) },
+      body: body ? (isBuf ? body : JSON.stringify(body)) : undefined
     });
     const sc = r.headers.get('set-cookie');
     if (sc) this.cookie = sc.split(';')[0];
     let j = null; try { j = await r.json(); } catch (e) {}
     return { s: r.status, j };
+  }
+  async raw(method, url, headers) {
+    const r = await fetch(base + url, { method, headers: { Cookie: this.cookie || '', Origin: base, ...(headers || {}) } });
+    const h = {}; r.headers.forEach((v, k) => { h[k] = v; });
+    return { s: r.status, h, b: Buffer.from(await r.arrayBuffer()) };
   }
 }
 (async () => {
@@ -160,52 +166,84 @@ class Client {
   r = await par.call('POST', '/api/chat', { text: 'x' }); ok(r.s === 403, 'ota-ona xodimlar chatiga yoza olmaydi');
   r = await par.call('POST', '/api/credentials', { parentOf: 'sb', login: 'ota_vali', password: 'zzzz' }); ok(r.s === 403, 'ota-ona parol o‘zgartira olmaydi');
 
-  // ---- ota-ona <-> administrator chati (alohida suhbatlar) ----
+  // ---- ota-onalar + administrator: bitta umumiy chat ----
+  const stuV = new Client(); r = await stuV.call('POST', '/api/auth/login', { user: 'vali', password: 'abcd' }); ok(r.s === 200 && r.j.role === 'student', 'o‘quvchi (Vali) kirdi');
   r = await par.call('POST', '/api/pchat', { text: '   ' }); ok(r.s === 400, 'bo‘sh xabar rad');
-  r = await par.call('POST', '/api/pchat', { text: '  Assalomu alaykum  ' }); ok(r.s === 200 && r.j.msg.text === 'Assalomu alaykum' && r.j.msg.role === 'parent', 'ota-ona yozdi');
+  r = await par.call('POST', '/api/pchat', { text: '  Assalomu alaykum  ' }); ok(r.s === 200 && r.j.msg.text === 'Assalomu alaykum' && r.j.msg.role === 'parent' && r.j.msg.me === true, 'ota-ona yozdi');
   const pm1 = r.j.msg.id;
-  r = await par2.call('POST', '/api/pchat', { text: 'Salom, Ali haqida savol' }); ok(r.s === 200, 'ikkinchi ota-ona yozdi');
-  r = await par.call('GET', '/api/pchat?since=0'); ok(r.j.msgs.length === 1 && r.j.msgs[0].text === 'Assalomu alaykum', 'ota-ona faqat o‘z suhbatini ko‘radi');
-  r = await par2.call('GET', '/api/pchat?since=0'); ok(r.j.msgs.length === 1 && r.j.msgs[0].text.startsWith('Salom'), 'boshqa ota-ona o‘z suhbatini ko‘radi');
-  r = await teacher.call('GET', '/api/pchat/threads'); ok(r.s === 403, 'o‘qituvchi ota-onalar chatiga kira olmaydi');
-  r = await teacher.call('POST', '/api/pchat/send', { sid: 'sb', text: 'x' }); ok(r.s === 403, 'o‘qituvchi ota-onaga yoza olmaydi');
-  r = await stu.call('GET', '/api/pchat/threads'); ok(r.s === 401 || r.s === 403, 'o‘quvchi ota-onalar chatiga kira olmaydi');
-  r = await admin.call('GET', '/api/pchat/unread'); ok(r.j.total === 2 && r.j.enabled === true, 'admin: 2 ta o‘qilmagan');
-  r = await admin.call('GET', '/api/pchat/threads');
-  ok(r.j.threads.length === 2 && r.j.threads.every(t => t.unread === 1 && t.hasAccount), 'admin: suhbatlar ro‘yxati');
-  r = await admin.call('GET', '/api/pchat/thread?sid=sb&since=0'); ok(r.j.msgs.length === 1 && r.j.msgs[0].id === pm1, 'admin suhbatni ochdi');
-  r = await admin.call('GET', '/api/pchat/unread'); ok(r.j.total === 1, 'ochilgan suhbat o‘qilgan bo‘ldi');
-  r = await admin.call('POST', '/api/pchat/send', { sid: 'sb', text: 'Va alaykum assalom' }); ok(r.s === 200 && r.j.msg.role === 'admin', 'admin javob yozdi');
-  r = await admin.call('POST', '/api/pchat/send', { sid: 'zzz', text: 'x' }); ok(r.s === 404, 'noma‘lum o‘quvchi rad');
-  r = await par.call('GET', '/api/me'); ok(r.j.chat.unread === 1, 'ota-onaga o‘qilmagan xabar soni');
-  r = await par.call('GET', '/api/pchat?since=0&peek=1'); ok(r.j.msgs.length === 2 && r.j.unread === 1, 'peek o‘qilgan qilmaydi');
-  r = await par.call('GET', '/api/pchat?since=0'); r = await par.call('GET', '/api/me'); ok(r.j.chat.unread === 0, 'ochilgach o‘qilgan bo‘ldi');
-  r = await par2.call('GET', '/api/pchat?since=0'); ok(r.j.msgs.length === 1, 'ikkinchi ota-ona birinchisining javobini ko‘rmaydi');
-
-  // yozishni to'xtatish: bitta ota-ona uchun
-  r = await admin.call('POST', '/api/pchat/lock', { sid: 'sb', locked: true }); ok(r.s === 200, 'bitta suhbat to‘xtatildi');
-  r = await par.call('POST', '/api/pchat', { text: 'yana' }); ok(r.s === 403, 'to‘xtatilgan suhbatga ota-ona yoza olmaydi');
-  r = await par2.call('POST', '/api/pchat', { text: 'men yozaman' }); ok(r.s === 200, 'boshqa ota-ona yozishda davom etadi');
-  r = await par.call('GET', '/api/pchat?since=0&peek=1'); ok(r.j.locked === true && r.j.msgs.length === 2, 'ota-ona eski xabarlarni ko‘radi, lekin yoza olmaydi');
-  r = await admin.call('POST', '/api/pchat/send', { sid: 'sb', text: 'Admin yoza oladi' }); ok(r.s === 200, 'admin to‘xtatilgan suhbatga ham yoza oladi');
-  r = await admin.call('POST', '/api/pchat/lock', { sid: 'sb', locked: false }); r = await par.call('POST', '/api/pchat', { text: 'rahmat' }); ok(r.s === 200, 'yoqilgach yana yozadi');
-  // hamma uchun
-  r = await admin.call('POST', '/api/pchat/lock', { locked: true }); ok(r.s === 200 && r.j.enabled === false, 'chat hamma uchun to‘xtatildi');
-  r = await par.call('POST', '/api/pchat', { text: 'x' }); ok(r.s === 403, 'umumiy to‘xtatishda ota-ona yoza olmaydi');
-  r = await par2.call('POST', '/api/pchat', { text: 'x' }); ok(r.s === 403, 'umumiy to‘xtatishda hamma yozolmaydi');
+  r = await par2.call('POST', '/api/pchat', { text: 'Salom, savolim bor' }); ok(r.s === 200, 'ikkinchi ota-ona yozdi');
+  r = await par.call('GET', '/api/pchat?since=0&peek=1');
+  ok(r.j.msgs.length === 2 && r.j.msgs[0].me === true && r.j.msgs[1].me === false && !JSON.stringify(r.j).includes('p:'), 'umumiy chat: ikkala ota-ona ham hamma xabarni ko‘radi (ichki id oshkor emas)');
+  r = await par2.call('GET', '/api/pchat?since=0&peek=1'); ok(r.j.msgs.length === 2 && r.j.unread === 0, 'yozgan ota-ona shu paytgacha hammasini ko‘rgan hisoblanadi');
+  r = await teacher.call('GET', '/api/pchat'); ok(r.s === 403, 'o‘qituvchi ota-onalar chatiga kira olmaydi');
+  r = await teacher.call('POST', '/api/pchat', { text: 'x' }); ok(r.s === 403, 'o‘qituvchi yoza olmaydi');
+  r = await stuV.call('GET', '/api/pchat'); ok(r.s === 403, 'o‘quvchi chatga kira olmaydi');
+  r = await admin.call('GET', '/api/pchat/unread'); ok(r.j.unread === 2 && r.j.enabled === true, 'admin: 2 ta o‘qilmagan');
+  r = await admin.call('GET', '/api/pchat?since=0'); ok(r.j.msgs.length === 2 && r.j.msgs.every(m => m.me === false), 'admin barcha xabarni ko‘rdi');
+  r = await admin.call('GET', '/api/pchat/unread'); ok(r.j.unread === 0, 'ochilgach o‘qilgan');
+  r = await admin.call('POST', '/api/pchat', { text: 'Hammaga salom' }); ok(r.s === 200 && r.j.msg.role === 'admin' && r.j.msg.name === 'Administrator', 'admin hammaga yozdi');
+  r = await par.call('GET', '/api/me'); ok(r.j.chat.unread === 2 && r.j.chat.enabled === true, 'ota-onaga o‘qilmagan soni (ikkinchi ota-ona + admin)');
+  r = await par.call('GET', '/api/pchat?since=0'); r = await par.call('GET', '/api/me'); ok(r.j.chat.unread === 0, 'ochilgach o‘qilgan');
+  r = await par2.call('GET', '/api/pchat?since=2'); ok(r.j.msgs.length === 1 && r.j.msgs[0].role === 'admin', 'since bo‘yicha faqat yangilari');
+  // to'xtatish
+  r = await par.call('POST', '/api/pchat/lock', { locked: true }); ok(r.s === 403, 'ota-ona chatni to‘xtata olmaydi');
+  r = await admin.call('POST', '/api/pchat/lock', { locked: true }); ok(r.s === 200 && r.j.enabled === false, 'admin chatni to‘xtatdi');
+  r = await par.call('POST', '/api/pchat', { text: 'x' }); ok(r.s === 403, 'to‘xtatilganda ota-ona yoza olmaydi');
+  r = await par2.call('POST', '/api/pchat', { text: 'x' }); ok(r.s === 403, 'to‘xtatilganda hech bir ota-ona yoza olmaydi');
+  r = await par.call('GET', '/api/pchat?since=0&peek=1'); ok(r.j.msgs.length === 3 && r.j.enabled === false, 'to‘xtatilganda ham o‘qiy oladi');
   r = await par.call('GET', '/api/me'); ok(r.j.chat.enabled === false, 'panelda chat to‘xtatilgani ko‘rinadi');
-  r = await admin.call('POST', '/api/pchat/lock', { locked: false }); r = await par2.call('POST', '/api/pchat', { text: 'yana yozdim' }); ok(r.s === 200, 'umumiy yoqilgach yozish tiklandi');
+  r = await admin.call('POST', '/api/pchat', { text: 'Admin yozishda davom etadi' }); ok(r.s === 200, 'admin to‘xtatilganda ham yoza oladi');
+  r = await admin.call('POST', '/api/pchat/lock', { locked: false }); r = await par.call('POST', '/api/pchat', { text: 'rahmat' }); ok(r.s === 200, 'yoqilgach yozish tiklandi');
   // o'chirish
-  r = await par.call('POST', '/api/pchat/delete', { sid: 'sb', id: pm1 }); ok(r.s === 403, 'ota-ona xabar o‘chira olmaydi');
-  r = await admin.call('POST', '/api/pchat/delete', { sid: 'sb', id: pm1 }); ok(r.s === 200, 'admin xabarni o‘chirdi');
-  r = await par.call('GET', '/api/pchat?since=0&peek=1'); ok(r.j.msgs.find(m => m.id === pm1).x === true && r.j.msgs.find(m => m.id === pm1).text === '', 'o‘chirilgan xabar matnsiz');
-  // sozlama saqlanishi
-  r = await admin.call('POST', '/api/pchat/lock', { locked: true });
+  r = await par.call('POST', '/api/pchat/delete', { id: pm1 }); ok(r.s === 403, 'ota-ona xabar o‘chira olmaydi');
+  r = await admin.call('POST', '/api/pchat/delete', { id: pm1 }); ok(r.s === 200, 'admin xabarni o‘chirdi');
+  r = await par2.call('GET', '/api/pchat?since=0&peek=1'); const gone = r.j.msgs.find(m => m.id === pm1); ok(gone.x === true && gone.text === '', 'o‘chirilgan xabar matnsiz');
+
+  // ---- yangiliklar ----
+  const tiny = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+  r = await par.call('GET', '/api/news'); ok(r.s === 200 && r.j.items.length === 0 && r.j.unread === 0, 'ota-ona yangiliklar ro‘yxatini ochadi');
+  r = await teacher.call('GET', '/api/news'); ok(r.s === 403, 'o‘qituvchi yangiliklarni ko‘rmaydi');
+  r = await par.call('POST', '/api/news', { text: 'x' }); ok(r.s === 403, 'ota-ona yangilik yoza olmaydi');
+  r = await stuV.call('POST', '/api/news', { text: 'x' }); ok(r.s === 403, 'o‘quvchi yangilik yoza olmaydi');
+  r = await par.call('POST', '/api/news/media', tiny, { 'Content-Type': 'image/png' }); ok(r.s === 403, 'ota-ona fayl yuklay olmaydi');
+  r = await admin.call('POST', '/api/news/media', tiny, { 'Content-Type': 'text/html' }); ok(r.s === 415, 'HTML fayl rad');
+  r = await admin.call('POST', '/api/news/media', tiny, { 'Content-Type': 'image/svg+xml' }); ok(r.s === 415, 'SVG rad');
+  r = await admin.call('POST', '/api/news/media', Buffer.alloc(9 * 1024 * 1024, 1), { 'Content-Type': 'image/png' }); ok(r.s === 413, 'katta rasm rad');
+  r = await admin.call('POST', '/api/news/media', tiny, { 'Content-Type': 'image/png' }); ok(r.s === 200 && r.j.kind === 'image' && r.j.size === tiny.length, 'rasm yuklandi');
+  const img = r.j;
+  const vid = Buffer.alloc(300000, 7);
+  r = await admin.call('POST', '/api/news/media', vid, { 'Content-Type': 'video/mp4' }); ok(r.s === 200 && r.j.kind === 'video', 'video yuklandi');
+  const vidMeta = r.j;
+  r = await admin.call('POST', '/api/news', { title: '', text: '', media: [] }); ok(r.s === 400, 'bo‘sh yangilik rad');
+  r = await admin.call('POST', '/api/news', { text: 'x', media: ['0'.repeat(24)] }); ok(r.s === 400, 'noma‘lum fayl rad');
+  r = await admin.call('POST', '/api/news', { title: 'Bayram', text: 'Ertaga dars yo‘q', media: [img.id, vidMeta.id] });
+  ok(r.s === 200 && r.j.item.media.length === 2, 'yangilik e‘lon qilindi');
+  const nid = r.j.item.id;
+  r = await admin.call('POST', '/api/news', { text: 'Ikkinchi', media: [img.id] }); ok(r.s === 400, 'biriktirilgan fayl qayta ishlatilmaydi');
+  r = await par.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'ota-onada 1 ta yangi yangilik');
+  r = await stuV.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'o‘quvchida ham 1 ta');
+  r = await par.call('GET', '/api/news'); ok(r.j.items.length === 1 && r.j.items[0].title === 'Bayram' && r.j.unread === 1, 'ro‘yxat o‘qilganni belgilamaydi');
+  r = await par.call('POST', '/api/news/seen', {}); r = await par.call('GET', '/api/me'); ok(r.j.news.unread === 0, 'ko‘rilgach belgilandi');
+  r = await stuV.call('GET', '/api/me'); ok(r.j.news.unread === 1, 'boshqa akkauntda alohida hisoblanadi');
+  // media xizmati
+  let m = await par.raw('GET', img.url); ok(m.s === 200 && m.h['content-type'] === 'image/png' && m.b.equals(tiny) && m.h['x-content-type-options'] === 'nosniff', 'rasm ko‘rsatiladi');
+  m = await par.raw('GET', vidMeta.url, { Range: 'bytes=0-99' }); ok(m.s === 206 && m.b.length === 100 && m.h['content-range'] === 'bytes 0-99/300000', 'video Range qo‘llab-quvvatlanadi');
+  m = await par.raw('GET', vidMeta.url, { Range: 'bytes=299990-' }); ok(m.s === 206 && m.b.length === 10, 'ochiq oxirli Range');
+  m = await par.raw('GET', vidMeta.url, { Range: 'bytes=999999-' }); ok(m.s === 416, 'chegaradan tashqari Range rad');
+  m = await teacher.raw('GET', img.url); ok(m.s === 403, 'o‘qituvchi faylni ocha olmaydi');
+  m = await (new Client()).raw('GET', img.url); ok(m.s === 401, 'kirmagan odam faylni ocha olmaydi');
+  m = await par.raw('GET', '/api/news/media/..%2f..%2fserver.js'); ok(m.s === 404, 'yo‘l chetlab o‘tish rad');
+  // o'chirish
+  r = await par.call('POST', '/api/news/delete', { id: nid }); ok(r.s === 403, 'ota-ona yangilikni o‘chira olmaydi');
+  r = await admin.call('POST', '/api/news/delete', { id: nid }); ok(r.s === 200, 'admin yangilikni o‘chirdi');
+  m = await par.raw('GET', img.url); ok(m.s === 404, 'yangilik o‘chgach fayl ham o‘chadi');
+  // yuklangan, lekin e'lon qilinmagan fayl
+  r = await admin.call('POST', '/api/news/media', tiny, { 'Content-Type': 'image/png' }); const orph = r.j;
+  r = await admin.call('POST', '/api/news/media-delete', { id: orph.id }); m = await admin.raw('GET', orph.url); ok(m.s === 404, 'bekor qilingan fayl o‘chadi');
+
   // ota-ona loginini o'chirish
   r = await admin.call('POST', '/api/credentials', { parentOf: 'sb', remove: true }); ok(r.s === 200, 'ota-ona logini o‘chirildi');
   r = await par.call('GET', '/api/me'); ok(r.s === 401, 'o‘chirilgach ota-ona sessiyasi yopiladi');
-  r = await admin.call('POST', '/api/pchat/lock', { locked: false });
-
 
   console.log(`\n${pass} ta o‘tdi, ${failN} ta xato`);
   server.close();
