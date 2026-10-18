@@ -52,6 +52,9 @@ async function createStore() {
     await pool.query(
       'create table if not exists kv(key text primary key, value jsonb not null, updated_at timestamptz not null default now())'
     );
+    await pool.query(
+      'create table if not exists media(id text primary key, mime text not null, size integer not null, data bytea not null, created_at timestamptz not null default now())'
+    );
     return {
       kind: 'postgres',
       async get(k) {
@@ -70,6 +73,20 @@ async function createStore() {
       async keys(prefix) {
         const r = await pool.query('select key from kv where key like $1 order by key', [prefix + '%']);
         return r.rows.map(x => x.key);
+      },
+      async putMedia(id, mime, buf) {
+        await pool.query('insert into media(id,mime,size,data) values($1,$2,$3,$4) on conflict (id) do nothing', [id, mime, buf.length, buf]);
+      },
+      async mediaMeta(id) {
+        const r = await pool.query('select mime,size from media where id=$1', [id]);
+        return r.rows[0] ? { mime: r.rows[0].mime, size: r.rows[0].size } : null;
+      },
+      async mediaRange(id, start, end) {
+        const r = await pool.query('select substring(data from $2::int for $3::int) as d from media where id=$1', [id, start + 1, end - start + 1]);
+        return r.rows[0] ? r.rows[0].d : Buffer.alloc(0);
+      },
+      async delMedia(id) {
+        await pool.query('delete from media where id=$1', [id]);
       },
       async close() {
         await pool.end();
@@ -105,6 +122,36 @@ async function createStore() {
     },
     async keys(prefix) {
       return Object.keys(mem).filter(k => k.startsWith(prefix)).sort();
+    },
+    async putMedia(id, mime, buf) {
+      const dir = path.join(DATA_DIR, 'media');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, id + '.bin'), buf);
+      fs.writeFileSync(path.join(dir, id + '.json'), JSON.stringify({ mime, size: buf.length }));
+    },
+    async mediaMeta(id) {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'media', id + '.json'), 'utf8'));
+      } catch (e) {
+        return null;
+      }
+    },
+    async mediaRange(id, start, end) {
+      const fd = fs.openSync(path.join(DATA_DIR, 'media', id + '.bin'), 'r');
+      try {
+        const b = Buffer.alloc(end - start + 1);
+        const n = fs.readSync(fd, b, 0, b.length, start);
+        return b.subarray(0, n);
+      } finally {
+        fs.closeSync(fd);
+      }
+    },
+    async delMedia(id) {
+      for (const ext of ['.bin', '.json']) {
+        try {
+          fs.unlinkSync(path.join(DATA_DIR, 'media', id + ext));
+        } catch (e) {}
+      }
     },
     async close() {}
   };
@@ -142,7 +189,9 @@ let DOC = { rev: 0, data: {} }; // asosiy ma'lumot
 let ADMIN = null; // { user, hash, ver }
 let CREDS = {}; // id (o'qituvchi yoki o'quvchi) -> { login, hash, ver, t, role }
 let CHAT = { counter: 0, msgs: [] }; // umumiy chat (admin + o'qituvchilar)
-let PCHAT = { enabled: true, threads: {} }; // ota-onalar chati: threads[studentId] = { counter, msgs, locked, aRead, pRead }
+let GCHAT = { enabled: true, counter: 0, msgs: [], reads: {} }; // ota-onalar + administrator: bitta umumiy chat
+let NEWS = { counter: 0, items: [], seen: {} }; // yangiliklar (admin yozadi, o'quvchi va ota-onalar ko'radi)
+const PENDING_MEDIA = new Map(); // yuklangan, lekin hali yangilikka biriktirilmagan fayllar
 let META = { secret: '' };
 
 const persistDoc = () => serial(() => store.set('doc', DOC));
@@ -255,6 +304,15 @@ function chatRate(key) {
 }
 setInterval(() => {
   const now = Date.now();
+  for (const [id, m] of PENDING_MEDIA) {
+    if (now - m.t > 3600000) {
+      PENDING_MEDIA.delete(id);
+      if (store) store.delMedia(id).catch(() => {});
+    }
+  }
+}, 600000).unref();
+setInterval(() => {
+  const now = Date.now();
   for (const [k, v] of chatHits) if (!v.some(t => now - t < 10000)) chatHits.delete(k);
 }, 60000).unref();
 
@@ -313,7 +371,7 @@ function securityHeaders(req, res) {
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-      "font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      "font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
   );
   if (PROD || isHttps(req)) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 }
@@ -507,125 +565,248 @@ async function dailyBackup() {
 const buildStudentView = require('./student');
 
 
-/* ---------------- ota-onalar chati (faqat ota-ona + administrator) ---------------- */
+/* ---------------- ota-onalar + administrator: bitta umumiy chat ---------------- */
 
-const pcThread = sid =>
-  PCHAT.threads[sid] || (PCHAT.threads[sid] = { counter: 0, msgs: [], locked: false, aRead: 0, pRead: 0 });
-const pcUnreadAdmin = th => th.msgs.filter(m => m.role === 'parent' && !m.x && m.seq > th.aRead).length;
+const accOf = sess => (sess.role === 'admin' ? 'admin' : sess.id);
 
-async function pchatAdmin(req, res, url, route) {
-  const students = Array.isArray(DOC.data.students) ? DOC.data.students.filter(isObj) : [];
-  const groups = Array.isArray(DOC.data.groups) ? DOC.data.groups.filter(isObj) : [];
-  const gName = id => (groups.find(g => g.id === id) || {}).name || '';
-  const stuOf = sid => students.find(x => x.id === sid);
-  const nameOf = st => ((st.first || '') + ' ' + (st.last || '')).trim();
-  const sidOf = v => {
-    const sid = String(v || '');
-    return sid && !BAD_KEYS.has(sid) && stuOf(sid) ? sid : '';
-  };
+async function gchatApi(req, res, url, route, sess) {
+  if (sess.role !== 'admin' && sess.role !== 'parent') return fail(res, 403, 'Bu bo‘lim faqat administrator va ota-onalar uchun');
+  const acc = accOf(sess);
+  const admin = sess.role === 'admin';
+  const view = m => ({ id: m.id, seq: m.seq, ver: m.ver, role: m.role, name: m.name, text: m.x ? '' : m.text, ts: m.ts, x: !!m.x, me: m.uid === acc });
+  const unread = () => GCHAT.msgs.filter(m => !m.x && m.uid !== acc && m.seq > (GCHAT.reads[acc] || 0)).length;
+  const save = () => store.set('gchat', GCHAT);
 
-  if (route === 'GET /api/pchat/unread') {
-    let total = 0;
-    for (const th of Object.values(PCHAT.threads)) total += pcUnreadAdmin(th);
-    return send(res, 200, { enabled: PCHAT.enabled, total });
-  }
+  if (route === 'GET /api/pchat/unread') return send(res, 200, { enabled: GCHAT.enabled, unread: unread() });
 
-  if (route === 'GET /api/pchat/threads') {
-    const rows = [];
-    for (const st of students) {
-      const has = !!(CREDS['p:' + st.id] && CREDS['p:' + st.id].role === 'parent');
-      const th = PCHAT.threads[st.id];
-      if (!has && !(th && th.msgs.length)) continue;
-      const lm = th && th.msgs.length ? th.msgs[th.msgs.length - 1] : null;
-      rows.push({
-        sid: st.id,
-        name: nameOf(st),
-        group: gName(st.groupId),
-        hasAccount: has,
-        locked: !!(th && th.locked),
-        unread: th ? pcUnreadAdmin(th) : 0,
-        last: lm ? { role: lm.role, ts: lm.ts, x: !!lm.x, text: lm.x ? '' : String(lm.text).slice(0, 90) } : null
-      });
-    }
-    rows.sort((a, b) => (b.last ? b.last.ts : 0) - (a.last ? a.last.ts : 0) || a.name.localeCompare(b.name));
-    return send(res, 200, { enabled: PCHAT.enabled, threads: rows });
-  }
-
-  if (route === 'GET /api/pchat/thread') {
-    const sid = sidOf(url.searchParams.get('sid'));
-    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
+  if (route === 'GET /api/pchat') {
     const since = Number(url.searchParams.get('since')) || 0;
-    const th = PCHAT.threads[sid];
-    const msgs = th ? th.msgs.filter(m => m.ver > since) : [];
-    if (th && url.searchParams.get('peek') !== '1' && th.aRead !== th.counter) {
+    const msgs = GCHAT.msgs.filter(m => m.ver > since).map(view);
+    const peek = url.searchParams.get('peek') === '1';
+    const before = unread();
+    if (!peek && (GCHAT.reads[acc] || 0) !== GCHAT.counter) {
       await serial(async () => {
-        th.aRead = th.counter;
-        await store.set('pchat:' + sid, th);
+        GCHAT.reads[acc] = GCHAT.counter;
+        await save();
       });
     }
-    return send(res, 200, { msgs, last: th ? th.counter : 0, locked: !!(th && th.locked), enabled: PCHAT.enabled });
+    return send(res, 200, { msgs, last: GCHAT.counter, enabled: GCHAT.enabled, unread: peek ? before : 0 });
   }
 
-  if (route === 'POST /api/pchat/send') {
+  if (route === 'POST /api/pchat') {
     const b = await readBody(req);
-    const sid = sidOf(b.sid);
-    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
     const text = String(b.text || '').trim().slice(0, 2000);
     if (!text) return fail(res, 400, 'Xabar bo‘sh');
-    if (chatRate(clientIp(req) + '|pchat|admin')) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
-    const name = (DOC.data.profile && DOC.data.profile.name) || ADMIN.user;
+    if (!admin && !GCHAT.enabled) return fail(res, 403, 'Chat vaqtincha to‘xtatilgan');
+    if (chatRate(clientIp(req) + '|pchat|' + acc)) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
+    let name = 'Administrator';
+    if (!admin) {
+      const st = (DOC.data.students || []).find(x => x && x.id === sess.id.slice(2));
+      name = st ? ((st.first || '') + ' ' + (st.last || '')).trim() : 'Ota-ona';
+    }
     const msg = await serial(async () => {
-      const th = pcThread(sid);
-      const n = ++th.counter;
-      const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, role: 'admin', name, text, ts: Date.now(), x: false };
-      th.msgs.push(m);
-      if (th.msgs.length > 400) th.msgs.splice(0, th.msgs.length - 400);
-      th.aRead = n;
-      await store.set('pchat:' + sid, th);
+      const n = ++GCHAT.counter;
+      const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, uid: acc, role: admin ? 'admin' : 'parent', name, text, ts: Date.now(), x: false };
+      GCHAT.msgs.push(m);
+      if (GCHAT.msgs.length > 500) GCHAT.msgs.splice(0, GCHAT.msgs.length - 500);
+      GCHAT.reads[acc] = n;
+      await save();
       return m;
     });
-    return send(res, 200, { ok: true, msg });
+    return send(res, 200, { ok: true, msg: view(msg) });
   }
 
   if (route === 'POST /api/pchat/delete') {
+    if (!admin) return fail(res, 403, 'Faqat administrator');
     const b = await readBody(req);
-    const sid = sidOf(b.sid);
-    if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
     await serial(async () => {
-      const th = PCHAT.threads[sid];
-      const m = th && th.msgs.find(x => x.id === String(b.id || ''));
+      const m = GCHAT.msgs.find(x => x.id === String(b.id || ''));
       if (!m || m.x) return;
       m.x = true;
       m.text = '';
-      m.ver = ++th.counter;
-      await store.set('pchat:' + sid, th);
+      m.ver = ++GCHAT.counter;
+      await save();
     });
     return send(res, 200, { ok: true });
   }
 
-  /* yozishni to'xtatish / yoqish: sid bo'lsa — bitta ota-ona, bo'lmasa — hamma uchun */
+  /* chatni vaqtincha to'xtatish / yoqish (ota-onalar yoza olmaydi, admin yozadi) */
   if (route === 'POST /api/pchat/lock') {
+    if (!admin) return fail(res, 403, 'Faqat administrator');
     const b = await readBody(req);
-    const locked = b.locked === true;
-    if (b.sid) {
-      const sid = sidOf(b.sid);
-      if (!sid) return fail(res, 404, 'O‘quvchi topilmadi');
-      await serial(async () => {
-        const th = pcThread(sid);
-        th.locked = locked;
-        await store.set('pchat:' + sid, th);
-      });
-    } else {
-      await serial(async () => {
-        PCHAT.enabled = !locked;
-        await store.set('pchatmeta', { enabled: PCHAT.enabled });
-      });
-    }
-    return send(res, 200, { ok: true, enabled: PCHAT.enabled });
+    await serial(async () => {
+      GCHAT.enabled = b.locked !== true;
+      await save();
+    });
+    return send(res, 200, { ok: true, enabled: GCHAT.enabled });
   }
 
   return fail(res, 404, 'Topilmadi');
 }
+
+/* ---------------- yangiliklar (rasm / video / matn) ---------------- */
+
+const NEWS_IMG = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const NEWS_VID = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
+const MAX_IMG = 8 * 1024 * 1024;
+const MAX_VID = 40 * 1024 * 1024;
+const MEDIA_ID = /^[a-f0-9]{24}$/;
+
+function readRaw(req, max) {
+  return new Promise((resolve, reject) => {
+    const len = Number(req.headers['content-length']);
+    if (len && len > max) {
+      req.resume();
+      return reject(Object.assign(new Error('Fayl juda katta'), { code: 413 }));
+    }
+    let size = 0;
+    const chunks = [];
+    req.on('data', c => {
+      size += c.length;
+      if (size > max) {
+        reject(Object.assign(new Error('Fayl juda katta'), { code: 413 }));
+        req.destroy();
+        return;
+      }
+      chunks.push(c);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+async function serveMedia(req, res, id) {
+  const meta = MEDIA_ID.test(id) ? await store.mediaMeta(id) : null;
+  if (!meta) return fail(res, 404, 'Fayl topilmadi');
+  const size = meta.size;
+  let start = 0;
+  let end = size - 1;
+  let code = 200;
+  const hdr = {
+    'Content-Type': meta.mime,
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'private, max-age=86400',
+    'Content-Disposition': 'inline',
+    'X-Content-Type-Options': 'nosniff'
+  };
+  const r = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || ''));
+  if (r && (r[1] !== '' || r[2] !== '')) {
+    if (r[1] === '') start = Math.max(0, size - Number(r[2]));
+    else {
+      start = Number(r[1]);
+      if (r[2] !== '') end = Math.min(end, Number(r[2]));
+    }
+    if (start > end || start >= size) {
+      res.writeHead(416, { 'Content-Range': 'bytes */' + size });
+      return res.end();
+    }
+    end = Math.min(end, start + 4 * 1024 * 1024 - 1); // bo'laklab beramiz
+    code = 206;
+    hdr['Content-Range'] = 'bytes ' + start + '-' + end + '/' + size;
+  }
+  hdr['Content-Length'] = end - start + 1;
+  res.writeHead(code, hdr);
+  if (req.method === 'HEAD') return res.end();
+  res.end(await store.mediaRange(id, start, end));
+}
+
+async function newsApi(req, res, url, route, sess) {
+  if (sess.role === 'teacher') return fail(res, 403, 'Bu bo‘limga ruxsat yo‘q');
+  const admin = sess.role === 'admin';
+  const acc = accOf(sess);
+  const view = it => ({
+    id: it.id,
+    seq: it.seq,
+    ts: it.ts,
+    title: it.title,
+    text: it.text,
+    media: it.media.map(m => ({ id: m.id, kind: m.kind, mime: m.mime, size: m.size, url: '/api/news/media/' + m.id }))
+  });
+  const save = () => store.set('news', NEWS);
+
+  if ((req.method === 'GET' || req.method === 'HEAD') && url.pathname.startsWith('/api/news/media/')) {
+    return serveMedia(req, res, url.pathname.slice('/api/news/media/'.length));
+  }
+
+  if (route === 'GET /api/news') {
+    const items = NEWS.items.slice().sort((a, b) => b.seq - a.seq).slice(0, 100).map(view);
+    return send(res, 200, { items, last: NEWS.counter, unread: newsUnread(acc) });
+  }
+
+  if (route === 'POST /api/news/seen') {
+    if ((NEWS.seen[acc] || 0) !== NEWS.counter) {
+      await serial(async () => {
+        NEWS.seen[acc] = NEWS.counter;
+        await save();
+      });
+    }
+    return send(res, 200, { ok: true });
+  }
+
+  if (!admin) return fail(res, 403, 'Faqat administrator');
+
+  if (route === 'POST /api/news/media') {
+    const mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    const isImg = NEWS_IMG.has(mime);
+    if (!isImg && !NEWS_VID.has(mime)) return fail(res, 415, 'Faqat rasm (JPG, PNG, WEBP, GIF) yoki video (MP4, WEBM, MOV)');
+    const buf = await readRaw(req, isImg ? MAX_IMG : MAX_VID);
+    if (!buf.length) return fail(res, 400, 'Fayl bo‘sh');
+    const id = crypto.randomBytes(12).toString('hex');
+    await store.putMedia(id, mime, buf);
+    const info = { id, kind: isImg ? 'image' : 'video', mime, size: buf.length };
+    PENDING_MEDIA.set(id, { ...info, t: Date.now() });
+    return send(res, 200, { ...info, url: '/api/news/media/' + id });
+  }
+
+  if (route === 'POST /api/news/media-delete') {
+    const b = await readBody(req);
+    const id = String(b.id || '');
+    if (PENDING_MEDIA.has(id)) {
+      PENDING_MEDIA.delete(id);
+      await store.delMedia(id);
+    }
+    return send(res, 200, { ok: true });
+  }
+
+  if (route === 'POST /api/news') {
+    const b = await readBody(req);
+    const title = String(b.title || '').trim().slice(0, 150);
+    const text = String(b.text || '').trim().slice(0, 5000);
+    const ids = Array.isArray(b.media) ? b.media.map(String).slice(0, 10) : [];
+    const media = [];
+    for (const id of ids) {
+      const m = PENDING_MEDIA.get(id);
+      if (!m) return fail(res, 400, 'Fayl topilmadi. Qayta yuklang');
+      media.push({ id: m.id, kind: m.kind, mime: m.mime, size: m.size });
+    }
+    if (!text && !title && !media.length) return fail(res, 400, 'Matn yoki rasm/video kiriting');
+    const item = await serial(async () => {
+      const n = ++NEWS.counter;
+      const it = { id: crypto.randomBytes(8).toString('hex'), seq: n, ts: Date.now(), title, text, media };
+      NEWS.items.push(it);
+      for (const m of media) PENDING_MEDIA.delete(m.id);
+      await save();
+      return it;
+    });
+    return send(res, 200, { ok: true, item: view(item) });
+  }
+
+  if (route === 'POST /api/news/delete') {
+    const b = await readBody(req);
+    const gone = await serial(async () => {
+      const i = NEWS.items.findIndex(x => x.id === String(b.id || ''));
+      if (i < 0) return null;
+      const [it] = NEWS.items.splice(i, 1);
+      await save();
+      return it;
+    });
+    if (gone) for (const m of gone.media) await store.delMedia(m.id);
+    return send(res, 200, { ok: true });
+  }
+
+  return fail(res, 404, 'Topilmadi');
+}
+const newsUnread = acc => NEWS.items.filter(i => i.seq > (NEWS.seen[acc] || 0)).length;
 
 /* ---------------- API ---------------- */
 
@@ -731,11 +912,15 @@ async function api(req, res, url) {
   }
 
   /* ---- ma'lumot ---- */
+  if (url.pathname.startsWith('/api/pchat')) return gchatApi(req, res, url, route, sess);
+  if (url.pathname.startsWith('/api/news')) return newsApi(req, res, url, route, sess);
+
   /* ---- o'quvchi: faqat o'z paneli ---- */
   if (sess.role === 'student') {
     if (route === 'GET /api/me') {
       const v = buildStudentView(DOC.data, sess.id);
       if (!v) return fail(res, 404, 'O‘quvchi topilmadi');
+      v.news = { unread: newsUnread(sess.id) };
       return send(res, 200, v);
     }
     if (route === 'POST /api/auth/password') return fail(res, 403, 'Faqat administrator');
@@ -748,54 +933,13 @@ async function api(req, res, url) {
     if (route === 'GET /api/me') {
       const v = buildStudentView(DOC.data, sid);
       if (!v) return fail(res, 404, 'O‘quvchi topilmadi');
-      const th = PCHAT.threads[sid];
       v.parent = true;
+      v.news = { unread: newsUnread(sess.id) };
       v.chat = {
-        enabled: PCHAT.enabled,
-        locked: !!(th && th.locked),
-        unread: th ? th.msgs.filter(m => m.role === 'admin' && !m.x && m.seq > th.pRead).length : 0
+        enabled: GCHAT.enabled,
+        unread: GCHAT.msgs.filter(m => !m.x && m.uid !== sess.id && m.seq > (GCHAT.reads[sess.id] || 0)).length
       };
       return send(res, 200, v);
-    }
-    if (route === 'GET /api/pchat') {
-      const since = Number(url.searchParams.get('since')) || 0;
-      const th = PCHAT.threads[sid];
-      const msgs = th ? th.msgs.filter(m => m.ver > since) : [];
-      if (th && url.searchParams.get('peek') !== '1' && th.pRead !== th.counter) {
-        await serial(async () => {
-          th.pRead = th.counter;
-          await store.set('pchat:' + sid, th);
-        });
-      }
-      return send(res, 200, {
-        msgs,
-        last: th ? th.counter : 0,
-        enabled: PCHAT.enabled,
-        locked: !!(th && th.locked),
-        unread: th ? th.msgs.filter(m => m.role === 'admin' && !m.x && m.seq > th.pRead).length : 0
-      });
-    }
-    if (route === 'POST /api/pchat') {
-      const b = await readBody(req);
-      const text = String(b.text || '').trim().slice(0, 2000);
-      if (!text) return fail(res, 400, 'Xabar bo‘sh');
-      if (!PCHAT.enabled) return fail(res, 403, 'Chat vaqtincha to‘xtatilgan');
-      const th0 = PCHAT.threads[sid];
-      if (th0 && th0.locked) return fail(res, 403, 'Administrator bu chatda yozishni vaqtincha to‘xtatgan');
-      if (chatRate(clientIp(req) + '|pchat|' + sess.id)) return fail(res, 429, 'Juda tez yozyapsiz. Biroz kuting');
-      const st = (DOC.data.students || []).find(x => x && x.id === sid);
-      const name = st ? ((st.first || '') + ' ' + (st.last || '')).trim() : 'Ota-ona';
-      const msg = await serial(async () => {
-        const th = pcThread(sid);
-        const n = ++th.counter;
-        const m = { id: crypto.randomBytes(8).toString('hex'), seq: n, ver: n, role: 'parent', name, text, ts: Date.now(), x: false };
-        th.msgs.push(m);
-        if (th.msgs.length > 400) th.msgs.splice(0, th.msgs.length - 400);
-        th.pRead = n;
-        await store.set('pchat:' + sid, th);
-        return m;
-      });
-      return send(res, 200, { ok: true, msg });
     }
     if (route === 'POST /api/auth/password') return fail(res, 403, 'Faqat administrator');
     return fail(res, 403, 'Bu bo‘limga ruxsat yo‘q');
@@ -803,11 +947,6 @@ async function api(req, res, url) {
 
   if (url.pathname === '/api/me' || url.pathname.startsWith('/api/me/')) {
     return fail(res, 403, 'Bu bo‘lim faqat o‘quvchilar uchun');
-  }
-
-  if (url.pathname.startsWith('/api/pchat')) {
-    if (sess.role !== 'admin') return fail(res, 403, 'Bu bo‘lim faqat administrator va ota-onalar uchun');
-    return pchatAdmin(req, res, url, route);
   }
 
   if (route === 'GET /api/data') {
@@ -1059,15 +1198,10 @@ async function init() {
   const ch = await store.get('chat');
   if (ch && Array.isArray(ch.msgs)) CHAT = ch;
   META = (await store.get('meta')) || { secret: '' };
-  const pm = await store.get('pchatmeta');
-  if (pm && typeof pm.enabled === 'boolean') PCHAT.enabled = pm.enabled;
-  for (const k of await store.keys('pchat:')) {
-    const sid = k.slice(6);
-    const th = await store.get(k);
-    if (sid && !BAD_KEYS.has(sid) && th && Array.isArray(th.msgs)) {
-      PCHAT.threads[sid] = { counter: th.counter || 0, msgs: th.msgs, locked: !!th.locked, aRead: th.aRead || 0, pRead: th.pRead || 0 };
-    }
-  }
+  const gc = await store.get('gchat');
+  if (gc && Array.isArray(gc.msgs)) GCHAT = { enabled: gc.enabled !== false, counter: gc.counter || 0, msgs: gc.msgs, reads: isObj(gc.reads) ? gc.reads : {} };
+  const nw = await store.get('news');
+  if (nw && Array.isArray(nw.items)) NEWS = { counter: nw.counter || 0, items: nw.items, seen: isObj(nw.seen) ? nw.seen : {} };
 
   if (!META.secret) {
     META.secret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString('hex');
