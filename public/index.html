@@ -3570,9 +3570,9 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
   .pc-head #pcLockSt{display:none}
 }
 /* o'quvchi/ota-ona paneli ichidagi chat */
-#stu .pcp-panel{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(17,26,51,.05);height:calc(100dvh - 215px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:300px}
-#stu .pcp-bar{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
-#stu .pcp-lock{padding:10px 14px;background:var(--warn-soft);color:var(--warn);font-size:13px;border-top:1px solid var(--line)}
+#stu .pcp-panel{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(17,26,51,.05);height:calc(100dvh - 212px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:260px}
+#stu .pcp-bar{padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px}
+#stu .pcp-lock{padding:7px 12px;background:var(--warn-soft);color:var(--warn);font-size:12px;border-top:1px solid var(--line)}
 #stu .pcp-lock[hidden]{display:none}
 #stu .pcp-panel .chat-list{flex:1;min-height:0}
 #stu .pcp-panel .chat-form textarea:disabled,#stu .pcp-panel .chat-form .btn:disabled{opacity:.55;cursor:not-allowed}
@@ -3584,10 +3584,10 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 #stu .sv-tabs[data-n="7"]{gap:0;padding-left:2px;padding-right:2px}
 #stu .sv-tabs[data-n="7"] button span{font-size:8.5px;letter-spacing:-.03em;overflow-wrap:normal}
 @media(max-width:380px){#stu .sv-tabs[data-n="7"] button span{font-size:7.5px}}
-@media(min-width:901px){#stu .pcp-panel{height:min(680px,calc((100dvh - 200px) / var(--z,1)))}}
+@media(min-width:901px){#stu .pcp-panel{height:min(580px,calc((100dvh - 150px) / var(--z,1)))}}
 
 /* ===== yangiliklar + umumiy chat ===== */
-.pc-room{display:flex;flex-direction:column;height:min(720px,calc((100dvh - 250px) / var(--z,1)));min-height:420px;overflow:hidden;padding:0}
+.pc-room{display:flex;flex-direction:column;height:min(600px,calc((100dvh - 250px) / var(--z,1)));min-height:380px;overflow:hidden;padding:0}
 .pc-room .pc-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
 .pc-room .pc-hn{flex:1;min-width:140px}
 .pc-room .chat-list{flex:1;min-height:0}
@@ -3669,6 +3669,61 @@ button,[role="button"],a,select,summary,label.chk,.nav-i{touch-action:manipulati
 .nws-x .ic{width:18px;height:18px;color:inherit}
 .nws-l{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
 @media(min-width:700px){.nws{align-items:center}.nws-box{border-radius:24px;max-height:86vh}}
+
+/* ===== Baho jadvali: ixcham ko'rinish ===== */
+.gwrap table.gtab td{height:40px!important}
+.gwrap table.gtab td .bgc{width:28px!important;height:28px!important;font-size:14px!important}
+.gwrap table.gtab thead th{padding:7px 0!important;line-height:1.15!important}
+.gwrap table.gtab thead th small{margin-top:1px!important;font-size:9.5px!important;letter-spacing:0!important}
+.gwrap table.gtab .satbox input{height:28px!important;min-height:28px!important}
+.gwrap table.gtab tfoot td{height:34px!important}
+.gwrap table.gtab tbody td.gname{font-size:12.5px!important}
+
+/* Ingliz/Nemis tili: kompyuterda ustunlar kengligi */
+@media(min-width:701px){
+  table.gtab.spk{table-layout:fixed!important;width:100%!important;min-width:0!important}
+  .gwrap table.gtab.spk th.gname,.gwrap table.gtab.spk td.gname{width:210px!important;min-width:0!important}
+  .gwrap table.gtab.spk th.satc,.gwrap table.gtab.spk td.satc{width:104px!important}
+  .gwrap table.gtab.spk thead th:last-child,.gwrap table.gtab.spk td.bavg{width:66px!important}
+  .gwrap table.gtab.spk thead th:not(.gname):not(.satc):not(:last-child){width:auto!important}
+}
+/* Ingliz/Nemis tili: ikkita shanba ustuni telefonga sig'sin */
+@media(max-width:700px){
+  table.gtab.spk{table-layout:fixed!important;width:100%!important;min-width:330px!important}
+  .gwrap table.gtab.spk th.gname,.gwrap table.gtab.spk td.gname{width:78px!important;min-width:0!important}
+  .gwrap table.gtab.spk th.satc,.gwrap table.gtab.spk td.satc{width:54px!important}
+  .gwrap table.gtab.spk thead th:last-child,.gwrap table.gtab.spk td.bavg{width:42px!important}
+  .gwrap table.gtab.spk thead th{font-size:10px!important;padding-left:0!important;padding-right:0!important;min-width:0!important}
+  .gwrap table.gtab.spk thead th.satc small{font-size:8.5px!important}
+  .gwrap table.gtab.spk thead th:not(.gname):not(.satc):not(:last-child){width:auto!important}
+  .gwrap table.gtab.spk tbody td.gname{font-size:10.5px!important;padding:0 2px 0 20px!important}
+  .gwrap table.gtab.spk tbody td.gname::before{width:18px!important;font-size:9.5px!important}
+  .gwrap table.gtab.spk td .bgc{width:20px!important;height:20px!important;font-size:11px!important;border-radius:5px!important}
+  .gwrap table.gtab.spk .satbox input{max-width:44px!important;width:44px!important;font-size:12px!important;padding:0!important}
+  .gwrap table.gtab.spk td.bavg{font-size:10.5px!important}
+}
+
+/* ===== Chat: ixcham ko'rinish ===== */
+body .chat-list{padding:10px;gap:4px}
+body .chat-m{max-width:86%}
+body .chat-b{padding:6px 10px 4px;font-size:13.5px;line-height:1.35;border-radius:14px 14px 14px 4px}
+body .chat-m.me .chat-b{border-radius:14px 14px 4px 14px}
+body .chat-b time{font-size:9.5px;margin-top:1px}
+body .chat-who{font-size:11px;margin:0 3px 1px}
+body .chat-who .tag{font-size:9.5px;padding:1px 7px}
+body .chat-day{margin:6px 0 2px;padding:2px 10px;font-size:10.5px}
+body .chat-empty{font-size:13px;padding:14px}
+body .chat-form{gap:8px;padding:8px 10px}
+body .chat-form textarea{min-height:36px;padding:7px 12px;border-radius:12px;font-size:16px}
+body .chat-form .btn{min-height:36px;padding:0 12px}
+body .pc-room .pc-head{padding:8px 14px}
+@media(max-width:700px){
+  body .pc-room .pc-hn small,body .pc-room #pcState{display:none}
+  body .pc-room .pc-head{flex-wrap:nowrap;padding:8px 12px}
+  body .pc-room .pc-hn{min-width:0}
+  body .pc-room .pcp-sl{display:none}
+  body .pc-room .chat-form .btn{padding:0 14px}
+}
 </style>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 </head>
@@ -7424,6 +7479,7 @@ function viewsWeeklyWeek(g,list){
   const mon=weekKeyFromDate(S.ui.wD);
   const key=g.id+'|'+S.ui.wS+'|'+mon;
   const wk=S.d.weekly[key]||{};
+  const spk=isSpeakSubId(S.ui.wS);
 
   const vals=
     Object.values(wk)
@@ -7497,7 +7553,7 @@ function viewsWeeklyWeek(g,list){
               inputmode="numeric"
               data-wk="correct"
               data-sid="${s.id}"
-              ${groupTotal?'':'disabled'}
+              ${groupTotal&&!spk?'':'disabled'}
               value="${v.correct||''}"
             >
 
@@ -7644,11 +7700,18 @@ function viewsWeeklyWeek(g,list){
             inputmode="numeric"
             style="width:76px;min-height:36px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-align:center;font-weight:700;color:var(--ink)"
             value="${groupTotal}"
+            ${spk?'disabled':''}
           >
 
         </label>
 
         ${
+          spk
+          ?
+          `<span class="pill warn notice">
+            Ingliz va Nemis tili natijalari “Baho” sahifasida (Main + Speaking) kiritiladi
+          </span>`
+          :
           groupTotal
           ?
           ''
@@ -7927,7 +7990,7 @@ views.weekly=()=>{
 };
 
 
-function weeklySave(sid,field,value){if(!canGrade(S.ui.wG,S.ui.wS||GEN_SUBJECT))return;const g=grp(S.ui.wG);
+function weeklySave(sid,field,value){if(!canGrade(S.ui.wG,S.ui.wS||GEN_SUBJECT))return;if(isSpeakSubId(S.ui.wS)){toast(SPEAK_BLOCK,'err');return}const g=grp(S.ui.wG);
 
   const mon=
     weekKeyFromDate(
@@ -7987,7 +8050,7 @@ function weeklySave(sid,field,value){if(!canGrade(S.ui.wG,S.ui.wS||GEN_SUBJECT))
 }
 
 
-function weeklySetTotal(value){if(!canGrade(S.ui.wG,S.ui.wS||GEN_SUBJECT))return;const g=grp(S.ui.wG);
+function weeklySetTotal(value){if(!canGrade(S.ui.wG,S.ui.wS||GEN_SUBJECT))return;if(isSpeakSubId(S.ui.wS)){toast(SPEAK_BLOCK,'err');return}const g=grp(S.ui.wG);
 
   const mon=
     weekKeyFromDate(
@@ -9120,15 +9183,34 @@ function ttSubsOn(g,dayISO){
   if(dw)ttOrder(all.filter(x=>x.day===dw.k)).forEach(x=>{const c=canonSub(sub(x.subjectId).name);if(!out.includes(c))out.push(c)});
   return {tt:true,subs:out};
 }
+/* Ingliz va Nemis tilida shanba kuni 2 ta baholash: Main + Speaking. Umumiy foiz — ikkalasining o'rtachasi */
+const SPEAK_KEYS=['Ingliz tili','Nemis tili'];
+const hasSpeak=k=>SPEAK_KEYS.includes(k);
+const isSpeakSubId=id=>{const x=sub(id);return !!x&&hasSpeak(canonSub(x.name))};
+const SPEAK_BLOCK='Ingliz va Nemis tili natijalari “Baho” sahifasida (Main + Speaking) kiritiladi';
+function satPct(sr,sid){
+  const p=[];
+  const c=sr.r&&sr.r[sid];
+  if(sr.total>0&&c!==undefined)p.push(Math.min(c,sr.total)/sr.total*100);
+  const v=sr.sp&&sr.sp[sid];
+  if(sr.spTotal>0&&v!==undefined)p.push(Math.min(v,sr.spTotal)/sr.spTotal*100);
+  return p.length?p.reduce((x,y)=>x+y,0)/p.length:null;
+}
 function syncWeekly(gid,subKey,mon,r,sid){
   const x=S.d.subjects.find(z=>canonSub(z.name)===subKey);
   if(!x)return;
   S.d.weekly=S.d.weekly||{};
   const k=gid+'|'+x.id+'|'+mon;
   const ex=S.d.weekly[k]=S.d.weekly[k]||{};
-  const put=id=>{const c=r.r[id];
-    if(c!==undefined&&r.total>0)ex[id]={correct:c,total:r.total};else delete ex[id]};
-  if(sid)put(sid);else Object.keys(r.r).forEach(put);
+  const put=id=>{
+    const pc=satPct(r,id);
+    if(pc===null){delete ex[id];return}
+    // Ingliz/Nemis tili: umumiy natija 100 balllik foiz sifatida saqlanadi (reyting va o'quvchi paneli shundan foydalanadi)
+    if(hasSpeak(subKey)||r.spTotal>0)ex[id]={correct:Math.round(pc*10)/10,total:100};
+    else ex[id]={correct:r.r[id],total:r.total};
+  };
+  if(sid)put(sid);
+  else new Set([...Object.keys(r.r||{}),...Object.keys(r.sp||{})]).forEach(put);
   if(!Object.keys(ex).length)delete S.d.weekly[k];
 }
 
@@ -9152,7 +9234,7 @@ function gradeStats(list,g,subKey,days,sr){
     list.forEach(st=>{const v=(d.grades[g.id+'|'+subKey+'|'+x]||{})[st.id];if(v!==undefined){sum+=v;n++}});
     return n?(sum/n):null});
   const pcs=[];
-  list.forEach(st=>{const c=sr.r[st.id];if(sr.total>0&&c!==undefined)pcs.push(Math.round(c/sr.total*100))});
+  list.forEach(st=>{const v=satPct(sr,st.id);if(v!==null)pcs.push(Math.round(v))});
   const avg=pcs.length?Math.round(pcs.reduce((a,b)=>a+b,0)/pcs.length):null;
   return {col,pcs,avg};
 }
@@ -9165,8 +9247,8 @@ function gradeSummary(st){
     <div class="gs-c pc-bad"><b>${r3}</b><small>60% dan past</small></div>
   </div>`;
 }
-function gradeFoot(st){
-  return `<tr class="gfoot"><td class="gname">O‘rtacha</td>${st.col.map(()=>'<td></td>').join('')}<td class="satc"></td>
+function gradeFoot(st,spk){
+  return `<tr class="gfoot"><td class="gname">O‘rtacha</td>${st.col.map(()=>'<td></td>').join('')}<td class="satc"></td>${spk?'<td class="satc"></td>':''}
     <td class="bavg ${st.avg===null?'':'pc-'+pctColor(st.avg)}">${st.avg===null?'—':st.avg+'%'}</td></tr>`;
 }
 function attWeekTable(list,g,day){
@@ -9325,9 +9407,11 @@ views.grades=()=>{
   const list=subs.length?studentsOf(g.id):[];
   const sat=days[5];
   const sr=d.satRes[g.id+'|'+S.ui.gS+'|'+sat]||{total:0,r:{}};
+  const spk=hasSpeak(S.ui.gS);
   const today=iso();
-  const head1=days.map((x,i)=>{const q=parseD(x);const w=DOW[i];
-    return `<th class="${x===today?'tod':''} ${i===5?'satc':''}">${esc(w.s)}<small>${q.getDate()}/${q.getMonth()+1}</small></th>`}).join('');
+  const head1=days.slice(0,5).map((x,i)=>`<th class="${x===today?'tod':''}">${esc(DOW[i].s)}</th>`).join('')
+    +(spk?`<th class="satc ${sat===today?'tod':''}">${esc(DOW[5].s)}<small>Main</small></th><th class="satc ${sat===today?'tod':''}">${esc(DOW[5].s)}<small>Speaking</small></th>`
+         :`<th class="satc ${sat===today?'tod':''}">${esc(DOW[5].s)}</th>`);
   const rows=list.map(st=>{
     let sum=0,n=0;
     const cells=days.slice(0,5).map((x,i)=>{
@@ -9336,9 +9420,11 @@ views.grades=()=>{
       if(ttl.length&&v===undefined&&!dset.has(DOW[i].k))return `<td><span class="bgc off">·</span></td>`;
       return `<td><button class="bgc ${v===undefined?'':'v v'+v}" data-act="gr-open" data-id="${st.id}" data-date="${x}">${v===undefined?'+':v}</button></td>`}).join('');
     const c=sr.r[st.id];
-    const pc=(sr.total>0&&c!==undefined)?Math.round(c/sr.total*100):null;
+    const sv=(sr.sp||{})[st.id];
+    const pcv=satPct(sr,st.id);
+    const pc=pcv===null?null:Math.round(pcv);
     return `<tr><td class="gname" data-act="gr-stu" data-id="${st.id}" title="Oylik baholarni ko‘rish">${esc(fullName(st))}</td>${cells}
-      <td class="satc"><div class="satbox"><input class="satIn" type="number" min="0" inputmode="numeric" data-id="${st.id}" value="${c===undefined?'':c}" placeholder="—"></div></td>
+      <td class="satc"><div class="satbox"><input class="satIn" type="number" min="0" inputmode="numeric" data-id="${st.id}" value="${c===undefined?'':c}" placeholder="—"></div></td>${spk?`<td class="satc"><div class="satbox"><input class="satIn" data-k="sp" type="number" min="0" inputmode="numeric" data-id="${st.id}" value="${sv===undefined?'':sv}" placeholder="—"></div></td>`:''}
       <td class="bavg ${pc===null?'':'pc-'+pctColor(pc)}" data-id="${st.id}">${pc===null?'—':pc+'%'}</td></tr>`}).join('');
   return head('Baho','Dars jadvaliga moslangan: faqat dars bor kunlarga baho qo‘yiladi. Shanba natijasi reytingga o‘tadi.')+`
   <div class="panel" style="margin-bottom:16px"><div class="panel-b">
@@ -9347,10 +9433,13 @@ views.grades=()=>{
       <div class="bwk"><button class="ib" data-act="gr-wk" data-n="-7" aria-label="Oldingi hafta">${ic('chevL')}</button><label class="bwkl">${ic('calendar')}<span>${weekLabel(S.ui.gWeek)}</span><input id="grWeekPick" type="date" value="${S.ui.gWeek}" aria-label="Haftani tanlash"></label><button class="ib" data-act="gr-wk" data-n="7" aria-label="Keyingi hafta">${ic('chevR')}</button></div>
     </div>
     <div class="daypick" style="margin:0">${subs.map(x=>`<button class="chip-day ${x===S.ui.gS?'on':''}" data-act="gr-sub" data-s="${esc(x)}"><b>${esc(subLabel(x))}</b></button>`).join('')}</div>
-    <div class="totbar"><label for="satTotal">Shanba testi — umumiy savol soni</label>
+    <div class="totbar"><label for="satTotal">${spk?'Shanba · Main — umumiy savol soni':'Shanba testi — umumiy savol soni'}</label>
       <input id="satTotal" type="number" min="0" inputmode="numeric" value="${sr.total||''}" placeholder="20"></div>
+    ${spk?`<div class="totbar"><label for="satSpTotal">Shanba · Speaking — maksimal ball</label>
+      <input id="satSpTotal" type="number" min="0" inputmode="numeric" value="${sr.spTotal||''}" placeholder="100"></div>
+    <p class="hint" style="margin-top:8px">Umumiy foiz = Main va Speaking foizlarining o‘rtachasi (masalan, 70% va 80% → 75%).</p>`:''}
   </div></div>
-  <div class="panel">${list.length?`<div class="gwrap"><table class="gtab"><thead><tr><th class="gname">O‘quvchi</th>${head1}<th>%</th></tr></thead><tbody>${rows}</tbody><tfoot>${gradeFoot(gradeStats(list,g,S.ui.gS,days,sr))}</tfoot></table></div>`
+  <div class="panel">${list.length?`<div class="gwrap"><table class="gtab${spk?' spk':''}"><thead><tr><th class="gname">O‘quvchi</th>${head1}<th>%</th></tr></thead><tbody>${rows}</tbody><tfoot>${gradeFoot(gradeStats(list,g,S.ui.gS,days,sr),spk)}</tfoot></table></div>`
     :`<div class="empty sm"><h3>Bu sinfda o‘quvchi yo‘q</h3></div>`}</div>`;
 };
 
@@ -10495,6 +10584,13 @@ group:(fd,f)=>{
           'Sinf va o‘quvchini tanlang'
       );
 
+    if(isSpeakSubId(subjectId))
+      return void(
+        f.querySelector(
+          '.form-error'
+        ).textContent=SPEAK_BLOCK
+      );
+
     if(!total)
       return void(
         f.querySelector(
@@ -10984,10 +11080,11 @@ function stuMonthModal(){
       if(i===5){
         const sr=(S.d.satRes||{})[g.id+'|'+sb+'|'+di]||{total:0,r:{}};
         const c=sr.r[st.id];
-        const pc=(sr.total>0&&c!==undefined)?Math.round(c/sr.total*100):null;
+        const pv=satPct(sr,st.id);
+        const pc=pv===null?null:Math.round(pv);
         if(pc!==null)pcs.push(pc);
         sats.push({d:dt.getDate(),pc});
-        tds+=`<td class="gm-c sat${isT}${fut}"><i>${dt.getDate()}</i>${pc===null?'<span class="gm-e"></span>':`<b class="gm-p ${pctColor(pc)}">${pc}%</b><small>${c}/${sr.total}</small>`}</td>`;
+        tds+=`<td class="gm-c sat${isT}${fut}"><i>${dt.getDate()}</i>${pc===null?'<span class="gm-e"></span>':`<b class="gm-p ${pctColor(pc)}">${pc}%</b><small>${sr.spTotal>0?'M '+(c===undefined?'—':c)+'/'+sr.total+' · S '+(((sr.sp||{})[st.id])===undefined?'—':sr.sp[st.id])+'/'+sr.spTotal:c+'/'+sr.total}</small>`}</td>`;
         continue;
       }
       const v=((S.d.grades||{})[g.id+'|'+sb+'|'+di]||{})[st.id];
@@ -11059,20 +11156,25 @@ document.addEventListener('change',e=>{
   if(t.id==='grGroupSel'){S.ui.gG=t.value;S.ui.gS='';render();return}
   if(t.id==='grWeekPick'){if(t.value){S.ui.gWeek=weekKeyFromDate(t.value);render()}return}
   if(t.id==='attDayPick'){if(t.value){S.ui.aDay=t.value;render()}return}
-  if(t.id==='satTotal'||(t.classList&&t.classList.contains('satIn'))){
+  if(t.id==='satTotal'||t.id==='satSpTotal'||(t.classList&&t.classList.contains('satIn'))){
     const k=S.ui.gG+'|'+S.ui.gS+'|'+attWeekDates(S.ui.gWeek)[5];
     S.d.satRes=S.d.satRes||{};
     const r=S.d.satRes[k]=S.d.satRes[k]||{total:0,r:{}};
+    r.r=r.r||{};
     if(t.id==='satTotal'){r.total=Math.max(0,Number(t.value)||0);syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,null);save();render();return}
-    if(t.value==='')delete r.r[t.dataset.id];
-    else r.r[t.dataset.id]=Math.min(Math.max(0,Number(t.value)),r.total||Infinity);
-    syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,t.dataset.id);
+    if(t.id==='satSpTotal'){r.spTotal=Math.max(0,Number(t.value)||0);r.sp=r.sp||{};syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,null);save();render();return}
+    const isSp=t.dataset.k==='sp';
+    if(isSp)r.sp=r.sp||{};
+    const bag=isSp?r.sp:r.r,lim=isSp?r.spTotal:r.total,id=t.dataset.id;
+    if(t.value==='')delete bag[id];
+    else bag[id]=Math.min(Math.max(0,Number(t.value)),lim||Infinity);
+    syncWeekly(S.ui.gG,S.ui.gS,S.ui.gWeek,r,id);
     save();
-    const c=r.r[t.dataset.id];
-    const pc=document.querySelector('.bavg[data-id="'+t.dataset.id+'"]');
-    if(c!==undefined)t.value=c;
+    if(bag[id]!==undefined)t.value=bag[id];
+    const pc=document.querySelector('.bavg[data-id="'+id+'"]');
     if(pc){
-      const v=(r.total>0&&c!==undefined)?Math.round(c/r.total*100):null;
+      const pv=satPct(r,id);
+      const v=pv===null?null:Math.round(pv);
       pc.textContent=v===null?'—':v+'%';
       pc.className='bavg'+(v===null?'':' pc-'+pctColor(v));
     }
@@ -12584,7 +12686,7 @@ const PCP={msgs:[],last:0,busy:false,timer:null,enabled:true,locked:false};
 function stuChatStop(){clearInterval(PCP.timer);PCP.timer=null}
 
 function stuChatView(d){
-  return `<h2>Chat</h2><div class="pcp-panel">
+  return `<div class="pcp-panel">
     <div class="pcp-bar"><b>Ota-onalar va administrator</b></div>
     <div class="chat-list" id="pcpList"><div class="chat-empty">Yuklanmoqda…</div></div>
     <div class="pcp-lock" id="pcpLock" hidden></div>
@@ -13427,7 +13529,7 @@ views.chat=()=>head('Chat','Administrator va o‘qituvchilar uchun umumiy yozish
     <div class="chat-list" id="chatList"><div class="chat-empty">Yuklanmoqda…</div></div>
     <form class="chat-form" id="chatForm" autocomplete="off">
       <textarea id="chatIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
-      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
+      <button class="btn primary" type="submit" aria-label="Yuborish">${ic('send')}<span class="pcp-sl">Yuborish</span></button>
     </form>
   </section>`;
 
@@ -13484,7 +13586,7 @@ views.pchat=()=>head('Ota-onalar chati','Ota-onalar va administrator uchun bitta
     <div class="chat-list" id="pcList"><div class="chat-empty">Yuklanmoqda…</div></div>
     <form class="chat-form" id="pcForm" autocomplete="off">
       <textarea id="pcIn" rows="1" maxlength="2000" placeholder="Xabar yozing…"></textarea>
-      <button class="btn primary" type="submit">${ic('send')}Yuborish</button>
+      <button class="btn primary" type="submit" aria-label="Yuborish">${ic('send')}<span class="pcp-sl">Yuborish</span></button>
     </form>
   </section>`;
 
